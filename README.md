@@ -2,6 +2,7 @@
 A simple seat booking system with support for multiple languages.
 
 **THIS PROJECT IS NOT UPDATED FREQUENTLY** 
+
 Use at your own risk
 
 **TO-DO list**
