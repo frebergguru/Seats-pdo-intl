@@ -15,15 +15,21 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
 $pwdwrong = false;
+
+if (!empty($_POST['nickname'])) {
+	$nickname = htmlspecialchars($_POST['nickname']);
+}
+if (!empty($POST['password'])) {
+	$password = htmlspecialchars($_POST['password']);
+}
 try {
-	$nickname = addslashes(htmlspecialchars(filter_input(INPUT_POST, 'nickname', FILTER_SANITIZE_STRING), ENT_QUOTES, 'UTF-8'));
-	$password = addslashes(htmlspecialchars(filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING), ENT_QUOTES, 'UTF-8'));
 	if (isset($nickname) && !empty($nickname) && isset($password) && !empty($password)) {
 		$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
 		$options = [
@@ -33,7 +39,8 @@ try {
 		];
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 		$stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
-		$stmt->execute(['nickname' => $nickname]);
+		$stmt->bindParam(":nickname", $nickname);
+		$stmt->execute();
 		$results = $stmt->fetch(PDO::FETCH_ASSOC);
 		if (isset($results["password"])) {
 			if (password_verify($password, $results["password"])) {
@@ -52,7 +59,7 @@ try {
 		}
 	}
 } catch (PDOException $e) {
-	echo $langArray['error'].': '.$e->getMessage();
+	error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 }{
 	if ($pwdwrong == false) {
 		include 'includes/header.php';

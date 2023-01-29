@@ -35,43 +35,21 @@ $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";
 $from_mail = "hypnotize@lastnetwork.net";
 
-if (!defined('DB_HOST')) {
-	define('DB_HOST', 'localhost');
-}
-if (!defined('DB_NAME')) {
-	define('DB_NAME', 'lanparty');
-}
-if (!defined('DB_USERNAME')) {
-	define('DB_USERNAME', 'lanparty');
-}
-if (!defined('DB_PASSWORD')) {
-	define('DB_PASSWORD', '');
-}
-if (!defined('USERS_TABLE')) {
-	define('USERS_TABLE', 'users');
-}
-if (!defined('RSEAT_TABLE')) {
-	define('RSEAT_TABLE', 'rseat');
-}
-if (!defined('CONFIG_TABLE')) {
-	define('CONFIG_TABLE', 'config');
-}
-if (!isset($formstatus)) {
-	$formstatus = false;
-}
-if (!isset($home)) {
-	$home = null;
-}
-if (!isset($left)) {
-	$left = null;
-}
-if (!isset($pwdchanged)) {
-	$pwdchanged = null;
-}
-if (!isset($seatid)) {
-	$seatid = null;
-}
-if (!isset($_SESSION['langID'])) {
-	$_SESSION['langID'] = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING);
-}
+if (!defined('DB_HOST')) { define('DB_HOST', 'localhost'); }
+if (!defined('DB_NAME')) { define('DB_NAME', 'lanparty'); }
+if (!defined('DB_USERNAME')) { define('DB_USERNAME', 'lanparty'); }
+if (!defined('DB_PASSWORD')) { define('DB_PASSWORD', ''); }
+if (!defined('USERS_TABLE')) { define('USERS_TABLE', 'users'); }
+if (!defined('RSEAT_TABLE')) { define('RSEAT_TABLE', 'rseat'); }
+if (!defined('CONFIG_TABLE')) { define('CONFIG_TABLE', 'config'); }
+if (!isset($formstatus)) { $formstatus = false; }
+if (!isset($home)) { $home = null; }
+if (!isset($left)) { $left = null; }
+if (!isset($pwdchanged)) { $pwdchanged = null; }
+if (!isset($seatid)) { $seatid = null; }
+if (!isset($email)) { $email = null; }
+if (!isset($nickname)) { $nickname = null; }
+if (!isset($fullname)) { $fullname = null; }
+if (!isset($seatid)) { $seatid = null; }
+if (!isset($_SESSION['langID'])) { $_SESSION['langID'] = "en"; }
 ?>

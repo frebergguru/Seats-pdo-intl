@@ -26,7 +26,7 @@
 <br>
 <form name="langSelect" action="" method="get" >
 	<select name="lang" id="lang" >
-		<option value="<?php echo $lang; ?>"><?php echo $langArray['select_language']; ?></option>
+		<option value="<?php echo $_SESSION['langID']; ?>"><?php echo $langArray['select_language']; ?></option>
 		<option value="en">English</option>
 		<option value="no">Norsk</option>
 	</select> <button type="submit"><?php echo $langArray['language_btn']; ?></button>

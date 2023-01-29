@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 require '../includes/config.php';
 try {
 	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
@@ -25,7 +26,7 @@ try {
 		PDO::ATTR_EMULATE_PREPARES => false,
 	];
 	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-	$postpassword = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+	$postpassword = htmlspecialchars($_POST['password']);
 	if (isset($postpassword)) {
 		if (empty($postpassword)) {
 			echo "PWDEMPTY";
@@ -40,6 +41,6 @@ try {
 		echo "PWDFAIL";
 	}
 } catch (PDOException $e) {
-	echo "Error: " . $e->getMessage();
+	error_log($langArray['error'] .' '. $e->getMessage());
 }
 ?>

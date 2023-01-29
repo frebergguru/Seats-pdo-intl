@@ -19,8 +19,10 @@
 
 //Generate seat map
 function seats($maxseats, $seat_width, $seat_height, $width) {
-	$seatid  = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
 	require 'config.php';
+	if (!isset($seatid)) {
+		$seatid  = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
+	}
 	try {
 		$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
 		$options = [
@@ -29,6 +31,11 @@ function seats($maxseats, $seat_width, $seat_height, $width) {
 			PDO::ATTR_EMULATE_PREPARES => false,
 		];
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+	} catch (PDOException $e) {
+		error_log($langArray['could_not_connect_to_db_server'].' ' . $e->getMessage(), 0);
+		exit();
+	}
+	try {
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		$stmt = $pdo->prepare("SELECT * FROM `reservations` WHERE taken = :seat");
 		for ($i = 1; $i <= $maxseats; $i++) {
@@ -48,14 +55,18 @@ function seats($maxseats, $seat_width, $seat_height, $width) {
 				echo "<br>\n";
 			};
 		}
-	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+	}catch (PDOException $e) {
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+		exit();
 	}
 	$pdo = null;
 }
 
 //Check if a seat is occupied or not
 function checkOccupiedSeat($rows) {
+	if (!isset($seatid)) {
+		$seatid  = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
+	}
 	foreach ($rows as $row) {
 		if ($row["taken"] == $seatid) {
 			$occupied = 1;

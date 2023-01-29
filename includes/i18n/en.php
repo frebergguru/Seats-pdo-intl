@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 $langArray = array(
 	"select_language" => "Select language",
 	"language_btn" => "Change lanuage",
@@ -77,5 +78,8 @@ $langArray = array(
 	"checking_availability" => "Checking availability...",
 	"checking" => "Checking...",
 	"an_error_has_occured" => "An error has occurred.",
+	"could_not_connect_to_db_server" => "Could not connect to the database server:",
+	"invalid_query" => "Invalid query:",
+	"whole_query" => "Whole query:",
 );
 ?>

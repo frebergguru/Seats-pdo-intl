@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 include '../includes/config.php';
 try {
 	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
@@ -40,6 +41,6 @@ try {
 		}
 	}
 } catch (PDOException $e) {
-	echo "Error: " . $e->getMessage();
+	error_log($langArray['error'] .' '. $e->getMessage());
 }
 ?>

@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 $langArray = array(
 	"select_language" => "Velg spr&aring;k",
 	"language_btn" => "Bytt spr&aring;k",
@@ -77,5 +78,8 @@ $langArray = array(
 	"checking_availability" => "Sjekker tilgjengelighet...",
 	"checking" => "Sjekker...",
 	"an_error_has_occured" => "Det har skjedd en ukjent feil.",
+	"could_not_connect_to_db_server" => "Kunne ikke koble til database serveren:",
+	"invalid_query" => "Ugyldig oppslag:",
+	"whole_query" => "Hele oppslaget:",
 );
 ?>

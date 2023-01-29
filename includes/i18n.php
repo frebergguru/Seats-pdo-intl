@@ -15,13 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
-$lang = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING);
-if (!isset($_SESSION['langID'])) {
-	$_SESSION['langID'] = "en";
-}
-if (isset($lang) && !empty($lang)) {
-	$_SESSION['langID'] = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING);
+ */
+require 'config.php';
+
+if (isset($_GET['lang']) && !empty($_GET['lang'])) {
+	$_SESSION['langID'] = htmlspecialchars($_GET['lang']);
 }
 
 include 'i18n/'.$_SESSION['langID'].'.php';

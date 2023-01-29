@@ -15,11 +15,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 $home = true;
-require 'includes/config.php';
-require 'includes/functions.php';
-require 'includes/i18n.php';
+require_once 'includes/config.php';
+require_once 'includes/functions.php';
+require_once 'includes/i18n.php';
 try {
 	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
 	$options = [
@@ -29,7 +30,7 @@ try {
 	];
 	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 } catch (PDOException $e) {
-	error_log("Kunne ikke koble til database serveren: " . $e->getMessage(), 0);
+	error_log($langArray['could_not_connect_to_db_server'].' ' . $e->getMessage(), 0);
 	exit();
 }
 require 'includes/header.php';
@@ -53,7 +54,7 @@ try {
 	seats($maxseats, $seat_width, $seat_height, $width);
 	echo '</div>';
 }catch (PDOException $e) {
-	error_log("Invalid query: " . $e->getMessage() . "\nWhole query: " . $stmt->queryString, 0);
+	error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 	exit();
 }
 $stmt->closeCursor();
@@ -71,7 +72,7 @@ if (isset($seatid)) {
 		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		checkOccupiedSeat($rows);
 	} catch (PDOException $e) {
-		error_log("Invalid query: " . $e->getMessage() . "\nWhole query: " . $stmt->queryString, 0);
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 		exit();
 	}
 };
@@ -105,13 +106,12 @@ if ($occupied == "1") {
 		$row = $stmt->fetch(PDO::FETCH_ASSOC);
 		$nickname = $row["nickname"];
 	} catch (PDOException $e) {
-		error_log("Invalid query: " . $e->getMessage() . "\nWhole query: " . $stmt->queryString, 0);
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 		exit();
 	}
 	$stmt->closeCursor();
 }
 try {
-	// Use a single prepared statement for multiple queries
 	$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE nickname = :nickname");
 
 	if (!empty($seatid)) {
@@ -136,8 +136,7 @@ try {
 		}
 	}
 } catch (PDOException $e) {
-	// Use error reporting functions
-	error_log("Invalid query: " . $e->getMessage() . "\nWhole query: " . $stmt->queryString, 0);
+	error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 	exit();
 }
 ?>

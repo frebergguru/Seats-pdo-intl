@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 include '../includes/config.php';
 try {
 	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
@@ -26,7 +27,7 @@ try {
 	];
 	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 	$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
-	$postnickname = filter_input(INPUT_POST, 'nickname', FILTER_SANITIZE_STRING);
+	$postnickname = htmlspecialchars($_POST['nickname']);
 	if (isset($postnickname)) {
 		$stmt->execute(['nickname' => $postnickname]);
 		if ($stmt->rowCount()) {
@@ -38,6 +39,6 @@ try {
 		}
 	}
 } catch (PDOException $e) {
-	echo "Error: " . $e->getMessage();
+	error_log($langArray['error'] .' '. $e->getMessage());
 }
 ?>

@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
@@ -35,13 +36,27 @@ try {
 	];
 	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 	$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-	$regsubmit = filter_input(INPUT_POST, 'regsubmit', FILTER_SANITIZE_STRING);
-	$fullname = filter_input(INPUT_POST, 'fullname', FILTER_SANITIZE_STRING);
-	$nickname = filter_input(INPUT_POST, 'nickname', FILTER_SANITIZE_STRING);
-	$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-	$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-	$password2 = filter_input(INPUT_POST, 'password2', FILTER_SANITIZE_STRING);
-	$form_csrf_token = filter_input(INPUT_POST, 'csrf_token', FILTER_SANITIZE_STRING);
+	if (!empty($_POST['regsubmit'])) {
+		$regsubmit = htmlspecialchars($_POST['regsubmit']);
+	}
+	if (!empty($_POST['fullname'])) {
+		$fullname = htmlspecialchars($_POST['fullname']);
+	}
+	if (!empty($_POST['nickname'])) {
+		$nickname = htmlspecialchars($_POST['nickname']);
+	}
+	if (!empty($_POST['email'])) {
+		$email = htmlspecialchars($_POST['email']);
+	}
+	if (!empty($_POST['password'])) {
+		$password = htmlspecialchars($_POST['password']);
+	}
+	if (!empty($_POST['password2'])) {
+		$password2 = htmlspecialchars($_POST['password2']);
+	}
+	if (!empty($_POST['csrf_token'])) {
+		$form_csrf_token = htmlspecialchars($_POST['csrf_token']);
+	}
 
 	if (isset($regsubmit) && !empty($regsubmit)) {
 		if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
@@ -64,7 +79,7 @@ try {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_name'].'</div><br><br>';
 			$formstatus = 'FEIL';
 		}
-		if (!preg_match_all($fullname_regex, $fullname)) {
+		if (!empty($fullname) && !preg_match_all($fullname_regex, $fullname)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['fullname_contains_illegal_characters'].'</div><br><br>';
 			$formstatus = 'FEIL';
 		}
@@ -120,7 +135,7 @@ try {
 		}
 	}
 } catch (PDOException $e) {
-	echo "Error: " . $e->getMessage();
+	error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 }
 if ($formstatus !== True) {
 	print'<form class="srs-container" method="POST" action="'.$_SERVER["PHP_SELF"].'">
@@ -148,7 +163,7 @@ if ($formstatus !== True) {
     </form>
     <script src="./js/formcheck.js"></script>
     <script src="./js/pwdcheck.js"></script>';
-};
+}
 ?>
 <br>
 <?php

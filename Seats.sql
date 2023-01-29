@@ -1,6 +1,6 @@
 -- MariaDB dump 10.19  Distrib 10.6.11-MariaDB, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: seats
+-- Host: localhost    Database: lanparty
 -- ------------------------------------------------------
 -- Server version	10.6.11-MariaDB-0ubuntu0.22.04.1
 
@@ -79,8 +79,8 @@ CREATE TABLE `users` (
   `nickname` text NOT NULL,
   `password` text NOT NULL,
   `email` text NOT NULL,
-  `forgottoken` char(65) DEFAULT NULL,
-  `rseat` int(1) DEFAULT NULL,
+  `forgottoken` char(64) DEFAULT NULL,
+  `rseat` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -103,4 +103,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-01-26 23:36:05
+-- Dump completed on 2023-01-29 19:17:09

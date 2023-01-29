@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 declare(strict_types=1);
 
 require 'includes/config.php';
@@ -29,12 +30,21 @@ $options = [
 	PDO::ATTR_EMULATE_PREPARES => false,
 ];
 $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-
-$nickname = filter_input(INPUT_GET, 'nickname', FILTER_SANITIZE_STRING);
-$key = filter_input(INPUT_GET, 'key', FILTER_SANITIZE_STRING);
-$email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_STRING);
-$password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-$password2 = filter_input(INPUT_POST, 'password2', FILTER_SANITIZE_STRING);
+if (!empty($_GET['nickname'])){
+	$nickname = htmlspecialchars($_GET['nickname']);
+}
+if (!empty($_GET['key'])) {
+	$key = htmlspecialchars($_GET['key']);
+}
+if (!empty($_POST['email'])) {
+	$email = htmlspecialchars($_POST['email']);
+}
+if (!empty($_POST['password'])) {
+	$password = htmlspecialchars($_POST['password']);
+}
+if (!empty($_POST['password2'])) {
+	$password2 = htmlspecialchars($_POST['password2']);
+}
 
 if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
 	echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_contains_illegal_characters'].'</div><br><br>';
@@ -61,16 +71,25 @@ if (isset($password) && !empty($password) && isset($password2) && !empty($passwo
 
 	];
 	$pwdhash = password_hash($password, PASSWORD_ARGON2ID, $options);
-
-	$stmt = $pdo->prepare("UPDATE users SET password = :password, forgottoken = NULL WHERE nickname = :nickname");
-	$stmt->execute([':password' => $pwdhash, ':nickname' => $nickname]);
-
+	try {
+		$stmt = $pdo->prepare("UPDATE users SET password = :password, forgottoken = NULL WHERE nickname = :nickname");
+		$stmt->bindParam(":password", $pwdhash);
+		$stmt->bindParam(":nickname", $nickname);
+		$stmt->execute();
+	} catch (PDOException $e) {
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+	}
 	$pwdchanged = true;
 }
 
 if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwdchanged != true) {
-	$stmt = $pdo->prepare("SELECT forgottoken FROM users WHERE nickname = :nickname");
-	$stmt->execute([':nickname' => $nickname]);
+	try {
+		$stmt = $pdo->prepare("SELECT forgottoken FROM users WHERE nickname = :nickname");
+		$stmt->bindParam(":nickname", $nickname);
+		$stmt->execute();
+	} catch (PDOException $e) {
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+	}
 	$sqlresults = $stmt->fetch(PDO::FETCH_ASSOC);
 	$forgottoken = $sqlresults["forgottoken"];
 
@@ -109,18 +128,25 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 '.$langArray['email_sent_instruction_page_text'].'
 </div><br><br><br>';
 	require 'includes/footer.php';
-	$stmt = $pdo->prepare("SELECT nickname FROM users WHERE email=:email");
-	$stmt->execute(['email' => $email]);
-	$sqlresults = $stmt->fetch(PDO::FETCH_ASSOC);
-	if ($stmt->rowCount() === 1) {
-		$nickname = $sqlresults['nickname'];
-		$randomkey = bin2hex(random_bytes(32));
-		$stmt = $pdo->prepare("UPDATE users SET forgottoken=:randomkey WHERE nickname=:nickname");
-		$stmt->execute(['randomkey' => $randomkey, 'nickname' => $nickname]);
-		$mailheaders = 'From: '.$from_name.' <'.$from_mail.'>'."\r\n".
-			'X-Mailer: Seat Reservation/2.0';
-		$mailmsg = $langArray['email_change_password_body']."\n\n https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."?nickname=".$nickname."&key=".$randomkey;
-		mail($email, $mail_subject, $mailmsg, $mailheaders);
+	try {
+		$stmt = $pdo->prepare("SELECT nickname FROM users WHERE email=:email");
+		$stmt->bindParam(":email", $email);
+		$stmt->execute();
+		$sqlresults = $stmt->fetch(PDO::FETCH_ASSOC);
+		if ($stmt->rowCount() === 1) {
+			$nickname = $sqlresults['nickname'];
+			$randomkey = bin2hex(random_bytes(32));
+			$stmt = $pdo->prepare("UPDATE users SET forgottoken=:randomkey WHERE nickname=:nickname");
+			$stmt->bindParam(":randomkey", $randomkey);
+			$stmt->bindParam(":nickname", $nickname);
+			$stmt->execute();
+			$mailheaders = 'From: '.$from_name.' <'.$from_mail.'>'."\r\n".
+				'X-Mailer: Seat Reservation/2.0';
+			$mailmsg = $langArray['email_change_password_body']."\n\n https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."?nickname=".$nickname."&key=".$randomkey;
+			mail($email, $mail_subject, $mailmsg, $mailheaders);
+		}
+	} catch (PDOException $e) {
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 	}
 }else {
 	if ($pwdchanged != true) {

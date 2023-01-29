@@ -15,7 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*/
+ */
+
 require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
@@ -32,38 +33,56 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 			PDO::ATTR_EMULATE_PREPARES => false,
 		];
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-		$stmt = $pdo->query("SELECT maxseats FROM config");
+	} catch (PDOException $e) {
+		error_log($langArray['could_not_connect_to_db_server'].' ' . $e->getMessage(), 0);
+		exit();
+	}
+	try {
+		$stmt = $pdo->prepare("SELECT maxseats FROM config");
+		$stmt->execute();
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		$maxseats = $result["maxseats"];
+
 		if ($seat < $maxseats) {
-			$stmt = $pdo->query("SELECT id FROM users WHERE nickname='$nickname'");
+			$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
+			$stmt->bindParam(":nickname", $nickname);
+			$stmt->execute();
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			$userid = $result["id"];
-			$stmt = $pdo->query("SELECT rseat FROM users WHERE nickname='$nickname'");
+
+			$stmt = $pdo->prepare("SELECT rseat FROM users WHERE nickname=:nickname");
+			$stmt->bindParam(":nickname", $nickname);
+			$stmt->execute();
 			$result = $stmt->fetch(PDO::FETCH_ASSOC);
 			if (empty($result["rseat"])) {
-				$pdo->query("UPDATE users SET rseat='".$seat."' WHERE nickname='".$_SESSION['nickname']."'");
-				$pdo->query("INSERT INTO reservations (taken, user_id) VALUES($seat, $userid)");
+				$stmt = $pdo->prepare("UPDATE users SET rseat=:rseat WHERE nickname=:nickname");
+				$stmt->bindParam(":rseat", $seat);
+				$stmt->bindParam(":nickname", $_SESSION['nickname']);
+				$stmt->execute();
+				$stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) VALUES(:staken, :suserid)");
+				$stmt->bindParam(":staken", $seat);
+				$stmt->bindParam(":suserid", $userid);
+				$stmt->execute();
 				header('Location: '.dirname($_SERVER['REQUEST_URI']));
 				exit;
 			}else {
-				require 'includes/header.php';
+				require_once 'includes/header.php';
 				print '<span class="srs-header">'.$langArray['an_error_has_occured'].'</span>
                 <div class="srs-content">
 		'.$langArray['you_can_only_reserve_one_seat'].'
 		</div><br><br><br>';
-				require 'includes/footer.php';
+				require_once 'includes/footer.php';
 			};
 		}else {
-			require 'includes/header.php';
+			require_once 'includes/header.php';
 			print'<span class="srs-header">'.$langArray['an_error_has_occured'].'</span>
             <div class="srs-content">
 	    '.$langArray['the_seat_you_have_selected_does_not_exist'].'
             </div><br><br><br>';
-			require 'includes/footer.php';
+			require_once 'includes/footer.php';
 		}
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 	}
 	$pdo = null;
 }else {
