@@ -38,7 +38,7 @@ CREATE USER lanparty WITH LOGIN PASSWORD 'password';
 psql -U lanparty -d lanparty < Seats-PostgreSQL.sql
 ```
 
-3. Give the database user access to the database and to the sequences user_id_seq and reservations_id_seq:**
+3. **Give the database user access to the database and to the sequences user_id_seq and reservations_id_seq:**
 ```pgsql
 GRANT CONNECT ON DATABASE lanparty TO lanparty;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lanparty;
