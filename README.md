@@ -9,8 +9,7 @@ A simple seat booking system with support for multiple languages.
 * Optimize the code
 * Add more features like change seat reservation, delete account and so on
 
-## MySQL:
-**Example:**
+## MySQL example:
 
 1. **Create a MySQL user:**
 ```mysql
@@ -27,8 +26,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON lanparty.* TO 'lanparty'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-## PostgreSQL:
-**Example**
+## PostgreSQL example:
 
 1. **Create the PostgreSQL user:**
 ```pgsql

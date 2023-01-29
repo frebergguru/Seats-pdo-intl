@@ -142,7 +142,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$stmt->execute();
 			$mailheaders = 'From: '.$from_name.' <'.$from_mail.'>'."\r\n".
 				'X-Mailer: Seat Reservation/2.0';
-			$mailmsg = $langArray['email_change_password_body']."\n\n https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."?nickname=".$nickname."&key=".$randomkey;
+			$mailmsg = $langArray['email_change_password_body_hi']." ".$nickname."\n\n".$langArray['email_change_password_body_link']."\n\n https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."?nickname=".$nickname."&key=".$randomkey;
 			mail($email, $mail_subject, $mailmsg, $mailheaders);
 		}
 	} catch (PDOException $e) {
