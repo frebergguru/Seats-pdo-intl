@@ -26,7 +26,7 @@ $pwdwrong = false;
 if (!empty($_POST['nickname'])) {
 	$nickname = htmlspecialchars($_POST['nickname']);
 }
-if (!empty($POST['password'])) {
+if (!empty($_POST['password'])) {
 	$password = htmlspecialchars($_POST['password']);
 }
 try {
