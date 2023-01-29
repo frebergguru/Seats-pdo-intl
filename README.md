@@ -35,7 +35,7 @@ FLUSH PRIVILEGES;
 CREATE USER lanparty WITH LOGIN PASSWORD 'password';
 ```
 
-2. **Create and mport the database from the SQL:**
+2. **Create and import the database from the SQL:**
 ```shell
 psql -U lanparty -d lanparty < Seats-PostgreSQL.sql
 ```
