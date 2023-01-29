@@ -21,7 +21,7 @@ require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-$nickname = $_SESSION['nickname'];
+$nickname = strtolower($_SESSION['nickname']);
 $seat = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 
 if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {

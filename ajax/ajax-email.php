@@ -31,7 +31,7 @@ try {
 		echo 'EMAILFAIL';
 		exit();
 	}
-	$postemail = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+	$postemail = strtolower(filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL));
 	if (isset($postemail)) {
 		$stmt->execute(['email' => $postemail]);
 		if ($stmt->rowCount()) {

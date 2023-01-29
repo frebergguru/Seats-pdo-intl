@@ -24,7 +24,7 @@ require 'includes/i18n.php';
 $pwdwrong = false;
 
 if (!empty($_POST['nickname'])) {
-	$nickname = htmlspecialchars($_POST['nickname']);
+	$nickname = htmlspecialchars(strtolower($_POST['nickname']));
 }
 if (!empty($_POST['password'])) {
 	$password = htmlspecialchars($_POST['password']);

@@ -31,7 +31,7 @@ $options = [
 ];
 $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 if (!empty($_GET['nickname'])){
-	$nickname = htmlspecialchars($_GET['nickname']);
+	$nickname = htmlspecialchars(strtolower($_GET['nickname']));
 }
 if (!empty($_GET['key'])) {
 	$key = htmlspecialchars($_GET['key']);

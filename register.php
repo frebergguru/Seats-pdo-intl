@@ -46,7 +46,7 @@ try {
 		$nickname = htmlspecialchars($_POST['nickname']);
 	}
 	if (!empty($_POST['email'])) {
-		$email = htmlspecialchars($_POST['email']);
+		$email = htmlspecialchars(strtolower($_POST['email']));
 	}
 	if (!empty($_POST['password'])) {
 		$password = htmlspecialchars($_POST['password']);
@@ -84,7 +84,7 @@ try {
 			$formstatus = 'FAIL';
 		}
 		if (isset($email) && !empty($email)) {
-			$stmt = $pdo->prepare("SELECT id FROM users WHERE email=:email");
+			$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
 			$stmt->bindValue(':email', $email);
 			$stmt->execute();
 			if ($stmt->rowCount()) {
@@ -101,7 +101,12 @@ try {
 			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname)) {
-			$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
+			if (DB_DRIVER == "mysql") {
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+			}
+			if (DB_DRIVER == "pgsql") {
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname ILIKE :nickname");
+			}
 			$stmt->bindValue(':nickname', $nickname);
 			$stmt->execute();
 			if ($stmt->rowCount()) {

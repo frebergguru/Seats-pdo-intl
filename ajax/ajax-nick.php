@@ -26,7 +26,12 @@ try {
 		PDO::ATTR_EMULATE_PREPARES => false,
 	];
 	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-	$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+	if (DB_DRIVER == "mysql") {
+		$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+	}
+	if (DB_DRIVER == "pgsql") {
+		$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname ILIKE :nickname");
+	}
 	$postnickname = htmlspecialchars($_POST['nickname']);
 	if (isset($postnickname)) {
 		$stmt->execute(['nickname' => $postnickname]);
