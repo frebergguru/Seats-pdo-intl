@@ -32,12 +32,12 @@ FLUSH PRIVILEGES;
 
 1. **Create the PostgreSQL user:**
 ```pgsql
-CREATE USER username WITH LOGIN PASSWORD 'password';
+CREATE USER lanparty WITH LOGIN PASSWORD 'password';
 ```
 
 2. **Create and mport the database from the SQL:**
 ```shell
-psql -U username -d database_name < Seats-PostgreSQL.sql
+psql -U lanparty -d lanparty < Seats-PostgreSQL.sql
 ```
 
 3. Give the database user access to the database and to the sequences user_id_seq and reservations_id_seq:**
