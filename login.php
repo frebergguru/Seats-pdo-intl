@@ -31,7 +31,7 @@ if (!empty($_POST['password'])) {
 }
 try {
 	if (isset($nickname) && !empty($nickname) && isset($password) && !empty($password)) {
-		$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+		$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 		$options = [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -39,7 +39,7 @@ try {
 		];
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 		$stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
-		$stmt->bindParam(":nickname", $nickname);
+		$stmt->bindParam(":nickname", $nickname, PDO::PARAM_STR);
 		$stmt->execute();
 		$results = $stmt->fetch(PDO::FETCH_ASSOC);
 		if (isset($results["password"])) {

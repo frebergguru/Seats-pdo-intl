@@ -17,13 +17,13 @@
 
  */
 
-declare(strict_types=1);
+#declare(strict_types=1);
 
 require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 $options = [
 	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -48,15 +48,15 @@ if (!empty($_POST['password2'])) {
 
 if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
 	echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_contains_illegal_characters'].'</div><br><br>';
-	$formstatus = 'FEIL';
+	$formstatus = 'FAIL';
 }
 
 if (isset($password2) && !empty($password2) && $password !== $password2) {
 	echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_dosent_match'].'</div><br><br>';
-	$formstatus = 'FEIL';
+	$formstatus = 'FAIL';
 }
 
-if (isset($password) && !empty($password) && isset($password2) && !empty($password2) && isset($key) && !empty($key) && $formstatus != "FEIL") {
+if (isset($password) && !empty($password) && isset($password2) && !empty($password2) && isset($key) && !empty($key) && $formstatus != "FAIL") {
 	require 'includes/header.php';
 	print '<span class="srs-header">'.$langArray['new_password'].'</span>
 <div class="srs-content">
@@ -148,22 +148,23 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 	} catch (PDOException $e) {
 		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
 	}
-}else {
+} else {
 	if ($pwdchanged != true) {
 		require 'includes/header.php';
-		print '<form class="srs-container" method="POST" action="'.$_SERVER["PHP_SELF"].'">
-<span class="srs-header">'.$langArray['lost_password'].'</span>
+		print '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '">
+<span class="srs-header">' . $langArray['lost_password'] . '</span>
 <div class="srs-content">
-	<label for="email" class="srs-lb">'.$langArray['email'].'</label><input name="email" value="" id="email" class="srs-tb"><br>
+	<label for="email" class="srs-lb">' . $langArray['email'] . '</label><input name="email" value="" id="email" class="srs-tb"><br>
 </div>
 <div class="srs-footer">
 	<div class="srs-button-container">
-		<input type="submit" class="submit" name="regsubmit" value="'.$langArray['continue'].'">
+		<input type="submit" class="submit" name="regsubmit" value="' . $langArray['continue'] . '">
 	</div>
 	<div class="srs-slope"></div>
 </div>
 </form><br>';
 		require 'includes/footer.php';
-	};
-};
+	}
+	;
+}
 ?>

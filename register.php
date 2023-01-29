@@ -28,7 +28,7 @@ if (!isset($_SESSION['csrf_token'])) {
 	$_SESSION['csrf_token'] = $csrf_token;
 }
 try {
-	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+	$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 	$options = [
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -61,27 +61,27 @@ try {
 	if (isset($regsubmit) && !empty($regsubmit)) {
 		if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_contains_illegal_characters'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($password2) && !empty($password2) && $password !== $password2) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_passwords_dosent_match'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($password) && empty($password)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_password'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($password2) && empty($password2)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_confirmation_password'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($fullname) && empty($fullname)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_name'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (!empty($fullname) && !preg_match_all($fullname_regex, $fullname)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['fullname_contains_illegal_characters'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($email) && !empty($email)) {
 			$stmt = $pdo->prepare("SELECT id FROM users WHERE email=:email");
@@ -89,16 +89,16 @@ try {
 			$stmt->execute();
 			if ($stmt->rowCount()) {
 				echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_email_address_already_exists'].'</div><br><br>';
-				$formstatus = 'FEIL';
+				$formstatus = 'FAIL';
 			}
 		}
 		if (isset($email) && empty($email)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_valid_email_address'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname) && !preg_match_all($nickname_regex, $nickname)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_nickname_is_invalid'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname)) {
 			$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
@@ -106,18 +106,18 @@ try {
 			$stmt->execute();
 			if ($stmt->rowCount()) {
 				echo '<div class="regerror">'.$langArray['error'].': '.$langArray['nickname_already_exists'].'.</div><br><br>';
-				$formstatus = 'FEIL';
+				$formstatus = 'FAIL';
 			}
 		}
 		if (isset($nickname) && empty($nickname)) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_nickname'].'</div><br><br>';
-			$formstatus = 'FEIL';
+			$formstatus = 'FAIL';
 		}
 		// Check if the form submission's CSRF token matches the one in the session
 		if ($form_csrf_token !== $_SESSION['csrf_token']) {
 			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['invalid_csfr_token'].'</div><br><br>';
-			$formstatus = 'FEIL';
-		}else if ($formstatus !== 'FEIL') {
+			$formstatus = 'FAIL';
+		}else if ($formstatus !== 'FAIL') {
 			// If the CSRF token is valid, process the form submission
 			$options = [
 				'memory_cost' => 1<<17,

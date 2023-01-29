@@ -19,7 +19,7 @@
 
 include '../includes/config.php';
 try {
-	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+	$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 	$options = [
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

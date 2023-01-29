@@ -1,6 +1,6 @@
 -- MariaDB dump 10.19  Distrib 10.6.11-MariaDB, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: lanparty
+-- Host: localhost    Database: Seats
 -- ------------------------------------------------------
 -- Server version	10.6.11-MariaDB-0ubuntu0.22.04.1
 

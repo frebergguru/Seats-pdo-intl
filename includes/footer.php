@@ -24,12 +24,12 @@
 ?>
 <br>
 <br>
-<form name="langSelect" action="" method="get" >
-	<select name="lang" id="lang" >
+<form name="langSelect" id="langSelect" action="" method="get" >
+	<select name="lang" id="lang" onchange="document.getElementById('langSelect').submit();">
 		<option value="<?php echo $_SESSION['langID']; ?>"><?php echo $langArray['select_language']; ?></option>
 		<option value="en">English</option>
 		<option value="no">Norsk</option>
-	</select> <button type="submit"><?php echo $langArray['language_btn']; ?></button>
+	</select>
 </form>
 </div>
 <!-- div menu end -->

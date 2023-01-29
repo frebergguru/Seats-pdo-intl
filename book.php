@@ -26,7 +26,7 @@ $seat = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 
 if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 	try {
-		$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+		$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 		$options = [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

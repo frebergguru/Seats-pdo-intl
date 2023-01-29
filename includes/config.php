@@ -26,19 +26,34 @@ $site_description = 'Seat registration';
 $site_keywords = 'seat, registration';
 $site_author = 'Hypnotize';
 
+//Regex to check if the password is valid.
 $pwd_regex = '/^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
-$fullname_regex = '/^[a-zA-ZæøåÆØÅ]{2,}(\s[a-zA-ZæøåÆØÅ]{2,})*$/';
+
+//Regex to check if the nickname is valid.
 $nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
+
+//Regex for checking if the fullname is valid.
+$fullname_regex = '/^[a-zA-ZæøåÆØÅ]{2,}(\s[a-zA-ZæøåÆØÅ]{2,})*$/';
+
+//Regex to check for illegal characters in the fullname.
 $fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅ\s]/g';
 
 $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";
 $from_mail = "hypnotize@lastnetwork.net";
 
+//Which database server do you want to use? (valid options: mysql or pgsql)
+if (!defined('DB_DRIVER')) { define('DB_DRIVER', 'pgsql'); }
+//Database server host
 if (!defined('DB_HOST')) { define('DB_HOST', 'localhost'); }
+//Database name
 if (!defined('DB_NAME')) { define('DB_NAME', 'lanparty'); }
+//Database server username
 if (!defined('DB_USERNAME')) { define('DB_USERNAME', 'lanparty'); }
+//Database server password
 if (!defined('DB_PASSWORD')) { define('DB_PASSWORD', ''); }
+
+//DO NOT CHANGE ANYTHING FROM HERE!!
 if (!defined('USERS_TABLE')) { define('USERS_TABLE', 'users'); }
 if (!defined('RSEAT_TABLE')) { define('RSEAT_TABLE', 'rseat'); }
 if (!defined('CONFIG_TABLE')) { define('CONFIG_TABLE', 'config'); }

@@ -22,7 +22,7 @@ require_once 'includes/config.php';
 require_once 'includes/functions.php';
 require_once 'includes/i18n.php';
 try {
-	$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+	$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 	$options = [
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -42,7 +42,7 @@ require 'includes/header.php';
     <hr>
 <?php
 try {
-	$stmt = $pdo->prepare("SELECT * FROM `" . CONFIG_TABLE . "`");
+	$stmt = $pdo->prepare("SELECT * FROM " . CONFIG_TABLE);
 	$stmt->execute();
 	$row = $stmt->fetch(PDO::FETCH_ASSOC);
 	$maxseats = $row["maxseats"];
@@ -66,7 +66,7 @@ $stmt->closeCursor();
 $seatid = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 if (isset($seatid)) {
 	try {
-		$stmt = $pdo->prepare("SELECT * FROM `reservations` WHERE taken = :seatid");
+		$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seatid");
 		$stmt->bindParam(':seatid', $seatid, PDO::PARAM_INT);
 		$stmt->execute();
 		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);

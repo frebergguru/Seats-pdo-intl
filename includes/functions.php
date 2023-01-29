@@ -17,14 +17,14 @@
 
  */
 
-//Generate seat map
+//Generate the seat map
 function seats($maxseats, $seat_width, $seat_height, $width) {
 	require 'config.php';
 	if (!isset($seatid)) {
 		$seatid  = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
 	}
 	try {
-		$dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME;
+		$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
 		$options = [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -37,7 +37,7 @@ function seats($maxseats, $seat_width, $seat_height, $width) {
 	}
 	try {
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$stmt = $pdo->prepare("SELECT * FROM `reservations` WHERE taken = :seat");
+		$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seat");
 		for ($i = 1; $i <= $maxseats; $i++) {
 			$stmt->execute(['seat' => $i]);
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
