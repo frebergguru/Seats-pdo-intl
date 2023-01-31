@@ -1,5 +1,5 @@
 # Seats
-A simple seat booking system with support for multiple languages and custom room map.
+A simple seat booking system with support for multiple languages and a custom room map.
 
 ## Screenshot:
 ![Screenshot](https://github.com/frebergguru/Seats-pdo-intl/raw/main/img/screenshot.png)
