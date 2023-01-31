@@ -5,33 +5,6 @@
 CREATE DATABASE IF NOT EXISTS lanparty;
 
 --
--- Table structure for table `config`
---
-
-DROP TABLE IF EXISTS `config`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `config` (
-  `id` int(11) NOT NULL,
-  `maxseats` int(11) NOT NULL,
-  `seat_width` int(11) NOT NULL,
-  `seat_height` int(11) NOT NULL,
-  `width` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `config`
---
-
-LOCK TABLES `config` WRITE;
-/*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (0,500,15,15,20);
-/*!40000 ALTER TABLE `config` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `reservations`
 --
 

@@ -1,5 +1,8 @@
 # Seats
-A simple seat booking system with support for multiple languages.
+A simple seat booking system with support for multiple languages and setting up a custom room map.
+
+## Screenshot:
+![Screenshot](https://github.com/frebergguru/Seats-pdo-intl/raw/main/img/screenshot.png)
 
 **THIS PROJECT IS NOT UPDATED FREQUENTLY**
 
@@ -8,6 +11,17 @@ A simple seat booking system with support for multiple languages.
 * Remove all unnecessary code
 * Optimize the code
 * Add more features like change seat reservation, delete account and so on
+
+## map.txt:
+```
+# = seat
+f = floor
+w = wall
+k = kitchen
+b = bathroom/toilet
+d = door
+e = emergency exit
+```
 
 ## MySQL example:
 

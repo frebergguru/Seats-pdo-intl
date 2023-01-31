@@ -1,21 +1,20 @@
 <?php
 /*
-    Copyright 2023 Morten Freberg
+Copyright 2023 Morten Freberg
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 $langArray = array(
 	"select_language" => "Select language",
@@ -31,6 +30,12 @@ $langArray = array(
 	"selected_seat" => "Selected seat",
 	"occupied_seat" => "Occupied seat",
 	"vacant_seat" => "Vacant seat",
+	"floor" => "Floor",
+	"wall" => "Wall",
+	"kitchen" => "Kitchen",
+	"bathroom" => "Bathroom/Toilet",
+	"door" => "Door",
+	"exit" => "Emergency exit",
 	"stage_front" => "[ - FRONT - ]",
 	"seat_number" => "Seat number",
 	"is_reserved_by" => "is reserved by",
@@ -40,7 +45,7 @@ $langArray = array(
 	"error" => "Error",
 	"you_can_only_reserve_one_seat" => "You can only reserve one seat.",
 	"you_have_reserved_seat_number" => "You have reserved seat number",
-	"the_seat_you_have_selected_does_not_exist" => "The seat you have selected does not exist",
+	"the_seat_you_have_selected_does_not_exist" => "The seat you have selected does not exist, or is already reserved by someone else.",
 	"wrong_username_or_password" => "Wrong username or password, please try again!",
 	"the_password_contains_illegal_characters" => "The password contains illegal characters or is shorter than 8 characters",
 	"the_password_dosent_match" => "The passwords doesn't match, please try again!",
@@ -82,5 +87,10 @@ $langArray = array(
 	"could_not_connect_to_db_server" => "Could not connect to the database server:",
 	"invalid_query" => "Invalid query:",
 	"whole_query" => "Whole query:",
+	"invalid_password" => "Invalid password.",
+	"delete_account" => "Delete account",
+	"please_confirm_with_your_password" => "Vennligst bekreft med passordet ditt:",
+	"user_is_now_successfully_deleted" => "The user is now successfully delete.",
+	"you_are_not_logged_in" => "You are not logged in.",
 );
 ?>

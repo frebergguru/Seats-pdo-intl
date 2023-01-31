@@ -17,17 +17,17 @@
  */
 
 //NICKNAME CHECK
-$(document).on('keyup focusout', '#nickname', function() {
+$(document).on('keyup focusout', '#nickname', function () {
     var nickname = $("#nickname").val();
     var url = "ajax/ajax-nick.php";
     $.ajax({
         type: "POST",
         url: url,
-        data: {nickname: nickname},
-        beforeSend: function(){
+        data: { nickname: nickname },
+        beforeSend: function () {
             $("#status").html('<img src="./img/loader.gif">&nbsp;' + langArray['checking_availability']);
         },
-        success: function(msg) {
+        success: function (msg) {
             if (nickname.length < 4) {
                 $("#nickname").removeClass("green").addClass("red");
                 $("#status").html(langArray.nickname_too_short);
@@ -43,7 +43,7 @@ $(document).on('keyup focusout', '#nickname', function() {
                 $("#nickname").removeClass("green").addClass("red");
                 $("#status").html(langArray.nickname_already_exists);
             }
-            else{
+            else {
                 console.log(msg);
             }
         }
@@ -51,14 +51,14 @@ $(document).on('keyup focusout', '#nickname', function() {
 });
 
 //EMAIL CHECK
-$(document).on('keyup focusout', '#email', function() {
+$(document).on('keyup focusout', '#email', function () {
     var url = "ajax/ajax-email.php";
     $("#statusemail").html('<img src="./img/loader.gif">&nbsp;' + langArray.checking_availability);
     $.ajax({
         type: "POST",
         url: url,
         data: $("#email").serialize(),
-        success: function(msg) {
+        success: function (msg) {
             if (msg == 'EMAILOK') {
                 $("#email").removeClass("red").addClass("green");
                 $("#statusemail").html('');
@@ -69,16 +69,16 @@ $(document).on('keyup focusout', '#email', function() {
                 $("#email").removeClass("green").addClass("red");
                 $("#statusemail").html(langArray.you_must_enter_a_valid_email_address);
             }
-	    else {
-		 console.log(msg);
-	    }
+            else {
+                console.log(msg);
+            }
         }
     });
     return false;
 });
 
 //FULLNAME CHECK
-$("#fullname").on("keyup focusout", function() {
+$("#fullname").on("keyup focusout", function () {
     var fullname = $(this).val();
 
     if (fullname.match(illegalChars)) {

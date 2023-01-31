@@ -4,24 +4,6 @@ CREATE DATABASE lanparty
     TEMPLATE = template0
   );
 
--- Table structure for table "config"
-DROP TABLE IF EXISTS "config";
-CREATE TABLE "config" (
-"id" serial PRIMARY KEY,
-"maxseats" integer NOT NULL,
-"seat_width" integer NOT NULL,
-"seat_height" integer NOT NULL,
-"width" integer NOT NULL
-);
-
---
-
--- Dumping data for table "config"
-INSERT INTO "config" ("id", "maxseats", "seat_width", "seat_height", "width") VALUES
-(0, 500, 15, 15, 20);
-
---
-
 -- Table structure for table "reservations"
 DROP TABLE IF EXISTS "reservations";
 CREATE TABLE "reservations" (

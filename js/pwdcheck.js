@@ -16,7 +16,7 @@
 
  */
 
-$(document).on('keyup focusout', '#password', function() {
+$(document).on('keyup focusout', '#password', function () {
     var password = $("#password").val();
     if (password.match(/[<>]/g) != null) {
         $("#password").removeClass("green").addClass("red");
@@ -28,7 +28,7 @@ $(document).on('keyup focusout', '#password', function() {
             type: "POST",
             url: url,
             data: $("#password").serialize(),
-            success: function(msg) {
+            success: function (msg) {
                 if (msg == 'PWDEMPTY') {
                     $("#password").removeClass("green").removeClass("yellow").removeClass("red");
                     $("#pwstatus").html('');
@@ -39,9 +39,9 @@ $(document).on('keyup focusout', '#password', function() {
                     $("#password").removeClass("red").removeClass("yellow").addClass("green");
                     $("#pwstatus").html('');
                 }
-		else {
-		     console.log(msg);
-		}
+                else {
+                    console.log(msg);
+                }
             }
         });
         return false;
@@ -60,6 +60,6 @@ function checkPasswordMatch() {
         $("#pwstatus2").html(langArray.the_passwords_match);
     }
 }
-$(document).ready(function() {
-	$("#password2").on("keyup focusout", checkPasswordMatch);
+$(document).ready(function () {
+    $("#password2").on("keyup focusout", checkPasswordMatch);
 });

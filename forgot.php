@@ -1,36 +1,34 @@
 <?php
 /*
-    Copyright 2023 Morten Freberg
+Copyright 2023 Morten Freberg
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #declare(strict_types=1);
 
 require 'includes/config.php';
-require 'includes/functions.php';
 require 'includes/i18n.php';
 
-$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
+$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
 $options = [
 	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 	PDO::ATTR_EMULATE_PREPARES => false,
 ];
 $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-if (!empty($_GET['nickname'])){
+if (!empty($_GET['nickname'])) {
 	$nickname = htmlspecialchars(strtolower($_GET['nickname']));
 }
 if (!empty($_GET['key'])) {
@@ -47,25 +45,25 @@ if (!empty($_POST['password2'])) {
 }
 
 if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
-	echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_contains_illegal_characters'].'</div><br><br>';
+	echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_password_contains_illegal_characters'] . '</div><br><br>';
 	$formstatus = 'FAIL';
 }
 
 if (isset($password2) && !empty($password2) && $password !== $password2) {
-	echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_dosent_match'].'</div><br><br>';
+	echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_password_dosent_match'] . '</div><br><br>';
 	$formstatus = 'FAIL';
 }
 
 if (isset($password) && !empty($password) && isset($password2) && !empty($password2) && isset($key) && !empty($key) && $formstatus != "FAIL") {
 	require 'includes/header.php';
-	print '<span class="srs-header">'.$langArray['new_password'].'</span>
+	print '<span class="srs-header">' . $langArray['new_password'] . '</span>
 <div class="srs-content">
-'.$langArray['password_changed_log_in'].'.
+' . $langArray['password_changed_log_in'] . '.
 </div><br><br><br>';
 	require 'includes/footer.php';
 
 	$options = [
-		'memory_cost' => 1<<17,
+		'memory_cost' => 1 << 17,
 		'time_cost' => 4,
 		'threads' => 3,
 
@@ -77,7 +75,7 @@ if (isset($password) && !empty($password) && isset($password2) && !empty($passwo
 		$stmt->bindParam(":nickname", $nickname);
 		$stmt->execute();
 	} catch (PDOException $e) {
-		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 	}
 	$pwdchanged = true;
 }
@@ -88,7 +86,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 		$stmt->bindParam(":nickname", $nickname);
 		$stmt->execute();
 	} catch (PDOException $e) {
-		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 	}
 	$sqlresults = $stmt->fetch(PDO::FETCH_ASSOC);
 	$forgottoken = $sqlresults["forgottoken"];
@@ -96,36 +94,37 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 	if ($key == $forgottoken) {
 		require 'includes/header.php';
 		print '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '?nickname=' . $nickname . '&key=' . $forgottoken . '">
-<span class="srs-header">'.$langArray['new_password'].'</span>
+<span class="srs-header">' . $langArray['new_password'] . '</span>
 
 <div class="srs-content">
-    <label for="password" class="srs-lb">'.$langArray['password'].'</label><input name="password" id="password" type="password" class="srs-tb"><br>
+    <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
     <span id="pwstatus"></span><br>
-    <label for="password2" class="srs-lb">'.$langArray['repeat_password'].'</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
+    <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
 </div>
 <div class="srs-footer">
 	<div class="srs-button-container">
-<input type="submit" value="'.$langArray['change_password_button'].'" class="srs-btn">
+<input type="submit" value="' . $langArray['change_password_button'] . '" class="srs-btn">
 </div>
 <div class="srs-slope"></div>
 </div>
 </form><br><br>
 <script src="./js/pwdcheck.js"></script><br>';
 		require 'includes/footer.php';
-	}else {
+	} else {
 		require 'includes/header.php';
-		print '<span class="srs-header">'.$langArray['lost_password'].' - '.$langArray['error'].'</span>
+		print '<span class="srs-header">' . $langArray['lost_password'] . ' - ' . $langArray['error'] . '</span>
 <div class="srs-content">
-'.$langArray['wrong_nickname_or_verification_key'].'
+' . $langArray['wrong_nickname_or_verification_key'] . '
 </div><br><br><br>';
 		require 'includes/footer.php';
 		exit();
-	};
-}elseif (!empty($email)) {
+	}
+	;
+} elseif (!empty($email)) {
 	require 'includes/header.php';
-	print '<span class="srs-header">'.$langArray['new_password'].' - '.$langArray['email'].'</span>
+	print '<span class="srs-header">' . $langArray['new_password'] . ' - ' . $langArray['email'] . '</span>
 <div class="srs-content">
-'.$langArray['email_sent_instruction_page_text'].'
+' . $langArray['email_sent_instruction_page_text'] . '
 </div><br><br><br>';
 	require 'includes/footer.php';
 	try {
@@ -140,13 +139,13 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$stmt->bindParam(":randomkey", $randomkey);
 			$stmt->bindParam(":nickname", $nickname);
 			$stmt->execute();
-			$mailheaders = 'From: '.$from_name.' <'.$from_mail.'>'."\r\n".
+			$mailheaders = 'From: ' . $from_name . ' <' . $from_mail . '>' . "\r\n" .
 				'X-Mailer: Seat Reservation/2.0';
-			$mailmsg = $langArray['email_change_password_body_hi']." ".$nickname."\n\n".$langArray['email_change_password_body_link']."\n\n https://".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."?nickname=".$nickname."&key=".$randomkey;
+			$mailmsg = $langArray['email_change_password_body_hi'] . " " . $nickname . "\n\n" . $langArray['email_change_password_body_link'] . "\n\n https://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] . "?nickname=" . $nickname . "&key=" . $randomkey;
 			mail($email, $mail_subject, $mailmsg, $mailheaders);
 		}
 	} catch (PDOException $e) {
-		error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 	}
 } else {
 	if ($pwdchanged != true) {

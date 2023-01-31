@@ -11,14 +11,12 @@
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
+	
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
  */
 
 require 'includes/config.php';
-require 'includes/functions.php';
 require 'includes/i18n.php';
 
 $register_page = true;
@@ -28,7 +26,7 @@ if (!isset($_SESSION['csrf_token'])) {
 	$_SESSION['csrf_token'] = $csrf_token;
 }
 try {
-	$dsn = DB_DRIVER.":host=".DB_HOST.";dbname=".DB_NAME;
+	$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
 	$options = [
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -60,27 +58,27 @@ try {
 
 	if (isset($regsubmit) && !empty($regsubmit)) {
 		if (isset($password) && !empty($password) && !preg_match_all($pwd_regex, $password)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_password_contains_illegal_characters'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_password_contains_illegal_characters'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($password2) && !empty($password2) && $password !== $password2) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_passwords_dosent_match'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_passwords_dosent_match'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($password) && empty($password)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_password'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['you_must_enter_a_password'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($password2) && empty($password2)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_confirmation_password'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['you_must_enter_a_confirmation_password'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($fullname) && empty($fullname)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_name'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['you_must_enter_a_name'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (!empty($fullname) && !preg_match_all($fullname_regex, $fullname)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['fullname_contains_illegal_characters'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['fullname_contains_illegal_characters'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($email) && !empty($email)) {
@@ -88,16 +86,16 @@ try {
 			$stmt->bindValue(':email', $email);
 			$stmt->execute();
 			if ($stmt->rowCount()) {
-				echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_email_address_already_exists'].'</div><br><br>';
+				echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_email_address_already_exists'] . '</div><br><br>';
 				$formstatus = 'FAIL';
 			}
 		}
 		if (isset($email) && empty($email)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_valid_email_address'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['you_must_enter_a_valid_email_address'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname) && !preg_match_all($nickname_regex, $nickname)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['the_nickname_is_invalid'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_nickname_is_invalid'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname)) {
@@ -110,58 +108,58 @@ try {
 			$stmt->bindValue(':nickname', $nickname);
 			$stmt->execute();
 			if ($stmt->rowCount()) {
-				echo '<div class="regerror">'.$langArray['error'].': '.$langArray['nickname_already_exists'].'.</div><br><br>';
+				echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['nickname_already_exists'] . '.</div><br><br>';
 				$formstatus = 'FAIL';
 			}
 		}
 		if (isset($nickname) && empty($nickname)) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['you_must_enter_a_nickname'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['you_must_enter_a_nickname'] . '</div><br><br>';
 			$formstatus = 'FAIL';
 		}
 		// Check if the form submission's CSRF token matches the one in the session
 		if ($form_csrf_token !== $_SESSION['csrf_token']) {
-			echo '<div class="regerror">'.$langArray['error'].': '.$langArray['invalid_csfr_token'].'</div><br><br>';
+			echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['invalid_csfr_token'] . '</div><br><br>';
 			$formstatus = 'FAIL';
-		}else if ($formstatus !== 'FAIL') {
+		} else if ($formstatus !== 'FAIL') {
 			// If the CSRF token is valid, process the form submission
 			$options = [
-				'memory_cost' => 1<<17,
+				'memory_cost' => 1 << 17,
 				'time_cost' => 4,
 				'threads' => 3,
 			];
 			$password = password_hash($password, PASSWORD_ARGON2ID, $options);
 			$stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password) VALUES (:fullname, :nickname, :email, :password)");
 			$stmt->execute(['fullname' => $fullname, 'nickname' => $nickname, 'email' => $email, 'password' => $password]);
-			echo '<span class="srs-header">'.$langArray['user_was_created'].'!</span>
+			echo '<span class="srs-header">' . $langArray['user_was_created'] . '!</span>
 <div class="srs-content">
-'.$langArray['you_can_now_login_and_reserve_a_seat'].'
+' . $langArray['you_can_now_login_and_reserve_a_seat'] . '
 </div><br><br>';
 			$formstatus = True;
 		}
 	}
 } catch (PDOException $e) {
-	error_log($langArray['invalid_query'].' '.$e->getMessage() . '\n'. $langArray['whole_query'].' '. $stmt->queryString, 0);
+	error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 }
 if ($formstatus !== True) {
-	print'<form class="srs-container" method="POST" action="'.$_SERVER["PHP_SELF"].'">
-        <span class="srs-header">'.$langArray['new_user'].'</span>
+	print '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '">
+        <span class="srs-header">' . $langArray['new_user'] . '</span>
 
         <div class="srs-content">
-            <label for="fullname" class="srs-lb">'.$langArray['fullname'].'</label><input name="fullname" value="'.$fullname.'" id="fullname" class="srs-tb"><br>
+            <label for="fullname" class="srs-lb">' . $langArray['fullname'] . '</label><input name="fullname" value="' . $fullname . '" id="fullname" class="srs-tb"><br>
             <span id="statusfullname"></span><br>
-            <label for="nickname" class="srs-lb">'.$langArray['nickname'].'</label><input name="nickname" value="'.$nickname.'" id="nickname" class="srs-tb"><br>
+            <label for="nickname" class="srs-lb">' . $langArray['nickname'] . '</label><input name="nickname" value="' . $nickname . '" id="nickname" class="srs-tb"><br>
             <span id="status"></span><br>
-            <label for="email" class="srs-lb">'.$langArray['email'].'</label><input name="email" value="'.$email.'" id="email" class="srs-tb"><br>
+            <label for="email" class="srs-lb">' . $langArray['email'] . '</label><input name="email" value="' . $email . '" id="email" class="srs-tb"><br>
             <span id="statusemail"></span><br>
-            <label for="password" class="srs-lb">'.$langArray['password'].'</label><input name="password" id="password" type="password" class="srs-tb"><br>
+            <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
             <span id="pwstatus"></span><br>
-            <label for="password2" class="srs-lb">'.$langArray['repeat_password'].'</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
+            <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
             <span id="pwstatus2"></span><br>
 	    <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '">
         </div>
         <div class="srs-footer">
             <div class="srs-button-container">
-		<input type="submit" class="submit" name="regsubmit" value="'.$langArray['register_button'].'">
+		<input type="submit" class="submit" name="regsubmit" value="' . $langArray['register_button'] . '">
             </div>
             <div class="srs-slope"></div>
         </div>
