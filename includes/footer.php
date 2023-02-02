@@ -15,23 +15,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ?>
 <br>
 <div class="menu">
-    <?php if ($home != true) {
-        echo '<a href="index.php">' . $langArray['home'] . '</a> | ';
+    <?php
+    if (!$home) {
+        echo '<a href="index.php">' . $langArray['home'] . '</a>';
     }
-    ;
+    if (!$home && !$rmuser && !$deluser) {
+        echo ' | ';
+    }
     if (!isset($_SESSION['nickname'])) {
         echo '<a href="register.php">' . $langArray['register'] . '</a> | <a href="login.php">' . $langArray['login'] . '</a>';
     } else {
-        echo '<a href="logout.php">' . $langArray['logout'] . '</a>';
-        if ($deluser != true) {
+        if(!$rmuser && !$home) {
+            echo ' | ';
+        }
+        if (!$rmuser) {
+            echo '<a href="logout.php">' . $langArray['logout'] . '</a>';
+        }
+        if (!$deluser) {
             echo ' | <a href="deluser.php">' . $langArray['delete_account'] . '</a>';
         }
     }
-    ;
     if (!isset($_SESSION['nickname'])) {
         echo ' | <a href="forgot.php">' . $langArray['forgot_password'] . '</a>';
     }
-    ;
     ?>
     <br>
     <br>
