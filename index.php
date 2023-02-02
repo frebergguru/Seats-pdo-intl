@@ -139,14 +139,16 @@ require 'includes/header.php';
 			$stmt->bindValue(':seatid', $seatid, PDO::PARAM_INT);
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			checkOccupiedSeat($rows);
+			foreach ($rows as $row) {
+				if ($row["taken"] == $seatid) {
+					$occupied = 1;
+				}
+			}
 		} catch (PDOException $e) {
 			error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 			exit();
 		}
 	}
-	;
-
 	$stmt->closeCursor();
 
 	if (isset($seatid)) {
@@ -166,7 +168,7 @@ require 'includes/header.php';
 	}
 
 	if (!isset($occupied)) {
-		$occupied = '';
+		$occupied = null;
 	}
 	if ($occupied == "1") {
 		try {

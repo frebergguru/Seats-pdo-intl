@@ -43,7 +43,7 @@ $from_mail = "hypnotize@lastnetwork.net";
 
 //Which database server do you want to use? (valid options: mysql or pgsql)
 if (!defined('DB_DRIVER')) {
-    define('DB_DRIVER', 'pgsql');
+    define('DB_DRIVER', 'mysql');
 }
 //Database server host
 if (!defined('DB_HOST')) {

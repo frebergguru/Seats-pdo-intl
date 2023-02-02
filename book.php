@@ -21,21 +21,41 @@ $nickname = htmlspecialchars($_SESSION['nickname']);
 $seat = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 $text = file_get_contents("map.txt");
 $maxseats = substr_count($text, "#");
+
+$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
+$options = [
+	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+	PDO::ATTR_EMULATE_PREPARES => false,
+];
+
 if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
-	try {
-		$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
-		$options = [
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-			PDO::ATTR_EMULATE_PREPARES => false,
-		];
-		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-	} catch (PDOException $e) {
-		error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
-		exit();
-	}
-	try {
-		if ($seat <= $maxseats) {
+
+	if ($seat <= $maxseats) {
+		try {
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+			$stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
+			$stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
+			$stmt->execute();
+			$checkSeat = $stmt->fetchColumn();
+			
+			if($checkSeat > "0") {
+				require_once 'includes/header.php';
+				print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+					<div class="srs-content">
+			' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+			</div><br><br><br>';
+				require_once 'includes/footer.php';
+				exit();
+			}
+			$pdo = null;
+		} catch (PDOException $e) {
+			error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+			exit();
+		}
+
+		try {
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
 			switch (DB_DRIVER) {
 				case "mysql":
 					$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
@@ -62,8 +82,18 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 			}
 			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
 			$stmt->execute();
-			$result = $stmt->fetch(PDO::FETCH_ASSOC);
-			if (empty($result["rseat"])) {
+			$pdo = null;
+
+		} catch (PDOException $e) {
+			error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+			exit();
+		}
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		
+		if (empty($result["rseat"])) {
+			try {
+				$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
 				$stmt = $pdo->prepare("UPDATE users SET rseat=:rseat WHERE nickname=:nickname");
 				$stmt->bindValue(":rseat", $seat, PDO::PARAM_STR);
 				$stmt->bindValue(":nickname", $_SESSION['nickname'], PDO::PARAM_STR);
@@ -72,28 +102,28 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 				$stmt->bindValue(":staken", $seat, PDO::PARAM_STR);
 				$stmt->bindValue(":suserid", $userid, PDO::PARAM_STR);
 				$stmt->execute();
-
-				header('Location: ' . dirname($_SERVER['REQUEST_URI']));
-				exit;
-			} else {
-				require_once 'includes/header.php';
-				print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-                <div class="srs-content">
-		' . $langArray['you_can_only_reserve_one_seat'] . '
-		</div><br><br><br>';
-				require_once 'includes/footer.php';
+				$pdo = null;
+			} catch (PDOException $e) {
+				error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+				exit();
 			}
+			header('Location: ' . dirname($_SERVER['REQUEST_URI']));
+			exit;
 		} else {
 			require_once 'includes/header.php';
 			print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+                <div class="srs-content">
+		' . $langArray['you_can_only_reserve_one_seat'] . '
+		</div><br><br><br>';
+			require_once 'includes/footer.php';
+		}
+	} else {
+		require_once 'includes/header.php';
+		print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
             <div class="srs-content">
 	    ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
             </div><br><br><br>';
-			require_once 'includes/footer.php';
-		}
-		$pdo = null;
-	} catch (PDOException $e) {
-		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
+		require_once 'includes/footer.php';
 	}
 } else {
 	header("Location: " . dirname($_SERVER['REQUEST_URI']));

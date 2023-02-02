@@ -11,6 +11,8 @@ A simple seat booking system with support for multiple languages and a custom ro
 * Remove all unnecessary code
 * Optimize the code
 * Add more features like change seat reservation, delete account and so on
+* Add support for sending rich mail
+* Make custom images instead of using unicode chars.
 
 ## map.txt:
 ```
