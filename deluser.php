@@ -26,13 +26,18 @@ if (isset($nickname)) {
     if (isset($delete_user)) {
         $password = (htmlspecialchars($_POST['password']));
 
-        if (DB_DRIVER == "mysql") {
-            $stmt = $pdo->prepare('SELECT password, rseat FROM users WHERE nickname = :nickname');
+        switch (DB_DRIVER) {
+            case "mysql":
+                $stmt = $pdo->prepare('SELECT password, rseat FROM users WHERE nickname = :nickname');
+                break;
+            case "pgsql":
+                $stmt = $pdo->prepare('SELECT password, rseat FROM users WHERE lower(nickname) LIKE :nickname');
+                break;
+            default:
+                throw new Exception("unsupported_database_driver");
         }
-        if (DB_DRIVER == "pgsql") {
-            $stmt = $pdo->prepare('SELECT password, rseat FROM users WHERE nickname ILIKE :nickname');
-        }
-        $stmt->execute(['nickname' => $nickname]);
+        $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+        $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         $hashed_password = $user['password'];
         $reservation_id = $user['rseat'];
@@ -46,13 +51,18 @@ if (isset($nickname)) {
                     $stmt = $pdo->prepare('DELETE FROM reservations WHERE taken = :reservation_id');
                     $stmt->execute(['reservation_id' => $reservation_id]);
                 }
-                if (DB_DRIVER == "mysql") {
-                    $stmt = $pdo->prepare('DELETE FROM users WHERE nickname = :nickname');
+                switch (DB_DRIVER) {
+                    case "mysql":
+                        $stmt = $pdo->prepare('DELETE FROM users WHERE nickname = :nickname');
+                        break;
+                    case "pgsql":
+                        $stmt = $pdo->prepare('DELETE FROM users WHERE lower(nickname) LIKE :nickname');
+                        break;
+                    default:
+                        throw new Exception("unsupported_database_driver");
                 }
-                if (DB_DRIVER == "pgsql") {
-                    $stmt = $pdo->prepare('DELETE FROM users WHERE nickname ILIKE :nickname');
-                }
-                $stmt->execute(['nickname' => $nickname]);
+                $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+                $stmt->execute();
 
                 $pdo->commit();
                 if (isset($_SESSION['nickname'])) {
@@ -82,7 +92,7 @@ if (isset($nickname)) {
     </div>
     <div class="srs-footer">
         <div class="srs-button-container">
-            <input type="submit" class="submit" value="' . $langArray['login'] . '">
+            <input type="submit" class="submit" value="' . $langArray['delete_btn'] . '">
             <input type="hidden" name="delete_user" value="">
         </div>
         <div class="srs-slope"></div>

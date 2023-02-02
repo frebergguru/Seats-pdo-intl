@@ -57,7 +57,7 @@ $langArray = array(
 	"password_changed_log_in" => "Passordet ditt er blitt byttet, du kan logge inn ved &aring; trykke <a href=\"login.php\">her</a>.",
 	"change_password_button" => "Bytt passord",
 	"wrong_nickname_or_verification_key" => "Feil kallenavn eller verifikasjonsn&oslash;kkel!",
-	"email_sent_instruction_page_text" => "Du har n&aring; f&aring;tt tilsendt en e-post med instruksjoner hvis adressen du oppga eksisterer.",
+	"email_sent_instruction_page_text" => "Du har n&aring; f&aring;tt tilsendt en e-post med instruksjoner, hvis adressen du oppga eksisterer.",
 	"email_change_password_body_hi" => "Hei",
 	"email_change_password_body_link" => "Trykk p&aring; linken under for &aring; bytte passordet ditt.",
 	"you_must_enter_a_name" => "Du m&aring; skrive inn et navn.",
@@ -91,6 +91,8 @@ $langArray = array(
 	"delete_account" => "Slett konto",
 	"please_confirm_with_your_password" => "Vennligst bekreft med passordet ditt:",
 	"user_is_now_successfully_deleted" => "Brukeren er n&aring; slettet.",
+	"delete_btn" => "Slett konto",
 	"you_are_not_logged_in" => "Du er ikke logget inn.",
+	"unsupported_database_driver" => "Ustøttet databasedriver",
 );
 ?>

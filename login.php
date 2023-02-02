@@ -1,17 +1,14 @@
 <?php
 /*
 Copyright 2023 Morten Freberg
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -36,8 +33,14 @@ try {
 			PDO::ATTR_EMULATE_PREPARES => false,
 		];
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
-		$stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
-		$stmt->bindParam(":nickname", $nickname, PDO::PARAM_STR);
+		if (DB_DRIVER == "mysql") {
+			$stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
+		} elseif (DB_DRIVER == "pgsql") {
+			$stmt = $pdo->prepare("SELECT password FROM users WHERE lower(nickname) LIKE :nickname");
+		} else {
+			throw new Exception("unsupported_database_driver");
+		}
+		$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
 		$stmt->execute();
 		$results = $stmt->fetch(PDO::FETCH_ASSOC);
 		if (isset($results["password"])) {

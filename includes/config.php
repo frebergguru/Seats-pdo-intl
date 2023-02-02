@@ -93,6 +93,9 @@ if (!isset($nickname)) {
 if (!isset($fullname)) {
     $fullname = null;
 }
+if (!isset($deluser)) {
+    $deluser = null;
+}
 if (!isset($_SESSION['langID'])) {
     $_SESSION['langID'] = "en";
 }

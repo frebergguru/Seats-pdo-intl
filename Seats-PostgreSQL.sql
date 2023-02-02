@@ -18,10 +18,10 @@ CREATE TABLE "reservations" (
 DROP TABLE IF EXISTS "users";
 CREATE TABLE "users" (
 "id" serial PRIMARY KEY,
-"fullname" text NOT NULL,
-"nickname" text NOT NULL,
-"password" text NOT NULL,
-"email" text NOT NULL,
-"forgottoken" text,
+"fullname" varchar(255) NOT NULL,
+"nickname" varchar(255) NOT NULL,
+"password" varchar(97) NOT NULL,
+"email" varchar(255) NOT NULL,
+"forgottoken" varchar(64),
 "rseat" integer
 );

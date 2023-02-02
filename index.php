@@ -72,7 +72,7 @@ require 'includes/header.php';
 						$stmt->execute(['seat' => $seatId]);
 						$dbrow = $stmt->fetch(PDO::FETCH_ASSOC);
 						if (is_array($dbrow) && $dbrow["taken"] == $seatId) {
-							echo '<td class="seat"><a href="?seatid='. $seatId .'"><img src="./img/red.jpg" title="' . $langArray['occupied_seat'] . ' #' . $seatId . '" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
+							echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" title="' . $langArray['occupied_seat'] . ' #' . $seatId . '" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
 						} elseif ($useatId == $seatId) {
 							echo '<td class="seat"><img src="./img/yellow.jpg" title="' . $langArray['selected_seat'] . ' #' . $seatId . '" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></td>';
 						} else {
@@ -136,7 +136,7 @@ require 'includes/header.php';
 	if (isset($seatid)) {
 		try {
 			$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seatid");
-			$stmt->bindParam(':seatid', $seatid, PDO::PARAM_INT);
+			$stmt->bindValue(':seatid', $seatid, PDO::PARAM_INT);
 			$stmt->execute();
 			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			checkOccupiedSeat($rows);
@@ -171,7 +171,7 @@ require 'includes/header.php';
 	if ($occupied == "1") {
 		try {
 			$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE id = :user");
-			$stmt->bindParam(':user', $user, PDO::PARAM_INT);
+			$stmt->bindValue(':user', $user, PDO::PARAM_INT);
 			$stmt->execute();
 			$row = $stmt->fetch(PDO::FETCH_ASSOC);
 			$nickname = $row["nickname"];
@@ -192,7 +192,7 @@ require 'includes/header.php';
 				if (!isset($_SESSION['nickname'])) {
 					echo $langArray['login_before_reserving'] . '</div>';
 				} else {
-					$stmt->bindParam(':nickname', $_SESSION['nickname']);
+					$stmt->bindValue(':nickname', $_SESSION['nickname'], PDO::PARAM_STR);
 					$stmt->execute();
 					$row = $stmt->fetch(PDO::FETCH_ASSOC);
 					$rseat = $row[RSEAT_TABLE];

@@ -57,7 +57,7 @@ $langArray = array(
 	"password_changed_log_in" => "Your password has been changed, you can log in by clicking <a href=\"login.php\">here</a>.",
 	"change_password_button" => "Change password",
 	"wrong_nickname_or_verification_key" => "Wrong nickname or verification key!",
-	"email_sent_instruction_page_text" => "You have now been sent an email with instructions if the address you entered exists.",
+	"email_sent_instruction_page_text" => "You have now been sent an email with instructions, if the address you entered exists.",
 	"email_change_password_body_hi" => "Hi",
 	"email_change_password_body_link" => "Press the link below to change your password.",
 	"you_must_enter_a_name" => "You must enter a name!",
@@ -89,8 +89,10 @@ $langArray = array(
 	"whole_query" => "Whole query:",
 	"invalid_password" => "Invalid password.",
 	"delete_account" => "Delete account",
-	"please_confirm_with_your_password" => "Vennligst bekreft med passordet ditt:",
-	"user_is_now_successfully_deleted" => "The user is now successfully delete.",
+	"please_confirm_with_your_password" => "Please confirm with your password:",
+	"user_is_now_successfully_deleted" => "The user is now successfully deleted.",
+	"delete_btn" => "Delete account",
 	"you_are_not_logged_in" => "You are not logged in.",
+	"unsupported_database_driver" => "Unsupported database driver",
 );
 ?>

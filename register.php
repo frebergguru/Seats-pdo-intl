@@ -1,20 +1,17 @@
 <?php
 /*
-    Copyright 2023 Morten Freberg
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-	
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+Copyright 2023 Morten Freberg
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 require 'includes/config.php';
 require 'includes/i18n.php';
@@ -44,7 +41,7 @@ try {
 		$nickname = htmlspecialchars($_POST['nickname']);
 	}
 	if (!empty($_POST['email'])) {
-		$email = htmlspecialchars(strtolower($_POST['email']));
+		$email = htmlspecialchars(mb_strtolower($_POST['email']));
 	}
 	if (!empty($_POST['password'])) {
 		$password = htmlspecialchars($_POST['password']);
@@ -82,8 +79,14 @@ try {
 			$formstatus = 'FAIL';
 		}
 		if (isset($email) && !empty($email)) {
-			$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
-			$stmt->bindValue(':email', $email);
+			if (DB_DRIVER == "mysql") {
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
+			} elseif (DB_DRIVER == "pgsql") {
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) LIKE :email");
+			} else {
+				throw new Exception("unsupported_database_driver");
+			}
+			$stmt->bindValue(':email', $email, PDO::PARAM_STR);
 			$stmt->execute();
 			if ($stmt->rowCount()) {
 				echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_email_address_already_exists'] . '</div><br><br>';
@@ -101,11 +104,12 @@ try {
 		if (isset($nickname) && !empty($nickname)) {
 			if (DB_DRIVER == "mysql") {
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+			} elseif (DB_DRIVER == "pgsql") {
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
+			} else {
+				throw new Exception("unsupported_database_driver");
 			}
-			if (DB_DRIVER == "pgsql") {
-				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname ILIKE :nickname");
-			}
-			$stmt->bindValue(':nickname', $nickname);
+			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
 			$stmt->execute();
 			if ($stmt->rowCount()) {
 				echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['nickname_already_exists'] . '.</div><br><br>';
@@ -123,9 +127,9 @@ try {
 		} else if ($formstatus !== 'FAIL') {
 			// If the CSRF token is valid, process the form submission
 			$options = [
-				'memory_cost' => 1 << 17,
-				'time_cost' => 4,
-				'threads' => 3,
+				'memory_cost' => 1 << 14,
+				'time_cost' => 2,
+				'threads' => 2,
 			];
 			$password = password_hash($password, PASSWORD_ARGON2ID, $options);
 			$stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password) VALUES (:fullname, :nickname, :email, :password)");

@@ -37,11 +37,11 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `fullname` text NOT NULL,
-  `nickname` text NOT NULL,
-  `password` text NOT NULL,
-  `email` text NOT NULL,
-  `forgottoken` char(64) DEFAULT NULL,
+  `fullname` varchar(255) NOT NULL,
+  `nickname` varchar(255) NOT NULL,
+  `password` varchar(97) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `forgottoken` varchar(64) DEFAULT NULL,
   `rseat` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_ci;
