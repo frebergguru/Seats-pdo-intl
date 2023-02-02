@@ -16,14 +16,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Start the session if it's not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-if (isset($_SESSION['nickname'])) {
+
+// Check if the session is active and if the nickname session variable is set
+if (session_status() == PHP_SESSION_ACTIVE && isset($_SESSION['nickname'])) {
+    // Destroy the session if both conditions are met
     session_destroy();
-    $left = true;
-    header("Location: " . dirname($_SERVER['REQUEST_URI']));
-    exit;
 }
+
+// Redirect the user to the current directory
 header("Location: " . dirname($_SERVER['REQUEST_URI']));
+// Exit the script
+exit;
 ?>

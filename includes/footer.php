@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         echo '<a href="index.php">' . $langArray['home'] . '</a> | ';
     }
     ;
-    if (!isset($_SESSION['nickname']) or $left == true) {
+    if (!isset($_SESSION['nickname'])) {
         echo '<a href="register.php">' . $langArray['register'] . '</a> | <a href="login.php">' . $langArray['login'] . '</a>';
     } else {
         echo '<a href="logout.php">' . $langArray['logout'] . '</a>';
@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         }
     }
     ;
-    if (!isset($_SESSION['nickname']) or $left == true) {
+    if (!isset($_SESSION['nickname'])) {
         echo ' | <a href="forgot.php">' . $langArray['forgot_password'] . '</a>';
     }
     ;
