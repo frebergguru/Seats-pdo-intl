@@ -13,6 +13,7 @@ A simple seat booking system with support for multiple languages and a custom ro
 * Add more features like change seat reservation, delete account and so on
 * Add support for sending rich mail
 * Make custom images instead of using unicode chars.
+* Add PDO rollBack functionality everywhere it is needed.
 
 ## map.txt:
 ```

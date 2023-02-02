@@ -25,6 +25,5 @@ if (isset($_SESSION['nickname'])) {
     header("Location: " . dirname($_SERVER['REQUEST_URI']));
     exit;
 }
-;
 header("Location: " . dirname($_SERVER['REQUEST_URI']));
 ?>

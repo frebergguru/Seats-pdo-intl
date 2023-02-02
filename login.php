@@ -82,7 +82,6 @@ try {
         </div>
     </form>';
 }
-;
 ?>
 <br>
 <?php
