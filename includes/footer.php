@@ -19,16 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     if (!$home) {
         echo '<a href="index.php">' . $langArray['home'] . '</a>';
     }
-    if (!$home && !$rmuser && !$deluser) {
+    if (!$home && !$deluser && !$deluser) {
         echo ' | ';
     }
     if (!isset($_SESSION['nickname'])) {
         echo '<a href="register.php">' . $langArray['register'] . '</a> | <a href="login.php">' . $langArray['login'] . '</a>';
     } else {
-        if(!$rmuser && !$home) {
+        if(!$deluser && !$home) {
             echo ' | ';
         }
-        if (!$rmuser) {
+        if (!$deluser) {
             echo '<a href="logout.php">' . $langArray['logout'] . '</a>';
         }
         if (!$deluser) {

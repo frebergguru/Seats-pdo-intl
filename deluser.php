@@ -62,7 +62,7 @@ if (isset($nickname)) {
                 $pdo->commit();
                 if (isset($_SESSION['nickname'])) {
                     session_destroy();
-                    $rmuser = True;
+                    $deluser = True;
                 }
                 require_once("includes/header.php");
                 echo '<div class="userdel">' . $langArray['user_is_now_successfully_deleted'] . '</div><br><br>';

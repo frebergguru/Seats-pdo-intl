@@ -158,7 +158,7 @@ require 'includes/header.php';
 				}
 			}
 		} catch (PDOException $e) {
-			echo "Error: " . $e->getMessage();
+			error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 		}
 	}
 
