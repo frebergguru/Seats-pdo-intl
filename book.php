@@ -22,18 +22,11 @@ $seat = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 $text = file_get_contents("map.txt");
 $maxseats = substr_count($text, "#");
 
-$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
-$options = [
-	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-	PDO::ATTR_EMULATE_PREPARES => false,
-];
-
 if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 
 	if ($seat <= $maxseats) {
 		try {
-			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 			$stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
 			$stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
 			$stmt->execute();
@@ -55,7 +48,7 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 		}
 
 		try {
-			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 			switch (DB_DRIVER) {
 				case "mysql":
 					$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
@@ -92,7 +85,7 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 		
 		if (empty($result["rseat"])) {
 			try {
-				$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+				$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
 				$stmt = $pdo->prepare("UPDATE users SET rseat=:rseat WHERE nickname=:nickname");
 				$stmt->bindValue(":rseat", $seat, PDO::PARAM_STR);

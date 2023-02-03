@@ -17,8 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 ?>
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="<?php echo $_SESSION['langID']; ?>">
 <head>
     <title>
         <?php echo $langArray['header_title']; ?>
@@ -37,7 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         var validNickname = <?php echo $nickname_regex; ?>
     </script>
 </head>
-
 <body>
     <div class="main_wrapper">
         <div id="wrapper">

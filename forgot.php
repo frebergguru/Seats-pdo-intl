@@ -19,12 +19,6 @@ require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-$dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME;
-$options = [
-	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-	PDO::ATTR_EMULATE_PREPARES => false,
-];
 if (!empty($_GET['nickname'])) {
 	$nickname = htmlspecialchars(mb_strtolower($_GET['nickname']));
 }
@@ -66,7 +60,7 @@ if (isset($password) && !empty($password) && isset($password2) && !empty($passwo
 	];
 	$pwdhash = password_hash($password, PASSWORD_ARGON2ID, $options);
 	try {
-		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 		switch (DB_DRIVER) {
 			case "mysql":
 				$stmt = $pdo->prepare("UPDATE users SET password = :password, forgottoken = NULL WHERE nickname = :nickname");
@@ -89,7 +83,7 @@ if (isset($password) && !empty($password) && isset($password2) && !empty($passwo
 
 if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwdchanged != true) {
 	try {
-		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 		switch (DB_DRIVER) {
 			case "mysql":
 				$stmt = $pdo->prepare("SELECT forgottoken FROM users WHERE nickname = :nickname");
@@ -144,7 +138,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 </div><br><br><br>';
 	require 'includes/footer.php';
 	try {
-		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 		$stmt = $pdo->prepare("SELECT nickname FROM users WHERE email=:email");
 		$stmt->bindValue(":email", $email);
 		$stmt->execute();
@@ -154,7 +148,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$randomkey = genRandomKey();
 			$pdo = null;
 
-			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $options);
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 			switch (DB_DRIVER) {
 				case "mysql":
 					$stmt = $pdo->prepare("UPDATE users SET forgottoken=:randomkey WHERE nickname=:nickname");

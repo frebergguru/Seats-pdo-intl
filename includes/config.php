@@ -1,17 +1,14 @@
 <?php
 /*
 Copyright 2023 Morten Freberg
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -41,6 +38,11 @@ $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";
 $from_mail = "hypnotize@lastnetwork.net";
 
+//Set the default language (valid options: en or no).
+if (!isset($_SESSION['langID'])) {
+    $_SESSION['langID'] = "no";
+}
+
 //Which database server do you want to use? (valid options: mysql or pgsql)
 if (!defined('DB_DRIVER')) {
     define('DB_DRIVER', 'pgsql');
@@ -61,7 +63,22 @@ if (!defined('DB_USERNAME')) {
 if (!defined('DB_PASSWORD')) {
     define('DB_PASSWORD', '');
 }
-
+//Some database configuration
+switch (DB_DRIVER) {
+    case "mysql":
+        $dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4;";
+        break;
+    case "pgsql":
+        $dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";options='--client_encoding=UTF8'";
+        break;
+    default:
+        throw new Exception("unsupported_database_driver");
+}
+$db_options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+];
 //DO NOT CHANGE ANYTHING FROM HERE!!
 if (!defined('USERS_TABLE')) {
     define('USERS_TABLE', 'users');
@@ -95,8 +112,5 @@ if (!isset($fullname)) {
 }
 if (!isset($deluser)) {
     $deluser = null;
-}
-if (!isset($_SESSION['langID'])) {
-    $_SESSION['langID'] = "en";
 }
 ?>
