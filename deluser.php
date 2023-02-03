@@ -43,7 +43,8 @@ if (isset($nickname)) {
             try {
                 if ($reservation_id) {
                     $stmt = $pdo->prepare('DELETE FROM reservations WHERE taken = :reservation_id');
-                    $stmt->execute(['reservation_id' => $reservation_id]);
+                    $stmt->bindValue(':reservation_id', $reservation_id, PDO::PARAM_STR);
+                    $stmt->execute();
                 }
                 switch (DB_DRIVER) {
                     case "mysql":

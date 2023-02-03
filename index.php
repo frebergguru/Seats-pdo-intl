@@ -63,7 +63,8 @@ require 'includes/header.php';
 				case "#":
 					try {
 						$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seat");
-						$stmt->execute(['seat' => $seatId]);
+						$stmt->bindValue(":seat", $seatId);
+						$stmt->execute();
 						$dbrow = $stmt->fetch(PDO::FETCH_ASSOC);
 						if (is_array($dbrow) && $dbrow["taken"] == $seatId) {
 							echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" title="' . $langArray['occupied_seat'] . ' #' . $seatId . '" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';

@@ -72,11 +72,14 @@ try {
 			$formstatus = 'FAIL';
 		}
 		if (isset($email) && !empty($email)) {
-			if (DB_DRIVER == "mysql") {
+			switch (DB_DRIVER) {
+				case "mysql";
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
-			} elseif (DB_DRIVER == "pgsql") {
+				break;
+			case "pgsql":
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) LIKE :email");
-			} else {
+				break;
+			default:
 				throw new Exception("unsupported_database_driver");
 			}
 			$stmt->bindValue(':email', $email, PDO::PARAM_STR);
@@ -95,11 +98,14 @@ try {
 			$formstatus = 'FAIL';
 		}
 		if (isset($nickname) && !empty($nickname)) {
-			if (DB_DRIVER == "mysql") {
+			switch (DB_DRIVER) {
+				case "mysql":
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
-			} elseif (DB_DRIVER == "pgsql") {
+				break;
+			case "pgsql":
 				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
-			} else {
+				break;
+			default:
 				throw new Exception("unsupported_database_driver");
 			}
 			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
@@ -126,7 +132,11 @@ try {
 			];
 			$password = password_hash($password, PASSWORD_ARGON2ID, $options);
 			$stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password) VALUES (:fullname, :nickname, :email, :password)");
-			$stmt->execute(['fullname' => $fullname, 'nickname' => $nickname, 'email' => $email, 'password' => $password]);
+			$stmt->bindValue(':fullname', $fullname, PDO::PARAM_STR);
+			$stmt->bindValue(':nickname', $nickname, PDO::PARAM_STR);
+			$stmt->bindValue(':email', $email, PDO::PARAM_STR);
+			$stmt->bindValue(':password', $password, PDO::PARAM_STR);
+			$stmt->execute();
 			echo '<span class="srs-header">' . $langArray['user_was_created'] . '!</span>
 <div class="srs-content">
 ' . $langArray['you_can_now_login_and_reserve_a_seat'] . '
