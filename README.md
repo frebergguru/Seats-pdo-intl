@@ -14,6 +14,7 @@ A simple seat booking system with support for multiple languages and a custom ro
 * Add support for sending rich mail
 * Make custom images instead of using unicode chars.
 * Add PDO rollBack functionality everywhere it is needed.
+* Make the mainpage more mobile friendly - Please contact me or create a new issue if you know how!
 
 ## map.txt:
 ```
