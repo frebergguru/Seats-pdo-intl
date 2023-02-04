@@ -1,17 +1,14 @@
 <?php
 /*
 Copyright 2023 Morten Freberg
-
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -42,11 +39,8 @@ require 'includes/header.php';
 		<?php echo $langArray['wall']; ?> &#127869;
 		<?php echo $langArray['kitchen']; ?> &#128701;
 		<?php echo $langArray['bathroom']; ?> &#128682;
-		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit"
-			title="<?php echo $langArray['exit']; ?>" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br><img src="./img/yellow.jpg" height="15"
-			alt="<?php echo $langArray['selected_seat']; ?>"> <?php echo $langArray['selected_seat']; ?> <img
-			src="./img/red.jpg" height="15" alt="<?php echo $langArray['occupied_seat']; ?>"> <?php echo $langArray['occupied_seat']; ?> <img src="./img/green.jpg" height="15"
-			alt="<?php echo $langArray['vacant_seat']; ?>"> <?php echo $langArray['vacant_seat']; ?>
+		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit" title="<?php echo $langArray['exit']; ?>" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br>
+		<img src="./img/yellow.jpg" alt="<?php echo $langArray['selected_seat']; ?>"> <?php echo $langArray['selected_seat']; ?> <img src="./img/red.jpg" alt="<?php echo $langArray['occupied_seat']; ?>"> <?php echo $langArray['occupied_seat']; ?> <img src="./img/green.jpg" alt="<?php echo $langArray['vacant_seat']; ?>"> <?php echo $langArray['vacant_seat']; ?>
 	</p>
 	<hr>
 	<?php
@@ -158,7 +152,7 @@ require 'includes/header.php';
 				}
 			}
 		} catch (PDOException $e) {
-			error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
+			echo "Error: " . $e->getMessage();
 		}
 	}
 
