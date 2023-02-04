@@ -324,6 +324,10 @@ img.exit {
         width: 100%;
         max-width: none;
     }
+    .menu {
+        width: 100%;
+        max-width: none;
+    }
     #seatMap {
         width: 600px;
         overflow: auto;

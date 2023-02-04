@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         echo ' | ';
     }
     if (!isset($_SESSION['nickname'])) {
-        echo '<a href="register.php">' . $langArray['register'] . '</a> | <a href="login.php">' . $langArray['login'] . '</a>';
+        echo '<a href="register.php">' . $langArray['new_user_menu'] . '</a> | <a href="login.php">' . $langArray['login'] . '</a>';
     } else {
         if(!$deluser && !$home) {
             echo ' | ';
