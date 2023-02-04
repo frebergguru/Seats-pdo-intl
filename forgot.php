@@ -122,7 +122,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 		require 'includes/footer.php';
 	} else {
 		require 'includes/header.php';
-		print '<span class="srs-header">' . $langArray['lost_password'] . ' - ' . $langArray['error'] . '</span>
+		print '<span class="srs-header">' . $langArray['forgot_password_heading'] . ' - ' . $langArray['error'] . '</span>
 <div class="srs-content">
 ' . $langArray['wrong_nickname_or_verification_key'] . '
 </div><br><br><br>';
@@ -175,7 +175,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 	if ($pwdchanged != true) {
 		require 'includes/header.php';
 		print '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '">
-<span class="srs-header">' . $langArray['lost_password'] . '</span>
+<span class="srs-header">' . $langArray['forgot_password_heading'] . '</span>
 <div class="srs-content">
 	<label for="email" class="srs-lb">' . $langArray['email'] . '</label><input name="email" value="" id="email" class="srs-tb"><br>
 </div>

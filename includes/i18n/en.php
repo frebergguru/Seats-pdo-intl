@@ -54,7 +54,7 @@ $langArray = array(
 	"you_must_enter_a_password" => "You must enter a password!",
 	"you_must_enter_a_confirmation_password" => "You must enter a confirmation password!",
 	"new_password" => "New password",
-	"lost_password" => "Lost password",
+	"forgot_password_heading" => "Forgot password",
 	"password_changed_log_in" => "Your password has been changed, you can log in by clicking <a href=\"login.php\">here</a>.",
 	"change_password_button" => "Change password",
 	"wrong_nickname_or_verification_key" => "Wrong nickname or verification key!",

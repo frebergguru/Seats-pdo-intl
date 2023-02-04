@@ -54,7 +54,7 @@ $langArray = array(
 	"you_must_enter_a_password" => "Du m&aring; skrive inn et passord.",
 	"you_must_enter_a_confirmation_password" => "Du m&aring; skrive inn et bekreftelsespassord.",
 	"new_password" => "Nytt passord",
-	"lost_password" => "Mistet passord",
+	"forgot_password_heading" => "Glemt passord",
 	"password_changed_log_in" => "Passordet ditt er blitt byttet, du kan logge inn ved &aring; trykke <a href=\"login.php\">her</a>.",
 	"change_password_button" => "Bytt passord",
 	"wrong_nickname_or_verification_key" => "Feil kallenavn eller verifikasjonsn&oslash;kkel!",
