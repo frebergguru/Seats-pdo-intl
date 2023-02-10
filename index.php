@@ -39,8 +39,10 @@ require 'includes/header.php';
 		<?php echo $langArray['wall']; ?> &#127869;
 		<?php echo $langArray['kitchen']; ?> &#128701;
 		<?php echo $langArray['bathroom']; ?> &#128682;
-		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit" title="<?php echo $langArray['exit']; ?>" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br>
-		<img src="./img/yellow.jpg" alt="<?php echo $langArray['selected_seat']; ?>"> <?php echo $langArray['selected_seat']; ?> <img src="./img/red.jpg" alt="<?php echo $langArray['occupied_seat']; ?>"> <?php echo $langArray['occupied_seat']; ?> <img src="./img/green.jpg" alt="<?php echo $langArray['vacant_seat']; ?>"> <?php echo $langArray['vacant_seat']; ?>
+		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit"
+			title="<?php echo $langArray['exit']; ?>" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br>
+		<img src="./img/yellow.jpg" alt="<?php echo $langArray['selected_seat']; ?>"> <?php echo $langArray['selected_seat']; ?> <img src="./img/red.jpg" alt="<?php echo $langArray['occupied_seat']; ?>"> <?php echo $langArray['occupied_seat']; ?> <img src="./img/green.jpg" alt="<?php echo $langArray['vacant_seat']; ?>">
+		<?php echo $langArray['vacant_seat']; ?>
 	</p>
 	<hr>
 	<?php
@@ -119,87 +121,87 @@ require 'includes/header.php';
 	}
 	?>
 	</table>
-
-	<?php
-	$seatid = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
-	if (isset($seatid)) {
-		try {
-			$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seatid");
-			$stmt->bindValue(':seatid', $seatid, PDO::PARAM_INT);
-			$stmt->execute();
-			$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-			foreach ($rows as $row) {
-				if ($row["taken"] == $seatid) {
-					$occupied = 1;
-				}
-			}
-		} catch (PDOException $e) {
-			error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
-			exit();
-		}
-	}
-	$stmt->closeCursor();
-
-	if (isset($seatid)) {
-		try {
-			$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = ?");
-			$stmt->execute([$seatid]);
-			$result = $stmt->fetchAll();
-			foreach ($result as $row) {
-				if ($row["taken"] == $seatid) {
-					$occupied = 1;
-					$user = $row["user_id"];
-				}
-			}
-		} catch (PDOException $e) {
-			echo "Error: " . $e->getMessage();
-		}
-	}
-
-	if (!isset($occupied)) {
-		$occupied = null;
-	}
-	if ($occupied == "1") {
-		try {
-			$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE id = :user");
-			$stmt->bindValue(':user', $user, PDO::PARAM_INT);
-			$stmt->execute();
-			$row = $stmt->fetch(PDO::FETCH_ASSOC);
-			$nickname = $row["nickname"];
-		} catch (PDOException $e) {
-			error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
-			exit();
-		}
-		$stmt->closeCursor();
-	}
+</div>
+<?php
+$seatid = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
+if (isset($seatid)) {
 	try {
-		$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE nickname = :nickname");
-
-		if (!empty($seatid)) {
-			print '<br><div class="seat_registered">';
-			if (!empty($occupied)) {
-				print $langArray['seat_number'] . ' ' . $seatid . ' ' . $langArray['is_reserved_by'] . ' ' . $nickname . '</div>';
-			} else {
-				if (!isset($_SESSION['nickname'])) {
-					echo $langArray['login_before_reserving'] . '</div>';
-				} else {
-					$stmt->bindValue(':nickname', $_SESSION['nickname'], PDO::PARAM_STR);
-					$stmt->execute();
-					$row = $stmt->fetch(PDO::FETCH_ASSOC);
-					$rseat = $row[RSEAT_TABLE];
-					if (empty($rseat) or $rseat == 0) {
-						print $langArray['do_you_want_to_reserve_seat_number'] . ' ' . $seatid . '? <a href="book.php?seatid=' . $seatid . '">' . $langArray['yes'] . '</a></div>';
-					} else {
-						print '<strong>' . $langArray['error'] . ': ' . $langArray['you_can_only_reserve_one_seat'] . '</strong><br><br>
-' . $langArray['you_have_reserved_seat_number'] . ' ' . $rseat . '.</div>';
-					}
-					;
-				}
+		$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = :seatid");
+		$stmt->bindValue(':seatid', $seatid, PDO::PARAM_INT);
+		$stmt->execute();
+		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		foreach ($rows as $row) {
+			if ($row["taken"] == $seatid) {
+				$occupied = 1;
 			}
 		}
 	} catch (PDOException $e) {
 		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
 		exit();
 	}
-	require 'includes/footer.php';
-	?>
+}
+$stmt->closeCursor();
+
+if (isset($seatid)) {
+	try {
+		$stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = ?");
+		$stmt->execute([$seatid]);
+		$result = $stmt->fetchAll();
+		foreach ($result as $row) {
+			if ($row["taken"] == $seatid) {
+				$occupied = 1;
+				$user = $row["user_id"];
+			}
+		}
+	} catch (PDOException $e) {
+		echo "Error: " . $e->getMessage();
+	}
+}
+
+if (!isset($occupied)) {
+	$occupied = null;
+}
+if ($occupied == "1") {
+	try {
+		$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE id = :user");
+		$stmt->bindValue(':user', $user, PDO::PARAM_INT);
+		$stmt->execute();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		$nickname = $row["nickname"];
+	} catch (PDOException $e) {
+		error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
+		exit();
+	}
+	$stmt->closeCursor();
+}
+try {
+	$stmt = $pdo->prepare("SELECT * FROM " . USERS_TABLE . " WHERE nickname = :nickname");
+
+	if (!empty($seatid)) {
+		print '<br><div class="seat_registered">';
+		if (!empty($occupied)) {
+			print $langArray['seat_number'] . ' ' . $seatid . ' ' . $langArray['is_reserved_by'] . ' ' . $nickname . '</div>';
+		} else {
+			if (!isset($_SESSION['nickname'])) {
+				echo $langArray['login_before_reserving'] . '</div>';
+			} else {
+				$stmt->bindValue(':nickname', $_SESSION['nickname'], PDO::PARAM_STR);
+				$stmt->execute();
+				$row = $stmt->fetch(PDO::FETCH_ASSOC);
+				$rseat = $row[RSEAT_TABLE];
+				if (empty($rseat) or $rseat == 0) {
+					print $langArray['do_you_want_to_reserve_seat_number'] . ' ' . $seatid . '? <a href="book.php?seatid=' . $seatid . '">' . $langArray['yes'] . '</a></div>';
+				} else {
+					print '<strong>' . $langArray['error'] . ': ' . $langArray['you_can_only_reserve_one_seat'] . '</strong><br><br>
+' . $langArray['you_have_reserved_seat_number'] . ' ' . $rseat . '.</div>';
+				}
+				;
+			}
+		}
+	}
+} catch (PDOException $e) {
+	error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
+	exit();
+}
+require 'includes/footer.php';
+?>

@@ -23,7 +23,7 @@ $site_keywords = 'seat, registration';
 $site_author = 'Hypnotize';
 
 //Regex to check if the password is valid.
-$pwd_regex = '/^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
+$pwd_regex = '/^(?=.{8,26})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
 
 //Regex to check if the nickname is valid.
 $nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
@@ -37,6 +37,13 @@ $fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅ\s]/g';
 $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";
 $from_mail = "hypnotize@lastnetwork.net";
+
+//Setup the Argon2id options that you want to use (You can use Argon2id.ods to calculate memory_cost).
+$argon2id_options = [
+    'memory_cost' => 1 << 17,
+    'time_cost' => 4,
+    'threads' => 6,
+];
 
 //Set the default language (valid options: en or no).
 if (!isset($_SESSION['langID'])) {

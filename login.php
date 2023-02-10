@@ -67,8 +67,8 @@ try {
         <span class="srs-header">' . $langArray['login'] . '</span>
 
         <div class="srs-content">
-            <label for="fullname" class="srs-lb">' . $langArray['nickname'] . '</label><input name="nickname" value="' . $nickname . '" id="nickname" class="srs-tb"><br>
-            <span id="statusfullname"></span><br>
+            <label for="nickname" class="srs-lb">' . $langArray['nickname'] . '</label><input name="nickname" value="' . $nickname . '" id="nickname" class="srs-tb"><br>
+			<br>
             <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
         </div>
         <div class="srs-footer">

@@ -47,18 +47,14 @@ if (isset($password2) && !empty($password2) && $password !== $password2) {
 
 if (isset($password) && !empty($password) && isset($password2) && !empty($password2) && isset($key) && !empty($key) && $formstatus != "FAIL") {
 	require 'includes/header.php';
-	print '<span class="srs-header">' . $langArray['new_password'] . '</span>
+	echo '<span class="srs-header">' . $langArray['new_password'] . '</span>
 <div class="srs-content">
 ' . $langArray['password_changed_log_in'] . '.
+</div>
 </div><br><br><br>';
 	require 'includes/footer.php';
 
-	$options = [
-		'memory_cost' => 1 << 14,
-		'time_cost' => 2,
-		'threads' => 2,
-	];
-	$pwdhash = password_hash($password, PASSWORD_ARGON2ID, $options);
+	$pwdhash = password_hash($password, PASSWORD_ARGON2ID, $argon2id_options);
 	try {
 		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 		switch (DB_DRIVER) {
@@ -107,6 +103,7 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 <span class="srs-header">' . $langArray['new_password'] . '</span>
 
 <div class="srs-content">
+	<a href="#" id="passwordRequirements">' . $langArray['password_requirements'] . '</a><br>
     <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
     <span id="pwstatus"></span><br>
     <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
@@ -117,8 +114,15 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 </div>
 <div class="srs-slope"></div>
 </div>
-</form><br><br>
-<script src="./js/pwdcheck.js"></script><br>';
+</form>
+<br><br>
+<div id="requirementsPopup"><br>
+' . $langArray['password_requirements_text'] . '
+<button id="closePopup">' . $langArray['close_btn'] . '</button>
+<br><br>
+</div>
+<script src="./js/pwdreq.js"></script>
+<script src="./js/pwdcheck.js"></script>';
 		require 'includes/footer.php';
 	} else {
 		require 'includes/header.php';

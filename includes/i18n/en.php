@@ -53,8 +53,17 @@ $langArray = array(
 	"the_passwords_match" => "The passwords match",
 	"you_must_enter_a_password" => "You must enter a password!",
 	"you_must_enter_a_confirmation_password" => "You must enter a confirmation password!",
-	"new_password" => "New password",
+	"new_password" => "New password (Min 8, max 26 chars, at least one lowercase, one uppercase and one lowercase ",
 	"forgot_password_heading" => "Forgot password",
+	"password_requirements" => "Click here for password requirements",
+	"password_requirements_text" => "<p><strong>Your password must meet the following requirements:</strong></p>
+	<ul>
+	  <li>At least 12 characters long</li>
+	  <li>Contain at least one lowercase letter</li>
+	  <li>Contain at least one uppercase letter</li>
+	  <li>Contain at least one number</li>
+	  <li>Contain at least one special character: <pre>(!@#$%^&*()_+-=:;&lt; &gt;,.?\/)</pre></li>
+	</ul>",
 	"password_changed_log_in" => "Your password has been changed, you can log in by clicking <a href=\"login.php\">here</a>.",
 	"change_password_button" => "Change password",
 	"wrong_nickname_or_verification_key" => "Wrong nickname or verification key!",
@@ -93,6 +102,7 @@ $langArray = array(
 	"please_confirm_with_your_password" => "Please confirm with your password:",
 	"user_is_now_successfully_deleted" => "The user is now successfully deleted.",
 	"delete_btn" => "Delete account",
+	"close_btn" => "Close",
 	"you_are_not_logged_in" => "You are not logged in.",
 	"unsupported_database_driver" => "Unsupported database driver",
 );

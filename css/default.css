@@ -7,7 +7,7 @@ a:link {
     color: #000;
     border-bottom: none;
     text-decoration: none;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     text-indent: 5px;
     font-family: Impact, Charcoal, sans-serif;
 }
@@ -17,7 +17,7 @@ a:visited {
     color: #000;
     border-bottom: none;
     text-decoration: none;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     text-indent: 5px;
     font-family: Impact, Charcoal, sans-serif;
 }
@@ -27,7 +27,7 @@ a:hover {
     text-decoration: none;
     border-bottom: 1px solid #000;
     border-top: 1px solid #000;
-    text-transform: uppercase;
+ /*   text-transform: uppercase;*/
     text-indent: 5px;
     font-family: Impact, Charcoal, sans-serif;
 }
@@ -278,6 +278,14 @@ img.exit {
     border-bottom-left-radius: 15px;
 }
 
+#requirementsPopup {
+    display: none;
+    background-color: #CECECE;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+}
+
 .srs-tb {
     display: inline-block;
     width: 80%;
@@ -320,14 +328,17 @@ img.exit {
         width: 100%;
         max-width: none;
     }
+
     .srs-container {
         width: 100%;
         max-width: none;
     }
+
     .menu {
         width: 100%;
         max-width: none;
     }
+
     #seatMap {
         width: 600px;
         overflow: auto;

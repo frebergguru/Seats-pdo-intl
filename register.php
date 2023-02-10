@@ -74,13 +74,13 @@ try {
 		if (isset($email) && !empty($email)) {
 			switch (DB_DRIVER) {
 				case "mysql";
-				$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
-				break;
-			case "pgsql":
-				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) LIKE :email");
-				break;
-			default:
-				throw new Exception("unsupported_database_driver");
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
+					break;
+				case "pgsql":
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) LIKE :email");
+					break;
+				default:
+					throw new Exception("unsupported_database_driver");
 			}
 			$stmt->bindValue(':email', $email, PDO::PARAM_STR);
 			$stmt->execute();
@@ -100,13 +100,13 @@ try {
 		if (isset($nickname) && !empty($nickname)) {
 			switch (DB_DRIVER) {
 				case "mysql":
-				$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
-				break;
-			case "pgsql":
-				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
-				break;
-			default:
-				throw new Exception("unsupported_database_driver");
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+					break;
+				case "pgsql":
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
+					break;
+				default:
+					throw new Exception("unsupported_database_driver");
 			}
 			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
 			$stmt->execute();
@@ -125,12 +125,7 @@ try {
 			$formstatus = 'FAIL';
 		} else if ($formstatus !== 'FAIL') {
 			// If the CSRF token is valid, process the form submission
-			$options = [
-				'memory_cost' => 1 << 14,
-				'time_cost' => 2,
-				'threads' => 2,
-			];
-			$password = password_hash($password, PASSWORD_ARGON2ID, $options);
+			$password = password_hash($password, PASSWORD_ARGON2ID, $argon2id_options);
 			$stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password) VALUES (:fullname, :nickname, :email, :password)");
 			$stmt->bindValue(':fullname', $fullname, PDO::PARAM_STR);
 			$stmt->bindValue(':nickname', $nickname, PDO::PARAM_STR);
@@ -157,7 +152,8 @@ if ($formstatus !== True) {
             <label for="nickname" class="srs-lb">' . $langArray['nickname'] . '</label><input name="nickname" value="' . $nickname . '" id="nickname" class="srs-tb"><br>
             <span id="status"></span><br>
             <label for="email" class="srs-lb">' . $langArray['email'] . '</label><input name="email" value="' . $email . '" id="email" class="srs-tb"><br>
-            <span id="statusemail"></span><br>
+            <span id="statusemail"></span>
+			<a href="#" id="passwordRequirements">' . $langArray['password_requirements'] . '</a><br>
             <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
             <span id="pwstatus"></span><br>
             <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
@@ -171,6 +167,13 @@ if ($formstatus !== True) {
             <div class="srs-slope"></div>
         </div>
     </form>
+	<br><br>
+	<div id="requirementsPopup"><br>
+	' . $langArray['password_requirements_text'] . '
+	<button id="closePopup">' . $langArray['close_btn'] . '</button>
+	<br><br>
+	</div>
+	<script src="./js/pwdreq.js"></script>
     <script src="./js/formcheck.js"></script>
     <script src="./js/pwdcheck.js"></script>';
 }
