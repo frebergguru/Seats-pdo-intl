@@ -34,7 +34,7 @@ CREATE TABLE "users" (
 "id" serial PRIMARY KEY,
 "fullname" varchar(255) NOT NULL COLLATE "C",
 "nickname" varchar(255) NOT NULL COLLATE "C",
-"password" varchar(97) NOT NULL COLLATE "C",
+"password" varchar(1000) NOT NULL COLLATE "C",
 "email" varchar(255) NOT NULL COLLATE "C",
 "forgottoken" varchar(64) COLLATE "C",
 "rseat" integer
