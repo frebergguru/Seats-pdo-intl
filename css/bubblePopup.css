@@ -13,17 +13,5 @@
     border: 2px solid #000;
     background: linear-gradient(to bottom, #FEEFB3, #CECECE);
     font-family: sans-serif;
-    transform: translateX(-50%) scale(0.8);
+    transform: translateX(-50%);
 }
-
-/*
-    .bubble:before {
-    content: "";
-    position: absolute;
-    bottom: -70px;
-    height: 70px;
-    width: 130px;
-    border-radius: 0 0 100%;
-    box-shadow: -2px -2px 0 0 #000 inset, -35px 0 0 0 #CECECE inset, -38px -1px 0 0 #000 inset;
-    }
-    */

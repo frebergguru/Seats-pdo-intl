@@ -63,7 +63,7 @@ $langArray = array(
 	  <li>Contain at least one lowercase letter</li>
 	  <li>Contain at least one uppercase letter</li>
 	  <li>Contain at least one number</li>
-	  <li>Contain at least one special character: <pre>(!@#$%^&*()_+-=:;&lt; &gt;,.?\/)</pre></li>
+	  <li>Contain at least one special character: <pre>!@#$%^*()_+-=:;,.?\/</pre></li>
 	</ul>",
 	"password_changed_log_in" => "Your password has been changed, you can log in by clicking <a href=\"login.php\">here</a>.",
 	"change_password_button" => "Change password",

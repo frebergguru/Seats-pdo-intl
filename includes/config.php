@@ -23,7 +23,8 @@ $site_keywords = 'seat, registration';
 $site_author = 'Hypnotize';
 
 //Regex to check if the password is valid.
-$pwd_regex = '/^(?=.{8,26})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
+$pwd_regex = '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%])(?=.{8,26})[A-Za-z\d!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%]+$/';
+//$pwd_regex = '/^(?=.{8,26})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
 
 //Regex to check if the nickname is valid.
 $nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
