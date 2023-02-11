@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     ?>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="./css/default.css">
+    <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css">
     <script src="./js/jquery-3.6.3.min.js"></script>
     <script>
         var langArray = <?php echo json_encode($langArray); ?>;

@@ -154,8 +154,14 @@ if ($formstatus !== True) {
             <label for="email" class="srs-lb">' . $langArray['email'] . '</label><input name="email" value="' . $email . '" id="email" class="srs-tb"><br>
             <span id="statusemail"></span>
 			<a href="#" id="passwordRequirements">' . $langArray['password_requirements'] . '</a><br>
+			<div class="bubble-container">
+			<div class="bubble" id="bubblePopup">
+			' . $langArray['password_requirements_text'] . '
+			<button id="closePopup">' . $langArray['close_btn'] . '</button>
+			</div>
             <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
             <span id="pwstatus"></span><br>
+			</div>
             <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
             <span id="pwstatus2"></span><br>
 	    <input type="hidden" name="csrf_token" value="' . $_SESSION["csrf_token"] . '">
@@ -168,11 +174,6 @@ if ($formstatus !== True) {
         </div>
     </form>
 	<br><br>
-	<div id="requirementsPopup"><br>
-	' . $langArray['password_requirements_text'] . '
-	<button id="closePopup">' . $langArray['close_btn'] . '</button>
-	<br><br>
-	</div>
 	<script src="./js/pwdreq.js"></script>
     <script src="./js/formcheck.js"></script>
     <script src="./js/pwdcheck.js"></script>';

@@ -53,12 +53,13 @@ $langArray = array(
 	"the_passwords_match" => "The passwords match",
 	"you_must_enter_a_password" => "You must enter a password!",
 	"you_must_enter_a_confirmation_password" => "You must enter a confirmation password!",
-	"new_password" => "New password (Min 8, max 26 chars, at least one lowercase, one uppercase and one lowercase ",
+	"new_password" => "New password",
 	"forgot_password_heading" => "Forgot password",
-	"password_requirements" => "Click here for password requirements",
+	"password_requirements" => "Click here for the password requirements",
 	"password_requirements_text" => "<p><strong>Your password must meet the following requirements:</strong></p>
 	<ul>
-	  <li>At least 12 characters long</li>
+	  <li>At least 8 characters long</li>
+	  <li>Not over 26 characters</li>
 	  <li>Contain at least one lowercase letter</li>
 	  <li>Contain at least one uppercase letter</li>
 	  <li>Contain at least one number</li>

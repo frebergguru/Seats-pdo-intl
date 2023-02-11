@@ -104,8 +104,14 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 
 <div class="srs-content">
 	<a href="#" id="passwordRequirements">' . $langArray['password_requirements'] . '</a><br>
+	<div class="bubble-container">
+			<div class="bubble" id="bubblePopup">
+			' . $langArray['password_requirements_text'] . '
+			<button id="closePopup">' . $langArray['close_btn'] . '</button>
+			</div>
     <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
     <span id="pwstatus"></span><br>
+	</div>
     <label for="password2" class="srs-lb">' . $langArray['repeat_password'] . '</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
 </div>
 <div class="srs-footer">
@@ -116,11 +122,6 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 </div>
 </form>
 <br><br>
-<div id="requirementsPopup"><br>
-' . $langArray['password_requirements_text'] . '
-<button id="closePopup">' . $langArray['close_btn'] . '</button>
-<br><br>
-</div>
 <script src="./js/pwdreq.js"></script>
 <script src="./js/pwdcheck.js"></script>';
 		require 'includes/footer.php';

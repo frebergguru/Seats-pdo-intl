@@ -27,7 +27,7 @@ a:hover {
     text-decoration: none;
     border-bottom: 1px solid #000;
     border-top: 1px solid #000;
- /*   text-transform: uppercase;*/
+    /*   text-transform: uppercase;*/
     text-indent: 5px;
     font-family: Impact, Charcoal, sans-serif;
 }
@@ -148,6 +148,8 @@ p.seat_symbols {
 }
 
 .seatmap {
+    display: grid;
+    grid-gap: 8px;
     -moz-border-radius: 15px;
     -webkit-border-radius: 15px;
     border-radius: 15px;
@@ -276,14 +278,6 @@ img.exit {
     -webkit-border-bottom-left-radius: 15px;
     -moz-border-radius-bottomleft: 15px;
     border-bottom-left-radius: 15px;
-}
-
-#requirementsPopup {
-    display: none;
-    background-color: #CECECE;
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
 }
 
 .srs-tb {

@@ -1,14 +1,18 @@
-var popup = document.getElementById("requirementsPopup");
-var link = document.getElementById("passwordRequirements");
+var passwordRequirements = document.getElementById("passwordRequirements");
+var bubblePopup = document.getElementById("bubblePopup");
+var closePopup = document.getElementById("closePopup");
 
-link.addEventListener("click", function () {
-    if (popup.style.display === "block") {
-        popup.style.display = "none";
-    } else {
-        popup.style.display = "block";
-    }
+passwordRequirements.addEventListener("click", function (e) {
+    e.preventDefault();
+    bubblePopup.style.display = "inline-block";
 });
 
-document.getElementById("closePopup").addEventListener("click", function () {
-    popup.style.display = "none";
+closePopup.addEventListener("click", function () {
+    bubblePopup.style.display = "none";
+});
+
+document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+        bubblePopup.style.display = "none";
+    }
 });
