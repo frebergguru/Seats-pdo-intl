@@ -10,11 +10,12 @@ A simple seat booking system with support for multiple languages and a custom ro
 * Remove duplicate code
 * Remove all unnecessary code
 * Optimize the code
-* Add more features like change seat reservation, delete account and so on
+* Add more features like change seat reservation, GDRP and so on
 * Add support for sending rich mail
 * Make custom images instead of using unicode chars.
 * Add PDO rollBack functionality everywhere it is needed.
 * Make the mainpage more mobile friendly - Please contact me or create a new issue if you know how!
+* Make comments in the code
 
 ## map.txt:
 ```
