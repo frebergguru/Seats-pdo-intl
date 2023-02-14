@@ -35,8 +35,8 @@ require 'includes/header.php';
 	<p class="heading">
 		<?php echo $langArray['symbol_explanation']; ?>:
 	</p>
-	<p class="seat_symbols">&#129521;
-		<?php echo $langArray['wall']; ?> &#127869;
+	<p class="seat_symbols">
+		<?php echo $langArray['wall']; ?> <img src="./img/wall.jpg" class="wall" title="<?php $langArray['wall'] ?>" alt="<?php $langArray['wall'] ?>">
 		<?php echo $langArray['kitchen']; ?> &#128701;
 		<?php echo $langArray['bathroom']; ?> &#128682;
 		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit"
@@ -83,7 +83,7 @@ require 'includes/header.php';
 					$has_td = true;
 					break;
 				case "w":
-					echo '<td class="wall" title="' . $langArray['wall'] . '">&#129521;</td>';
+					echo '<td class="wall" title="' . $langArray['wall'] . '"><img src="./img/wall.jpg" class="wall" title="' . $langArray['wall'] . '" alt="' . $langArray['wall'] . '"></td>';
 					$columns++;
 					$has_td = true;
 					break;

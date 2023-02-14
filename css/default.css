@@ -119,7 +119,10 @@ input {
 .white {
     background-color: #FFF;
 }
-
+img.wall {
+	width: 15px;
+	height: 15px;
+}
 p.heading {
     text-transform: uppercase;
     font-family: Impact, #36454f, sans-serif;
@@ -353,4 +356,8 @@ img.exit {
         height: 14px;
         width: 14px;
     }
+    img.wall {
+        width: 14px;
+        height: 14px;
+}
 }
