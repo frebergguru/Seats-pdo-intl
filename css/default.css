@@ -72,7 +72,7 @@ img {
 hr {
     border: 0px;
     height: 1px;
-    width: 100%;
+    width: 50%;
     background-image: -webkit-linear-gradient(left, rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
     background-image: -moz-linear-gradient(left,  rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
     background-image: -ms-linear-gradient(left,  rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
