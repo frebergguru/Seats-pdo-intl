@@ -36,8 +36,8 @@ require 'includes/header.php';
 		<?php echo $langArray['symbol_explanation']; ?>:
 	</p>
 	<p class="seat_symbols">
-		<?php echo $langArray['wall']; ?> <img src="./img/wall.jpg" class="wall" title="<?php $langArray['wall'] ?>" alt="<?php $langArray['wall'] ?>">
-		<?php echo $langArray['kitchen']; ?> &#128701;
+	<img src="./img/wall.jpg" class="wall" title="<?php $langArray['wall'] ?>" alt="<?php $langArray['wall'] ?>"> <?php echo $langArray['wall']; ?>
+		&#127869; <?php echo $langArray['kitchen']; ?> &#128701;
 		<?php echo $langArray['bathroom']; ?> &#128682;
 		<?php echo $langArray['door']; ?> <img src="./img/exit.jpg" class="exit"
 			title="<?php echo $langArray['exit']; ?>" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br>
