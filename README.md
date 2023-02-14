@@ -10,7 +10,7 @@ A simple seat booking system with support for multiple languages and a custom ro
 * Remove duplicate code
 * Remove all unnecessary code
 * Optimize the code
-* Add more features like change seat reservation, GDRP and so on
+* Add more features like change seat reservation, user information and password, make it GDRP compliant, and so on.
 * Add support for sending rich mail
 * Make custom images instead of using unicode chars.
 * Add PDO rollBack functionality everywhere it is needed.
