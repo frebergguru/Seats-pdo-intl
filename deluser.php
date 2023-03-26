@@ -79,7 +79,7 @@ if (isset($nickname)) {
 
     } else {
         require_once("includes/header.php");
-        echo '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '">
+        echo '<form class="srs-container" method="POST" action="' . htmlspecialchars($_SERVER["PHP_SELF"]); . '">
     <span class="srs-header">' . $langArray['delete_account'] . '</span>
     <div class="srs-content">
         <p><strong>' . $langArray['please_confirm_with_your_password'] . '</strong></p>

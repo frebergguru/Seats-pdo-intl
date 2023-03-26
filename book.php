@@ -100,7 +100,7 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 				error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
 				exit();
 			}
-			header('Location: ' . dirname($_SERVER['REQUEST_URI']));
+			header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
 			exit;
 		} else {
 			require_once 'includes/header.php';
@@ -119,6 +119,6 @@ if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 		require_once 'includes/footer.php';
 	}
 } else {
-	header("Location: " . dirname($_SERVER['REQUEST_URI']));
+	header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
 }
 ?>

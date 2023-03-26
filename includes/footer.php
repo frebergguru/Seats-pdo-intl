@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     ?>
     <br>
     <br>
-    <form name="langSelect" id="langSelect" action="<?php echo $_SERVER["PHP_SELF"]; ?>" method="get">
+    <form name="langSelect" id="langSelect" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="get">
         <select name="lang" id="lang" onchange="document.getElementById('langSelect').submit();">
             <option value="<?php echo $_SESSION['langID']; ?>"><?php echo $langArray['select_language']; ?></option>
             <option value="en">English</option>

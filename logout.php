@@ -28,7 +28,7 @@ if (session_status() == PHP_SESSION_ACTIVE && isset($_SESSION['nickname'])) {
 }
 
 // Redirect the user to the current directory
-header("Location: " . dirname($_SERVER['REQUEST_URI']));
+header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
 // Exit the script
 exit;
 ?>

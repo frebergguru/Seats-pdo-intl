@@ -43,7 +43,7 @@ try {
 		if (isset($results["password"])) {
 			if (password_verify($password, $results["password"])) {
 				$_SESSION['nickname'] = $nickname;
-				header('Location: ' . dirname($_SERVER['REQUEST_URI']));
+				header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
 				exit;
 			} else {
 				include 'includes/header.php';
