@@ -67,8 +67,9 @@ require 'includes/header.php';
 						}
 						$seatId++;
 					} catch (PDOException $e) {
-						echo "could not connect to db server " . $e->getMessage();
-						exit();
+						echo '<pre>';
+						print_r($e);
+						die();
 					}
 					$columns++;
 					$has_td = true;
@@ -150,7 +151,9 @@ if (isset($seatid)) {
 			}
 		}
 	} catch (PDOException $e) {
-		echo "Error: " . $e->getMessage();
+		echo '<pre>';
+		print_r($e);
+		die();
 	}
 }
 
