@@ -63,7 +63,7 @@ $langArray = array(
 	<li>Inneholde minst én liten bokstav</li>
 	<li>Inneholde minst én stor bokstav</li>
 	<li>Inneholde minst ett tall</li>
-	<li>Inneholde minst ett spesialtegn: <pre>!@#$%^*()_+-=:;,.?\/</pre></li>
+	<li>Inneholde minst ett spesialtegn: <pre>! @ # ^ & * ( ) , . ? " : { } | < > + - / [ ] = _ ` ~ $ %</pre></li>
 	</ul>",
 	"password_changed_log_in" => "Passordet ditt er blitt byttet, du kan logge inn ved &aring; trykke <a href=\"login.php\">her</a>.",
 	"change_password_button" => "Bytt passord",
