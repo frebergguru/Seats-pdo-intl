@@ -169,11 +169,35 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$stmt->bindValue(":nickname", $nickname);
 			$stmt->execute();
 			$pdo = null;
-			$from_name = str_replace(["\r", "\n"], '', filter_var($from_name, FILTER_SANITIZE_STRING));
-			$from_mail = str_replace(["\r", "\n"], '', filter_var($from_mail, FILTER_VALIDATE_EMAIL));
+			$from_name = htmlspecialchars(trim($from_name), ENT_QUOTES, 'UTF-8');
+			$from_mail = filter_var($from_mail, FILTER_VALIDATE_EMAIL);
 			if (!$from_mail) {
+				error_log('Invalid sender email address: ' . $from_mail);
 				exit('Invalid sender email address');
 			}
+			
+			// Verify the email exists in the database
+			$stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = :email");
+			$stmt->bindValue(':email', $email);
+			$stmt->execute();
+			if ($stmt->fetchColumn() === 0) {
+				exit('Email address not found');
+			}
+			
+			// Rate limiting to prevent abuse
+			if (!isset($_SESSION['email_attempts'])) {
+				$_SESSION['email_attempts'] = 0;
+			}
+			if ($_SESSION['email_attempts'] >= 5) {
+				exit('Too many email attempts. Please try again later.');
+			}
+			$_SESSION['email_attempts']++;
+			
+			// Ensure HTTPS is used
+			if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
+				exit('Secure connection required');
+			}
+			
 			$mailheaders = "From: {$from_name} <{$from_mail}>\r\n";
 			$mailheaders .= "X-Mailer: Seat Reservation/2.0";
 			$linkPath = '/forgot.php';
@@ -182,6 +206,10 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$mailmsg = $langArray['email_change_password_body_hi'] . " " . htmlspecialchars($nickname) . "\n\n" .
 				$langArray['email_change_password_body_link'] . "\n\n" .
 				$resetLink;
+			
+			// Log email-sending activity for debugging
+			// error_log("Password reset email sent to: {$email}");
+			
 			mail($email, $mail_subject, $mailmsg, $mailheaders);
 		}
 	} catch (PDOException $e) {

@@ -18,9 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 require 'config.php';
 $allowedLangs = ['en', 'no'];
 
-if (isset($_GET['lang']) && in_array($_GET['lang'], $allowedLangs, true)) {
-    $_SESSION['langID'] = $_GET['lang'];
+$langID = $_SESSION['langID'] ?? 'en';
+if (!in_array($langID, $allowedLangs, true)) {
+    $langID = 'en';
 }
 
-include 'i18n/' . $_SESSION['langID'] . '.php';
+include __DIR__ . '/i18n/' . $langID . '.php';
 ?>
