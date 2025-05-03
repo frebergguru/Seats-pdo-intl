@@ -1,39 +1,25 @@
-/* Container for the bubble popup */
 .bubble-container {
     position: relative;
 }
 
-/* Bubble popup styling */
 .bubble {
-    display: none; /* Hidden by default */
+    display: none;
     position: absolute;
+    /*    top: -135px; */
     top: -10rem;
     left: 50%;
-    padding: 2rem;
-    min-width: 20rem;
-    max-width: 90%;
+    padding: 30px 40px;
+    min-width: 450px;
     border-radius: 10px;
     border: 2px solid #000;
     background: linear-gradient(to bottom, #FEEFB3, #CECECE);
     font-family: sans-serif;
     transform: translateX(-50%);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
 }
 
-/* Responsive adjustments for smaller screens */
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
     .bubble {
-        top: -8rem;
-        padding: 1.5rem;
-        min-width: 15rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .bubble {
-        top: -6rem;
-        padding: 1rem;
-        min-width: 12rem;
+            min-width: auto;
+            max-width: auto;
     }
 }

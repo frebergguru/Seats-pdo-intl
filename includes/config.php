@@ -23,17 +23,17 @@ $site_keywords = 'seat, registration';
 $site_author = 'Hypnotize';
 
 //Regex to check if the password is valid.
-$pwd_regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%])(?=.{8,26})[A-Za-z\d!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%]+$/';
+$pwd_regex = '/^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%])(?=.{8,26})[A-Za-z\d!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%]+$/';
 //$pwd_regex = '/^(?=.{8,26})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
 
 //Regex to check if the nickname is valid.
 $nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
 
 //Regex for checking if the fullname is valid.
-$fullname_regex = '/^[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,}(\s[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,})*$/u';
+$fullname_regex = '/^[a-zA-ZæøåÆØÅ]{2,}(\s[a-zA-ZæøåÆØÅ]{2,})*$/';
 
 //Regex to check for illegal characters in the fullname.
-$fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-\s]/u';
+$fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅ\s]/g';
 
 $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";

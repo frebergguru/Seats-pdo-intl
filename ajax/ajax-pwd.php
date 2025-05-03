@@ -17,18 +17,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require '../includes/config.php';
-
-// Sanitize and validate the password input
-$postpassword = trim($_POST['password'] ?? '');
-if (!isset($postpassword) || $postpassword === '') {
-    echo "PWDEMPTY";
-    exit();
-}
-
-// Check if the password matches the regex
-if (!preg_match($pwd_regex, $postpassword)) {
-    echo "PWDINVALIDCHAR";
+$postpassword = htmlspecialchars($_POST['password']);
+if (isset($postpassword)) {
+	if (empty($postpassword)) {
+		echo "PWDEMPTY";
+	} else {
+		if (!preg_match($pwd_regex, $postpassword)) {
+			echo "PWDINVALIDCHAR";
+		} else {
+			echo "PWDSTRONG";
+		}
+	}
 } else {
-    echo "PWDSTRONG";
+	echo "PWDFAIL";
 }
 ?>

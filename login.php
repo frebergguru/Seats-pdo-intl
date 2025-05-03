@@ -40,20 +40,12 @@ try {
 		$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
 		$stmt->execute();
 		$results = $stmt->fetch(PDO::FETCH_ASSOC);
-		if (password_verify($password, $results["password"])) {
-			$_SESSION['nickname'] = $nickname;
-		
-			$baseUrl = filter_var('https://' . $_SERVER['SERVER_NAME'], FILTER_SANITIZE_URL);
-		
-			$redirectPath = filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
-		
-			if (strpos($redirectPath, $baseUrl) !== 0) {
-				$redirectPath = $baseUrl;
-			}
-		
-			header("Location: " . $redirectPath);
-			exit;
-		} else {
+		if (isset($results["password"])) {
+			if (password_verify($password, $results["password"])) {
+				$_SESSION['nickname'] = $nickname;
+				header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
+				exit;
+			} else {
 				include 'includes/header.php';
 				print '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
 				$pwdwrong = true;

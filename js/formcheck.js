@@ -13,96 +13,82 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
-// Selectors
-const nicknameInput = $("#nickname");
-const emailInput = $("#email");
-const fullnameInput = $("#fullname");
-const statusNickname = $("#status");
-const statusEmail = $("#statusemail");
-const statusFullname = $("#statusfullname");
+ */
 
-// Debounce function to limit the frequency of AJAX requests
-function debounce(func, delay) {
-    let timer;
-    return function (...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => func.apply(this, args), delay);
-    };
-}
-
-// Reusable AJAX function
-function performAjaxCheck(url, data, successCallback) {
+//NICKNAME CHECK
+$(document).on('keyup focusout', '#nickname', function () {
+    var nickname = $("#nickname").val();
+    var url = "ajax/ajax-nick.php";
     $.ajax({
         type: "POST",
         url: url,
-        data: data,
+        data: { nickname: nickname },
         beforeSend: function () {
-            statusNickname.html('<img src="./img/loader.gif">&nbsp;' + langArray['checking_availability']);
+            $("#status").html('<img src="./img/loader.gif">&nbsp;' + langArray['checking_availability']);
         },
-        success: successCallback,
-        error: function () {
-            console.error("An error occurred during the AJAX request.");
+        success: function (msg) {
+            if (nickname.length < 4) {
+                $("#nickname").removeClass("green").addClass("red");
+                $("#status").html(langArray.nickname_too_short);
+            }
+            else if (!nickname.match(validNickname)) {
+                $("#nickname").removeClass("green").addClass("red");
+                $("#status").html(langArray.nickname_contains_illegal_characters);
+            }
+            else if (msg == 'NICKOK') {
+                $("#nickname").removeClass("red").addClass("green");
+                $("#status").html(langArray.nickname_available);
+            } else if (msg == 'NICKEXISTS') {
+                $("#nickname").removeClass("green").addClass("red");
+                $("#status").html(langArray.nickname_already_exists);
+            }
+            else {
+                console.log(msg);
+            }
         }
     });
-}
+});
 
-// Nickname Check
-nicknameInput.on("keyup focusout", debounce(function () {
-    const nickname = nicknameInput.val();
-    if (nickname.length < 4) {
-        nicknameInput.removeClass("green").addClass("red");
-        statusNickname.html(langArray.nickname_too_short);
-        return;
-    }
-    if (!nickname.match(validNickname)) {
-        nicknameInput.removeClass("green").addClass("red");
-        statusNickname.html(langArray.nickname_contains_illegal_characters);
-        return;
-    }
-    performAjaxCheck("ajax/ajax-nick.php", { nickname: nickname }, function (msg) {
-        if (msg === "NICKOK") {
-            nicknameInput.removeClass("red").addClass("green");
-            statusNickname.html(langArray.nickname_available);
-        } else if (msg === "NICKEXISTS") {
-            nicknameInput.removeClass("green").addClass("red");
-            statusNickname.html(langArray.nickname_already_exists);
-        } else {
-            console.error(msg);
+//EMAIL CHECK
+$(document).on('keyup focusout', '#email', function () {
+    var url = "ajax/ajax-email.php";
+    $("#statusemail").html('<img src="./img/loader.gif">&nbsp;' + langArray.checking_availability);
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: $("#email").serialize(),
+        success: function (msg) {
+            if (msg == 'EMAILOK') {
+                $("#email").removeClass("red").addClass("green");
+                $("#statusemail").html('');
+            } else if (msg == 'EMAILINUSE') {
+                $("#email").removeClass("green").addClass("red");
+                $("#statusemail").html(langArray.the_email_address_already_exists);
+            } else if (msg == 'EMAILFAIL') {
+                $("#email").removeClass("green").addClass("red");
+                $("#statusemail").html(langArray.you_must_enter_a_valid_email_address);
+            }
+            else {
+                console.log(msg);
+            }
         }
     });
-}, 300));
+    return false;
+});
 
-// Email Check
-emailInput.on("keyup focusout", debounce(function () {
-    performAjaxCheck("ajax/ajax-email.php", emailInput.serialize(), function (msg) {
-        if (msg === "EMAILOK") {
-            emailInput.removeClass("red").addClass("green");
-            statusEmail.html("");
-        } else if (msg === "EMAILINUSE") {
-            emailInput.removeClass("green").addClass("red");
-            statusEmail.html(langArray.the_email_address_already_exists);
-        } else if (msg === "EMAILFAIL") {
-            emailInput.removeClass("green").addClass("red");
-            statusEmail.html(langArray.you_must_enter_a_valid_email_address);
-        } else {
-            console.error(msg);
-        }
-    });
-}, 300));
+//FULLNAME CHECK
+$("#fullname").on("keyup focusout", function () {
+    var fullname = $(this).val();
 
-// Full Name Check
-fullnameInput.on("keyup focusout", function () {
-    const fullname = fullnameInput.val();
     if (fullname.match(illegalChars)) {
-        fullnameInput.removeClass("green").addClass("red");
-        statusFullname.html(langArray.fullname_contains_illegal_characters);
+        $(this).removeClass("green").addClass("red");
+        $("#statusfullname").html(langArray.fullname_contains_illegal_characters);
     } else if (!fullname || !fullname.match(validName) || fullname.length < 2 || !fullname.match(/\s/)) {
-        fullnameInput.removeClass("green").addClass("red");
-        statusFullname.html(langArray.you_must_enter_your_full_name);
+        $(this).removeClass("green").addClass("red");
+        $("#statusfullname").html(langArray.you_must_enter_your_full_name);
     } else {
-        fullnameInput.removeClass("red").addClass("green");
-        statusFullname.html("");
+        $(this).removeClass("red").addClass("green");
+        $("#statusfullname").html("");
     }
 });

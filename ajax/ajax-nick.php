@@ -14,50 +14,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 include '../includes/config.php';
-
 try {
-    // Establish a database connection
-    $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
-
-    // Prepare the query based on the database driver
-    switch (DB_DRIVER) {
-        case "mysql":
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
-            break;
-        case "pgsql":
-            $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) = :nickname");
-            break;
-        default:
-            error_log("Unsupported database driver: " . DB_DRIVER);
-            echo 'NICKFAIL';
-            exit();
-    }
-
-    // Sanitize and validate the nickname
-    $postnickname = trim($_POST['nickname'] ?? '');
-    if (empty($postnickname)) {
-        echo 'NICKFAIL';
-        exit();
-    }
-
-    if (strlen($postnickname) < 4) {
-        echo 'LENGTHFAIL';
-        exit();
-    }
-
-    // Bind and execute the query
-    $stmt->bindValue(':nickname', mb_strtolower($postnickname), PDO::PARAM_STR);
-    $stmt->execute();
-
-    // Check if the nickname is in use
-    if ($stmt->rowCount() > 0) {
-        echo 'NICKEXISTS';
-    } else {
-        echo 'NICKOK';
-    }
+	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+	switch (DB_DRIVER) {
+		case "mysql":
+			$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
+			break;
+		case "pgsql":
+			$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
+			break;
+		default:
+			throw new Exception("unsupported_database_driver");
+	}
+	$postnickname = htmlspecialchars($_POST['nickname']);
+	if (isset($postnickname)) {
+		$stmt->bindValue(':nickname', mb_strtolower($postnickname), PDO::PARAM_STR);
+		$stmt->execute();
+		if ($stmt->rowCount()) {
+			echo 'NICKEXISTS';
+		} elseif (strlen($postnickname) < 4) {
+			echo 'LENGTHFAIL';
+		} else {
+			echo "NICKOK";
+		}
+	}
 } catch (PDOException $e) {
-    // Log the error and return a failure response
-    error_log("Database error: " . $e->getMessage());
-    echo 'NICKFAIL';
+	error_log($langArray['error'] . ' ' . $e->getMessage());
 }
 ?>

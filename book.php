@@ -17,114 +17,108 @@ require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-session_start();
-
-// Validate session and nickname
-if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
-    header("Location: login.php");
-    exit();
-}
-
-$nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
-
-// Validate and sanitize seat ID
-$seat = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
-if (!$seat || $seat <= 0) {
-    require_once 'includes/header.php';
-    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-        <div class="srs-content">
-        ' . $langArray['invalid_seat_selected'] . '
-        </div><br><br><br>';
-    require_once 'includes/footer.php';
-    exit();
-}
-
-// Check if the seat exists in the map
+$nickname = htmlspecialchars($_SESSION['nickname']);
+$seat = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
 $text = file_get_contents("map.txt");
 $maxseats = substr_count($text, "#");
-if ($seat > $maxseats) {
-    require_once 'includes/header.php';
-    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-        <div class="srs-content">
-        ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
-        </div><br><br><br>';
-    require_once 'includes/footer.php';
-    exit();
-}
 
-try {
-    $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+if (isset($nickname) && !empty($nickname) && isset($seat) && !empty($seat)) {
 
-    // Check if the seat is already reserved
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
-    $stmt->execute();
-    if ($stmt->fetchColumn() > 0) {
-        require_once 'includes/header.php';
-        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+	if ($seat <= $maxseats) {
+		try {
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+			$stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
+			$stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
+			$stmt->execute();
+			$checkSeat = $stmt->fetchColumn();
+			
+			if($checkSeat > "0") {
+				require_once 'includes/header.php';
+				print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+					<div class="srs-content">
+			' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+			</div><br><br><br>';
+				require_once 'includes/footer.php';
+				exit();
+			}
+			$pdo = null;
+		} catch (PDOException $e) {
+			error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+			exit();
+		}
+
+		try {
+			$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+			switch (DB_DRIVER) {
+				case "mysql":
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE nickname=:nickname");
+					break;
+				case "pgsql":
+					$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
+					break;
+				default:
+					throw new Exception("unsupported_database_driver");
+			}
+			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+			$stmt->execute();
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			$userid = $result["id"];
+			switch (DB_DRIVER) {
+				case "mysql":
+					$stmt = $pdo->prepare("SELECT rseat FROM users WHERE nickname=:nickname");
+					break;
+				case "pgsql":
+					$stmt = $pdo->prepare("SELECT rseat FROM users WHERE lower(nickname) LIKE :nickname");
+					break;
+				default:
+					throw new Exception("unsupported_database_driver");
+			}
+			$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+			$stmt->execute();
+			$pdo = null;
+
+		} catch (PDOException $e) {
+			error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+			exit();
+		}
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		
+		if (empty($result["rseat"])) {
+			try {
+				$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+				$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
+				$stmt = $pdo->prepare("UPDATE users SET rseat=:rseat WHERE nickname=:nickname");
+				$stmt->bindValue(":rseat", $seat, PDO::PARAM_STR);
+				$stmt->bindValue(":nickname", $_SESSION['nickname'], PDO::PARAM_STR);
+				$stmt->execute();
+				$stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) VALUES(:staken, :suserid)");
+				$stmt->bindValue(":staken", $seat, PDO::PARAM_STR);
+				$stmt->bindValue(":suserid", $userid, PDO::PARAM_STR);
+				$stmt->execute();
+				$pdo = null;
+			} catch (PDOException $e) {
+				error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+				exit();
+			}
+			header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
+			exit;
+		} else {
+			require_once 'includes/header.php';
+			print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+                <div class="srs-content">
+		' . $langArray['you_can_only_reserve_one_seat'] . '
+		</div><br><br><br>';
+			require_once 'includes/footer.php';
+		}
+	} else {
+		require_once 'includes/header.php';
+		print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
             <div class="srs-content">
-            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+	    ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
             </div><br><br><br>';
-        require_once 'includes/footer.php';
-        exit();
-    }
-
-    // Get user ID and check if the user already has a reserved seat
-    $stmt = $pdo->prepare("SELECT id, rseat FROM users WHERE lower(nickname) = :nickname");
-    $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
-    $stmt->execute();
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$user) {
-        require_once 'includes/header.php';
-        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-            <div class="srs-content">
-            ' . $langArray['user_not_found'] . '
-            </div><br><br><br>';
-        require_once 'includes/footer.php';
-        exit();
-    }
-
-    if (!empty($user['rseat'])) {
-        require_once 'includes/header.php';
-        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-            <div class="srs-content">
-            ' . $langArray['you_can_only_reserve_one_seat'] . '
-            </div><br><br><br>';
-        require_once 'includes/footer.php';
-        exit();
-    }
-
-    // Reserve the seat
-    $pdo->beginTransaction();
-
-    $stmt = $pdo->prepare("UPDATE users SET rseat = :rseat WHERE id = :userid");
-    $stmt->bindValue(':rseat', $seat, PDO::PARAM_INT);
-    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
-    $stmt->execute();
-
-    $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) VALUES (:seatid, :userid)");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
-    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
-    $stmt->execute();
-
-    $pdo->commit();
-
-    // Redirect to the same page (safe redirect)
-    $redirectUrl = filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
-    header("Location: " . $redirectUrl);
-    exit();
-} catch (PDOException $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
-    require_once 'includes/header.php';
-    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-        <div class="srs-content">
-        ' . $langArray['database_error'] . '
-        </div><br><br><br>';
-    require_once 'includes/footer.php';
-    exit();
+		require_once 'includes/footer.php';
+	}
+} else {
+	header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
 }
 ?>

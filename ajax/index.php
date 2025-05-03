@@ -7,5 +7,4 @@
 
 
 header("Location: ../");
-exit;
 ?>

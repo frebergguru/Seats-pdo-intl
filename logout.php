@@ -17,27 +17,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Start the session if it's not already started
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Destroy the session and invalidate the session cookie
-if (session_status() === PHP_SESSION_ACTIVE) {
-    // Unset all session variables
-    $_SESSION = [];
-
-    // Destroy the session
+// Check if the session is active and if the nickname session variable is set
+if (session_status() == PHP_SESSION_ACTIVE && isset($_SESSION['nickname'])) {
+    // Destroy the session if both conditions are met
     session_destroy();
-
-    // Invalidate the session cookie
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
-    }
 }
 
-// Redirect the user to the home page (or a safe location)
-$redirectUrl = filter_var('index.php', FILTER_SANITIZE_URL);
-header("Location: " . $redirectUrl);
+// Redirect the user to the current directory
+header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
+// Exit the script
 exit;
 ?>
