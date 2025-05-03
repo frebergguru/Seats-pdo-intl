@@ -14,31 +14,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 include '../includes/config.php';
-$email = mb_strtolower(filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL));
+
+// Sanitize and validate the email
+$email = filter_var(mb_strtolower(trim($_POST['email'] ?? '')), FILTER_VALIDATE_EMAIL);
 if (!$email) {
-	echo 'EMAILFAIL';
-	exit();
+    echo 'EMAILFAIL';
+    exit();
 }
+
 try {
-	$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
-	switch (DB_DRIVER) {
-		case "mysql":
-			$stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
-			break;
-		case "pgsql":
-			$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) = :email");
-			break;
-		default:
-			throw new Exception("unsupported_database_driver");
-	}
-	$stmt->bindValue(':email', $email, PDO::PARAM_STR);
-	$stmt->execute();
-	if ($stmt->rowCount()) {
-		echo 'EMAILINUSE';
-	} else {
-		echo "EMAILOK";
-	}
+    // Use the shared PDO connection
+    $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+
+    // Prepare the query based on the database driver
+    switch (DB_DRIVER) {
+        case "mysql":
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
+            break;
+        case "pgsql":
+            $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) = :email");
+            break;
+        default:
+            error_log("Unsupported database driver: " . DB_DRIVER);
+            echo 'EMAILFAIL';
+            exit();
+    }
+
+    // Bind and execute the query
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt->execute();
+
+    // Check if the email is in use
+    if ($stmt->rowCount() > 0) {
+        echo 'EMAILINUSE';
+    } else {
+        echo 'EMAILOK';
+    }
 } catch (PDOException $e) {
-	error_log($langArray['error'] . ' ' . $e->getMessage());
+    // Log the error and return a failure response
+    error_log("Database error: " . $e->getMessage());
+    echo 'EMAILFAIL';
 }
 ?>
