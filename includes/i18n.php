@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 require 'config.php';
+$allowedLangs = ['en', 'no'];
 
-if (isset($_GET['lang']) && !empty($_GET['lang'])) {
-    $_SESSION['langID'] = htmlspecialchars($_GET['lang']);
+if (isset($_GET['lang']) && in_array($_GET['lang'], $allowedLangs, true)) {
+    $_SESSION['langID'] = $_GET['lang'];
 }
 
 include 'i18n/' . $_SESSION['langID'] . '.php';
