@@ -169,9 +169,19 @@ if (isset($nickname) && !empty($nickname) && isset($key) && !empty($key) && $pwd
 			$stmt->bindValue(":nickname", $nickname);
 			$stmt->execute();
 			$pdo = null;
-			$mailheaders = 'From: ' . $from_name . ' <' . $from_mail . '>' . "\r\n" .
-				'X-Mailer: Seat Reservation/2.0';
-			$mailmsg = $langArray['email_change_password_body_hi'] . " " . $nickname . "\n\n" . $langArray['email_change_password_body_link'] . "\n\n https://" . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'] . "?nickname=" . $nickname . "&key=" . $randomkey;
+			$from_name = str_replace(["\r", "\n"], '', filter_var($from_name, FILTER_SANITIZE_STRING));
+			$from_mail = str_replace(["\r", "\n"], '', filter_var($from_mail, FILTER_VALIDATE_EMAIL));
+			if (!$from_mail) {
+				exit('Invalid sender email address');
+			}
+			$mailheaders = "From: {$from_name} <{$from_mail}>\r\n";
+			$mailheaders .= "X-Mailer: Seat Reservation/2.0";
+			$linkPath = '/forgot.php';
+			$baseUrl = 'https://' . $_SERVER['SERVER_NAME'] . $linkPath;
+			$resetLink = $baseUrl . '?nickname=' . urlencode($nickname) . '&key=' . urlencode($randomkey);
+			$mailmsg = $langArray['email_change_password_body_hi'] . " " . htmlspecialchars($nickname) . "\n\n" .
+				$langArray['email_change_password_body_link'] . "\n\n" .
+				$resetLink;
 			mail($email, $mail_subject, $mailmsg, $mailheaders);
 		}
 	} catch (PDOException $e) {
