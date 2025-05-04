@@ -84,19 +84,21 @@ $(document).on('keyup focusout', '#email', function () {
         url: url,
         data: { email: email },
         success: function (response) {
+            const sanitizedMessage = $("<div>").text(response.message || '').html(); // Sanitize the message
+
             switch (response.status) {
                 case 'EMAILOK':
                     $("#email").removeClass("red").addClass("green");
-                    $("#statusemail").html('');
+                    $("#statusemail").html(''); // Clear the status message
                     break;
                 case 'EMAILINUSE':
                     $("#email").removeClass("green").addClass("red");
-                    $("#statusemail").html(response.message);
+                    $("#statusemail").html(sanitizedMessage); // Use sanitized message
                     break;
                 case 'EMAILFAIL':
                 default:
                     $("#email").removeClass("green").addClass("red");
-                    $("#statusemail").html(response.message || 'Unknown error.');
+                    $("#statusemail").html(sanitizedMessage || 'Unknown error.'); // Use sanitized message
                     break;
             }
         },
