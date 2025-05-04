@@ -39,11 +39,11 @@ if (!in_array($langID, $allowedLangs, true)) {
 // Construct the file path securely
 $langFile = __DIR__ . '/i18n/' . $langID . '.php';
 
-// Check if the language file exists before including it
-if (file_exists($langFile)) {
+// Validate the file path strictly
+if (in_array($langID, $allowedLangs, true) && file_exists($langFile)) {
     include $langFile;
 } else {
-    // Fallback to English if the file is missing
+    // Fallback to English if the file is missing or invalid
     include __DIR__ . '/i18n/en.php';
 }
 ?>
