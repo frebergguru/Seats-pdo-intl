@@ -147,8 +147,7 @@ HTML;
                 $mail->isHTML(true);
                 $mail->Subject = $mail_subject;
 
-                $baseUrl = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://{$_SERVER['SERVER_NAME']}" . dirname($_SERVER['REQUEST_URI']);
-                $resetLink = $baseUrl . "/forgot.php?nickname=" . urlencode($nickname) . "&key=" . urlencode($token);
+                $resetLink = htmlspecialchars((isset($_SERVER['HTTPS']) ? "https" : "http") . "://{$_SERVER['SERVER_NAME']}" . dirname($_SERVER['REQUEST_URI']) . "/forgot.php?nickname=" . urlencode($nickname) . "&key=" . urlencode($token));
 
                 $mail->Body = "{$langArray['email_change_password_body_hi']} " . htmlspecialchars($nickname) . "<br><br>" .
                               "{$langArray['email_change_password_body_link']}<br><br>" .
