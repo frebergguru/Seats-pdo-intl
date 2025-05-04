@@ -12,34 +12,33 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+// Ensure required variables are set
+$langID = htmlspecialchars($_SESSION['langID'] ?? 'en', ENT_QUOTES, 'UTF-8');
+$headerTitle = htmlspecialchars($langArray['header_title'] ?? 'Default Title', ENT_QUOTES, 'UTF-8');
+$siteDescription = htmlspecialchars($site_description ?? '', ENT_QUOTES, 'UTF-8');
+$siteKeywords = htmlspecialchars($site_keywords ?? '', ENT_QUOTES, 'UTF-8');
+$siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo $_SESSION['langID']; ?>">
+<html lang="<?php echo $langID; ?>">
 
 <head>
-    <title>
-        <?php echo $langArray['header_title']; ?>
-    </title>
+    <title><?php echo $headerTitle; ?></title>
     <meta charset="UTF-8">
-    <meta name="description" content="<?php echo $site_description; ?>">
-    <meta name="keywords" content="<?php echo $site_keywords; ?>">
-    <meta name="author" content="<?php echo $site_author; ?>">
-    <?php
-    if ($home == true) {
-        echo '<meta name="viewport" content="width=600, initial-scale=1.0">' . PHP_EOL;
-    } else {
-        echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">' . PHP_EOL;
-    }
-    ?>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="<?php echo $siteDescription; ?>">
+    <meta name="keywords" content="<?php echo $siteKeywords; ?>">
+    <meta name="author" content="<?php echo $siteAuthor; ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="./css/default.css">
     <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css">
-    <script src="./js/jquery-3.6.3.min.js"></script>
+    <script src="./js/jquery-3.7.1.min.js"></script>
     <script>
-        var langArray = <?php echo json_encode($langArray); ?>;
-        var illegalChars = <?php echo $fullname_illegal_chars_regex; ?>;
-        var validName = <?php echo $fullname_regex; ?>;
-        var validNickname = <?php echo $nickname_regex; ?>
+        var langArray = <?php echo json_encode($langArray ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+        var illegalChars = <?php echo json_encode($fullname_illegal_chars_regex ?? ''); ?>;
+        var validName = <?php echo json_encode($fullname_regex ?? ''); ?>;
+        var validNickname = <?php echo json_encode($nickname_regex ?? ''); ?>;
     </script>
 </head>
 

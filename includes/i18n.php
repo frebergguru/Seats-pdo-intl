@@ -15,13 +15,22 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+session_start(); // Ensure the session is started
 require 'config.php';
 
+// Get the list of allowed languages
 $allowedLangs = array_map(function ($file) {
     return basename($file, '.php');
 }, glob(__DIR__ . '/i18n/*.php'));
 
-// Validate and sanitize the language ID
+// Check if the user has selected a language
+if (isset($_GET['lang']) && in_array($_GET['lang'], $allowedLangs, true)) {
+    // Sanitize and set the selected language in the session
+    $_SESSION['langID'] = htmlspecialchars($_GET['lang']);
+}
+
+// Use the language from the session or default to English
 $langID = $_SESSION['langID'] ?? 'en';
 if (!in_array($langID, $allowedLangs, true)) {
     $langID = 'en'; // Default to English if invalid

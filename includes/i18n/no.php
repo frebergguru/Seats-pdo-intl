@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 $langArray = array(
-	"select_language" => "Velg spr&aring;k",
+	"select_language" => "Velg språk",
 	"language_btn" => "Bytt spr&aring;k",
 	"header_title" => "Sete reservasjon",
 	"home" => "Hjem",
@@ -58,12 +58,12 @@ $langArray = array(
 	"password_requirements" => "Trykk her for &aring; se passord krav",
 	"password_requirements_text" => "<p><strong>Passordet ditt må oppfylle følgende krav:</strong></p>
 	<ul>
-	<li>Minst 8 tegn langt</li>
-	<li>Ikke over 26 tegn langt</li>
-	<li>Inneholde minst én liten bokstav</li>
-	<li>Inneholde minst én stor bokstav</li>
-	<li>Inneholde minst ett tall</li>
-	<li>Inneholde minst ett spesialtegn: <pre>! @ # ^ & * ( ) , . ? " : { } | < > + - / [ ] = _ ` ~ $ %</pre></li>
+		<li>Minst 8 tegn langt</li>
+		<li>Ikke over 26 tegn langt</li>
+		<li>Inneholde minst én liten bokstav</li>
+		<li>Inneholde minst én stor bokstav</li>
+		<li>Inneholde minst ett tall</li>
+		<li>Inneholde minst ett spesialtegn: <pre>!@#$%^*()_+-=:;,.?\/</pre></li>
 	</ul>",
 	"password_changed_log_in" => "Passordet ditt er blitt byttet, du kan logge inn ved &aring; trykke <a href=\"login.php\">her</a>.",
 	"change_password_button" => "Bytt passord",

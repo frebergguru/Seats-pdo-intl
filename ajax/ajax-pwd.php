@@ -16,19 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+header('Content-Type: application/json');
 require '../includes/config.php';
-$postpassword = htmlspecialchars($_POST['password']);
-if (isset($postpassword)) {
-	if (empty($postpassword)) {
-		echo "PWDEMPTY";
-	} else {
-		if (!preg_match($pwd_regex, $postpassword)) {
-			echo "PWDINVALIDCHAR";
-		} else {
-			echo "PWDSTRONG";
-		}
-	}
+
+$response = ['status' => 'UNKNOWN_ERROR'];
+
+// Sanitize and validate the password input
+$postpassword = trim($_POST['password'] ?? '');
+
+if ($postpassword === '') {
+    $response['status'] = 'EMPTY';
+} elseif (!preg_match($pwd_regex, $postpassword)) {
+    $response['status'] = 'INVALID_CHARACTERS';
 } else {
-	echo "PWDFAIL";
+    $response['status'] = 'STRONG';
 }
+
+echo json_encode($response);
 ?>

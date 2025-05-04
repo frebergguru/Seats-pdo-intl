@@ -13,74 +13,89 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+session_start(); // Start the session
 require 'includes/config.php';
 require 'includes/i18n.php';
 
-$pwdwrong = false;
+$pwdwrong = false; // Flag to track incorrect password
 
-if (!empty($_POST['nickname'])) {
-	$nickname = htmlspecialchars($_POST['nickname']);
-}
-if (!empty($_POST['password'])) {
-	$password = htmlspecialchars($_POST['password']);
-}
+// Sanitize and validate inputs
+$nickname = trim($_POST['nickname'] ?? '');
+$password = trim($_POST['password'] ?? '');
+
 try {
-	if (isset($nickname) && !empty($nickname) && isset($password) && !empty($password)) {
-		$pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
-		switch (DB_DRIVER) {
-			case "mysql":
-				$stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
-				break;
-			case "pgsql":
-				$stmt = $pdo->prepare("SELECT password FROM users WHERE lower(nickname) LIKE :nickname");
-				break;
-			default:
-				throw new Exception("unsupported_database_driver");
-		}
-		$stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
-		$stmt->execute();
-		$results = $stmt->fetch(PDO::FETCH_ASSOC);
-		if (isset($results["password"])) {
-			if (password_verify($password, $results["password"])) {
-				$_SESSION['nickname'] = $nickname;
-				header("Location: " . filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL));
-				exit;
-			} else {
-				include 'includes/header.php';
-				print '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
-				$pwdwrong = true;
-			}
-		} else {
-			include 'includes/header.php';
-			print '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
-			$pwdwrong = true;
-		}
-	}
-} catch (PDOException $e) {
-	error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . $langArray['whole_query'] . ' ' . $stmt->queryString, 0);
-} {
-	if ($pwdwrong == false) {
-		include 'includes/header.php';
-	}
-	;
-	print '<form class="srs-container" method="POST" action="' . $_SERVER["PHP_SELF"] . '">
-        <span class="srs-header">' . $langArray['login'] . '</span>
+    if (!empty($nickname) && !empty($password)) {
+        // Establish database connection
+        $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
-        <div class="srs-content">
-            <label for="nickname" class="srs-lb">' . $langArray['nickname'] . '</label><input name="nickname" value="' . $nickname . '" id="nickname" class="srs-tb"><br>
-			<br>
-            <label for="password" class="srs-lb">' . $langArray['password'] . '</label><input name="password" id="password" type="password" class="srs-tb"><br>
-        </div>
-        <div class="srs-footer">
-            <div class="srs-button-container">
-                <input type="submit" class="submit" value="' . $langArray['login'] . '">
-            </div>
-            <div class="srs-slope"></div>
-        </div>
-    </form>';
+        // Prepare the query based on the database driver
+        switch (DB_DRIVER) {
+            case "mysql":
+                $stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
+                break;
+            case "pgsql":
+                $stmt = $pdo->prepare("SELECT password FROM users WHERE lower(nickname) = :nickname");
+                break;
+            default:
+                throw new Exception("Unsupported database driver");
+        }
+
+        // Bind and execute the query
+        $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+        $stmt->execute();
+        $results = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Verify the password
+        if ($results && password_verify($password, $results["password"])) {
+            $_SESSION['nickname'] = $nickname;
+
+            // Redirect to the main page
+            $redirectUrl = filter_var('https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']), FILTER_SANITIZE_URL);
+            header("Location: $redirectUrl");
+            exit;
+        } else {
+            // Incorrect username or password
+            $pwdwrong = true;
+        }
+    }
+} catch (PDOException $e) {
+    // Log database errors
+    error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . ($stmt ? $langArray['whole_query'] . ' ' . $stmt->queryString : ''), 0);
+} catch (Exception $e) {
+    // Log other exceptions
+    error_log("Error: " . $e->getMessage());
 }
+
+// Include the header
+include 'includes/header.php';
+
+// Display error message if login failed
+if ($pwdwrong) {
+    echo '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
+}
+
+// Display the login form
 ?>
-<br>
+<form class="srs-container" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+    <span class="srs-header"><?php echo $langArray['login']; ?></span>
+
+    <div class="srs-content">
+        <label for="nickname" class="srs-lb"><?php echo $langArray['nickname']; ?></label>
+        <input name="nickname" value="<?php echo htmlspecialchars($nickname); ?>" id="nickname" class="srs-tb"><br><br>
+
+        <label for="password" class="srs-lb"><?php echo $langArray['password']; ?></label>
+        <input name="password" id="password" type="password" class="srs-tb"><br>
+    </div>
+
+    <div class="srs-footer">
+        <div class="srs-button-container">
+            <input type="submit" class="submit" value="<?php echo $langArray['login']; ?>">
+        </div>
+        <div class="srs-slope"></div>
+    </div>
+</form>
+
 <?php
+// Include the footer
 include 'includes/footer.php';
 ?>

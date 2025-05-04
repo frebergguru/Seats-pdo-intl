@@ -35,9 +35,13 @@ $fullname_regex = '/^[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,}(\s[a-zA-Zæøå
 //Regex to check for illegal characters in the fullname.
 $fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-\s]/u';
 
+$smtp_port = "587";
+$smtp_server = "";
+$smtp_username = "";
+$smtp_password = "";
 $from_name = "Seat reservation";
 $mail_subject = "Seat reservation";
-$from_mail = "hypnotize@lastnetwork.net";
+$from_mail = "";
 
 //Setup the Argon2id options that you want to use (You can use Argon2id.ods to calculate memory_cost).
 $argon2id_options = [
@@ -53,19 +57,19 @@ if (!isset($_SESSION['langID'])) {
 
 //Which database server do you want to use? (valid options: mysql or pgsql)
 if (!defined('DB_DRIVER')) {
-    define('DB_DRIVER', 'pgsql');
+    define('DB_DRIVER', 'mysql');
 }
 //Database server host
 if (!defined('DB_HOST')) {
-    define('DB_HOST', 'localhost');
+    define('DB_HOST', '');
 }
 //Database name
 if (!defined('DB_NAME')) {
-    define('DB_NAME', 'lanparty');
+    define('DB_NAME', '');
 }
 //Database server username
 if (!defined('DB_USERNAME')) {
-    define('DB_USERNAME', 'lanparty');
+    define('DB_USERNAME', '');
 }
 //Database server password
 if (!defined('DB_PASSWORD')) {
