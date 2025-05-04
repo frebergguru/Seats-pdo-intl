@@ -110,8 +110,13 @@ try {
 
     $pdo->commit();
 
-    // Redirect to the same page (safe redirect)
+    // Construct the redirect URL
     $redirectUrl = filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
+
+    // Ensure the redirect URL is within the same domain
+    $redirectUrl = rtrim($redirectUrl, '/') . '/index.php'; // Redirect to a safe default page
+
+    // Perform the redirection
     header("Location: " . $redirectUrl);
     exit();
 } catch (PDOException $e) {
