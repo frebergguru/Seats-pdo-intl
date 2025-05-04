@@ -49,10 +49,21 @@ try {
         if ($results && password_verify($password, $results["password"])) {
             $_SESSION['nickname'] = $nickname;
 
-            // Redirect to the main page
-            $redirectUrl = filter_var('https://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']), FILTER_SANITIZE_URL);
-            header("Location: $redirectUrl");
-            exit;
+            // Construct the redirect URL
+            $baseUrl = 'https://' . $_SERVER['HTTP_HOST']; // Use a trusted base URL
+            $redirectPath = dirname($_SERVER['PHP_SELF']);
+            $redirectUrl = filter_var($baseUrl . $redirectPath, FILTER_SANITIZE_URL);
+
+            // Validate the redirect URL to ensure it stays within the same domain
+            if (strpos($redirectUrl, $baseUrl) === 0) {
+                header("Location: $redirectUrl");
+                exit;
+            } else {
+                // Log the invalid redirect attempt and redirect to a safe default page
+                error_log("Invalid redirect attempt to: $redirectUrl");
+                header("Location: $baseUrl/index.php");
+                exit;
+            }
         } else {
             // Incorrect username or password
             $pwdwrong = true;
