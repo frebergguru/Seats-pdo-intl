@@ -61,6 +61,7 @@ e = emergency exit
 - PHP 7.4 or higher
 - MySQL or PostgreSQL database
 - A web server (e.g., Apache or Nginx)
+- Composer
 
 ### Steps
 1. Clone the repository:
@@ -69,9 +70,14 @@ e = emergency exit
    cd Seats-pdo-intl
    ```
 
-2. Configure the database connection in `includes/config.php`.
+2. Install PHPMailer with composer
+   ```shell
+   composer install
+   ```
 
-3. Import the database schema:
+3. Configure the database connection and e-mail settings in `includes/config.php`.
+
+4. Import the database schema:
    - For MySQL:
      ```bash
      mysql -u lanparty -p < Seats-MySQL.sql
@@ -81,7 +87,7 @@ e = emergency exit
      psql -U lanparty -d lanparty < Seats-PostgreSQL.sql
      ```
 
-4. Grant the necessary permissions to the database user (see examples below).
+5. Grant the necessary permissions to the database user (see examples below).
 
 ---
 

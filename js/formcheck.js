@@ -1,5 +1,5 @@
 /*
-    Copyright 2023 Morten Freberg
+    CopyLeft 2023-2025 Morten Freberg
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 */
 
 /*
-    Copyright 2023 Morten Freberg
+    CopyLeft 2023-2025 Morten Freberg
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
