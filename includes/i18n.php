@@ -16,8 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-session_start(); // Ensure the session is started
-require 'config.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once 'config.php';
 
 // Get the list of allowed languages
 $allowedLangs = array_map(function ($file) {
@@ -46,4 +48,3 @@ if (in_array($langID, $allowedLangs, true) && file_exists($langFile)) {
     // Fallback to English if the file is missing or invalid
     include __DIR__ . '/i18n/en.php';
 }
-?>
