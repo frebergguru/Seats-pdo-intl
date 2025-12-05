@@ -45,8 +45,8 @@ if (!$seat || $seat <= 0) {
 }
 
 // Check if the seat exists in the map
-$text = file_get_contents("map.txt");
-$maxseats = substr_count($text, "#");
+$mapData = getMapData();
+$maxseats = $mapData['max_seats'];
 if ($seat > $maxseats) {
     require_once 'includes/header.php';
     print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
