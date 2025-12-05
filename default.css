@@ -16,367 +16,253 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
+
+/* =========================================
+   Reset & Base Styles
+   ========================================= */
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: #696969;
-}
-
-a:link {
-    text-decoration: none;
-    color: #000;
-    border-bottom: none;
-    text-decoration: none;
-    /*text-transform: uppercase;*/
-    text-indent: 5px;
-    font-family: Impact, Charcoal, sans-serif;
-}
-
-a:visited {
-    text-decoration: none;
-    color: #000;
-    border-bottom: none;
-    text-decoration: none;
-    /*text-transform: uppercase;*/
-    text-indent: 5px;
-    font-family: Impact, Charcoal, sans-serif;
-}
-
-a:hover {
-    color: #000;
-    text-decoration: none;
-    border-bottom: 1px solid #000;
-    border-top: 1px solid #000;
-    /*   text-transform: uppercase;*/
-    text-indent: 5px;
-    font-family: Impact, Charcoal, sans-serif;
-}
-
-.submit {
-    text-indent: 5px;
-    font-family: Impact, Charcoal, sans-serif;
-    background: #cecece;
-    background-image: -webkit-linear-gradient(top, #cecece, #696969);
-    background-image: -moz-linear-gradient(top, #cecece, #696969);
-    background-image: -ms-linear-gradient(top, #cecece, #696969);
-    background-image: -o-linear-gradient(top, #cecece, #696969);
-    background-image: linear-gradient(to bottom, #cecece, #696969);
-    -webkit-border-radius: 15px;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    color: #000;
-    font-size: 20px;
-    padding: 10px 20px 10px 20px;
-    text-decoration: none;
-    height: 50px;
-}
-
-.submit:hover {
-    text-indent: 5px;
-    font-family: Impact, Charcoal, sans-serif;
-    background: #696969;
-    background-image: -webkit-linear-gradient(top, #696969, #CECECE);
-    background-image: -moz-linear-gradient(top, #696969, #CECECE);
-    background-image: -ms-linear-gradient(top, #696969, #CECECE);
-    background-image: -o-linear-gradient(top, #696969, #CECECE);
-    background-image: linear-gradient(to bottom, #696969, #CECECE);
-    text-decoration: none;
-    color: #000;
-    height: 50px;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 img {
     border: 0;
+    vertical-align: middle;
+}
+
+a {
+    text-decoration: none;
+    color: #000;
+}
+
+/* =========================================
+   Typography & Shared Components
+   ========================================= */
+.heading {
+    text-transform: uppercase;
+    font-family: Impact, Charcoal, sans-serif;
+    text-indent: 5px;
+    margin: 10px 0;
 }
 
 hr {
-    border: 0px;
+    border: 0;
     height: 1px;
     width: 50%;
-    background-image: -webkit-linear-gradient(left, rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
-    background-image: -moz-linear-gradient(left,  rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
-    background-image: -ms-linear-gradient(left,  rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
-    background-image: -o-linear-gradient(left, rgb(206, 206, 206), rgb(0, 0, 0), rgb(206, 206, 206));
+    margin: 20px auto;
+    background: linear-gradient(to right, #cecece, #000, #cecece);
 }
 
-input {
-    font-size: 16px;
-    width: 200px;
-    height: 25px;
-    border: solid 1px #333333;
-    padding: 4px;
-}
-
-#status {
-    font-size: 11px;
-    margin-left: 10px;
-    font-weight: bold;
-}
-
-#statusemail {
-    font-size: 11px;
-    margin-left: 10px;
-    font-weight: bold;
-}
-
-#statuspw {
-    font-size: 11px;
-    margin-left: 10px;
-    font-weight: bold;
-}
-
-.green {
-    background-color: #008000;
-}
-
-.red {
-    background-color: #FF0000;
-}
-
-.yellow {
-    background-color: #FFFF00;
-}
-
-.white {
-    background-color: #FFF;
-}
-img.wall {
-	width: 15px;
-	height: 15px;
-}
-p.heading {
-    text-transform: uppercase;
-    font-family: Impact, #36454f, sans-serif;
-    text-indent: 5px;
-}
-
-p.seat_symbols {
-    font-weight: bold;
-}
-
+/* =========================================
+   Layout Containers
+   ========================================= */
 .main_wrapper {
     text-align: center;
-    height: 100%;
-    min-height: 100%;
     width: 100%;
-    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 #wrapper {
+    width: 100%;
     max-width: 1000px;
+    padding: 20px 10px;
     margin: 0 auto;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    position: relative;
-    text-align: center;
 }
 
-.seatmap {
-    display: grid;
-    grid-gap: 8px;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    background-color: #CECECE;
-    margin: 0 auto;
-    padding: 5px;
-    text-align: center;
-    width: auto;
-}
-
-#seatMap {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.seat,
-.floor,
-.wall,
-.kitchen,
-.toilet,
-.door,
-.exit {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-}
-
-.door {
-    font-size: 20px;
-    text-align: center;
-}
-
-img.exit {
-    width: 20px;
-    height: 19px;
-}
-
-.seat_registered {
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    background-color: #CECECE;
-    margin: 0 auto;
-    padding: 5px;
-    text-align: center;
-    width: auto;
-}
-
+/* =========================================
+   Navigation & Menu
+   ========================================= */
 .menu {
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
     background-color: #CECECE;
-    margin: 0 auto;
-    padding: 5px;
-    text-align: center;
-    width: auto;
+    border-radius: 15px;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
 }
 
-.regerror {
-    font-size: 20px;
+.menu a {
     font-family: Impact, Charcoal, sans-serif;
-    text-indent: 5px;
-    background-color: #CECECE;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    color: #FF0000;
-    width: 600px;
-    margin: 0 auto;
+    padding: 5px 10px;
 }
 
-.userdel {
-    font-size: 20px;
-    font-family: Impact, Charcoal, sans-serif;
-    text-indent: 5px;
-    background-color: #CECECE;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    color: #FF0000;
-    width: 600px;
-    margin: 0 auto;
+.menu a:hover {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
 }
 
-.msg {
-    font-size: 20px;
-    font-family: Impact, Charcoal, sans-serif;
-    text-indent: 5px;
-    background-color: #CECECE;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    border-radius: 15px;
-    color: #000;
-    width: 600px;
-    margin: 0 auto;
-}
-
+/* =========================================
+   Forms (Login, Register, etc.)
+   ========================================= */
 .srs-container {
-    width: 600px;
-    margin: 0 auto;
+    background-color: #CECECE;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 20px;
+    overflow: hidden; /* Contains floated children if any, though we prefer flex */
+    text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .srs-header {
+    background-color: #CECECE; /* Same as container, maybe distinct if desired */
+    font-family: Impact, Charcoal, sans-serif;
     font-size: 20px;
     text-transform: uppercase;
-    font-family: Impact, Charcoal, sans-serif;
-    text-indent: 5px;
-    background-color: #CECECE;
-    width: 100%;
-    float: left;
-    -webkit-border-top-left-radius: 15px;
-    -webkit-border-top-right-radius: 15px;
-    -moz-border-radius-topleft: 15px;
-    -moz-border-radius-topright: 15px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    padding: 10px;
+    border-bottom: 1px solid #aaa;
 }
 
 .srs-content {
-    width: 100%;
-    background-color: #CECECE;
-    float: left;
-    line-height: 1.5;
-    padding-bottom: 5px;
-    -webkit-border-bottom-left-radius: 15px;
-    -moz-border-radius-bottomleft: 15px;
-    border-bottom-left-radius: 15px;
-}
-
-.srs-tb {
-    display: inline-block;
-    width: 80%;
+    padding: 20px;
 }
 
 .srs-lb {
-    display: inline-block;
-    width: 100px;
-    font-family: Arial, Helvetica, sans-serif;
-    text-indent: 5px;
+    display: block;
     font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.srs-tb {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 15px;
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #333;
+    border-radius: 5px;
 }
 
 .srs-footer {
-    width: 100%;
-    display: inline-block;
-    height: 40px;
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
 }
 
-.srs-button-container {
-    float: right;
+.submit {
+    background: linear-gradient(to bottom, #cecece, #696969);
+    border: none;
+    border-radius: 15px;
+    font-family: Impact, Charcoal, sans-serif;
+    font-size: 20px;
+    padding: 10px 30px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.submit:hover {
+    background: linear-gradient(to bottom, #696969, #cecece);
+}
+
+/* =========================================
+   App Configuration (Hidden)
+   ========================================= */
+#app-config {
+    display: none;
+}
+
+/* =========================================
+   Seat Map (Table Layout)
+   ========================================= */
+.seatmap {
     background-color: #CECECE;
-    height: 60px;
-    padding-right: 20px;
-    -webkit-border-bottom-right-radius: 15px;
-    -moz-border-radius-bottomright: 15px;
-    border-bottom-right-radius: 15px;
+    border-radius: 15px;
+    padding: 15px;
+    margin: 0 auto;
+    display: inline-block; /* Center via parent text-align */
+    max-width: 100%; /* Don't exceed screen width */
 }
 
-.srs-slope {
-    width: 0;
-    height: 0;
-    border-top: 60px solid #CECECE;
-    border-left: 60px solid transparent;
-    float: right;
+.scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
 }
 
-@media (max-width: 1000px) {
+.seat-table {
+    border-collapse: collapse;
+    margin: 0 auto;
+    border-spacing: 0;
+}
+
+.map-cell {
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.map-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block; /* Remove bottom spacing */
+}
+
+.map-cell.kitchen, .map-cell.toilet, .map-cell.door {
+    font-size: 20px;
+}
+
+/* =========================================
+   Messages & Notifications
+   ========================================= */
+.regerror, .userdel, .msg, .seat_registered {
+    background-color: #CECECE;
+    border-radius: 15px;
+    padding: 15px;
+    margin: 10px auto;
+    width: 100%;
+    max-width: 600px;
+    font-family: Impact, Charcoal, sans-serif;
+    text-align: center;
+}
+
+.regerror, .userdel {
+    color: red;
+}
+
+/* =========================================
+   Responsive Adjustments
+   ========================================= */
+@media (max-width: 600px) {
     #wrapper {
-        width: 100%;
-        max-width: none;
+        padding: 10px;
     }
 
+    .seatmap {
+        width: 100%; /* On mobile, take full width */
+        padding: 10px 5px;
+    }
+
+    /* Allow cells to be slightly smaller on mobile to fit more if possible,
+       but maintain touch target size via invisible padding or just scroll */
+    .map-cell {
+        width: 30px; /* Bigger touch targets */
+        height: 30px;
+    }
+
+    /* Ensure forms take full width */
     .srs-container {
         width: 100%;
-        max-width: none;
+        border-radius: 10px;
     }
 
-    .menu {
+    .submit {
         width: 100%;
-        max-width: none;
+        border-radius: 10px;
     }
-
-    #seatMap {
-        width: 600px;
-        overflow: auto;
-        margin: 0, 0;
-    }
-
-    p.seat_symbols {
-        font-size: 15px;
-        line-height: 15px;
-    }
-
-    p.seat_symbols.img {
-        height: 14px;
-        width: 14px;
-    }
-
-    p.seat_symbols.img.exit {
-        height: 14px;
-        width: 14px;
-    }
-    img.wall {
-        width: 14px;
-        height: 14px;
-}
 }
