@@ -22,7 +22,9 @@ require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Validate session and nickname
 if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
@@ -45,8 +47,8 @@ if (!$seat || $seat <= 0) {
 }
 
 // Check if the seat exists in the map
-$text = file_get_contents("map.txt");
-$maxseats = substr_count($text, "#");
+$mapData = getMapData();
+$maxseats = $mapData['max_seats'];
 if ($seat > $maxseats) {
     require_once 'includes/header.php';
     print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
