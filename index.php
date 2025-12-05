@@ -10,7 +10,9 @@ require_once 'includes/config.php';
 require_once 'includes/functions.php';
 require_once 'includes/i18n.php';
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $useatId = isset($_GET['seatid']) ? (int)$_GET['seatid'] : null;
 $seatId = 1;
@@ -40,61 +42,66 @@ require 'includes/header.php';
     <hr>
 
     <p class="heading"><?php echo $langArray['stage_front']; ?></p>
-    <table id="seatMap" cellspacing="0" cellpadding="0">
-        <?php
-        $data = file_get_contents("map.txt");
-        $rows = explode("\n", trim($data));
+    <?php
+    $mapData = getMapData();
+    $rows = $mapData['rows'];
+    $takenSeats = [];
+    $mapWidth = !empty($rows) ? max(array_map('strlen', $rows)) : 0;
 
+    try {
+        $stmt = $pdo->query("SELECT taken FROM reservations");
+        $takenSeats = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+        // Flip for faster lookup: [seatId => true]
+        $takenSeats = array_flip($takenSeats);
+    } catch (PDOException $e) {
+        error_log("Failed to fetch reservations: " . $e->getMessage());
+    }
+    ?>
+    <div class="seat-grid" style="--cols: <?php echo $mapWidth; ?>;">
+        <?php
         foreach ($rows as $row) {
-            echo "<tr>";
-            for ($i = 0; $i < strlen($row); $i++) {
-                $char = $row[$i];
+            $rowLen = strlen($row);
+            for ($i = 0; $i < $mapWidth; $i++) {
+                $char = ($i < $rowLen) ? $row[$i] : ' ';
                 switch ($char) {
                     case "#":
-                        try {
-                            $stmt = $pdo->prepare("SELECT 1 FROM reservations WHERE taken = ?");
-                            $stmt->execute([$seatId]);
-                            $taken = $stmt->fetchColumn();
+                        $taken = isset($takenSeats[$seatId]);
 
-                            if ($taken) {
-                                echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
-                            } elseif ($useatId === $seatId) {
-                                echo '<td class="seat"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></td>';
-                            } else {
-                                echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . ' #' . $seatId . '"></a></td>';
-                            }
-                            $seatId++;
-                        } catch (PDOException $e) {
-                            echo '<td>Error</td>';
+                        if ($taken) {
+                            echo '<div class="map-cell seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></div>';
+                        } elseif ($useatId === $seatId) {
+                            echo '<div class="map-cell seat"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></div>';
+                        } else {
+                            echo '<div class="map-cell seat"><a href="?seatid=' . $seatId . '"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . ' #' . $seatId . '"></a></div>';
                         }
+                        $seatId++;
                         break;
                     case "f":
-                        echo '<td class="floor" title="' . $langArray['floor'] . '"></td>';
+                        echo '<div class="map-cell floor" title="' . $langArray['floor'] . '"></div>';
                         break;
                     case "w":
-                        echo '<td class="wall"><img src="./img/wall.jpg" class="wall" alt="' . $langArray['wall'] . '"></td>';
+                        echo '<div class="map-cell wall"><img src="./img/wall.jpg" class="wall" alt="' . $langArray['wall'] . '"></div>';
                         break;
                     case "k":
-                        echo '<td class="kitchen" title="' . $langArray['kitchen'] . '">&#127869;</td>';
+                        echo '<div class="map-cell kitchen" title="' . $langArray['kitchen'] . '">&#127869;</div>';
                         break;
                     case "b":
-                        echo '<td class="toilet" title="' . $langArray['bathroom'] . '">&#128701;</td>';
+                        echo '<div class="map-cell toilet" title="' . $langArray['bathroom'] . '">&#128701;</div>';
                         break;
                     case "d":
-                        echo '<td class="door" title="' . $langArray['door'] . '">&#128682;</td>';
+                        echo '<div class="map-cell door" title="' . $langArray['door'] . '">&#128682;</div>';
                         break;
                     case "e":
-                        echo '<td class="exit"><img src="./img/exit.jpg" class="exit" alt="' . $langArray['exit'] . '"></td>';
+                        echo '<div class="map-cell exit"><img src="./img/exit.jpg" class="exit" alt="' . $langArray['exit'] . '"></div>';
                         break;
                     default:
-                        echo '<td></td>';
+                        echo '<div class="map-cell empty"></div>';
                         break;
                 }
             }
-            echo "</tr>";
         }
         ?>
-    </table>
+    </div>
 </div>
 
 <?php
