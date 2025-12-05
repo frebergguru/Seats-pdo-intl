@@ -19,6 +19,19 @@ $headerTitle = htmlspecialchars($langArray['header_title'] ?? 'Default Title', E
 $siteDescription = htmlspecialchars($site_description ?? '', ENT_QUOTES, 'UTF-8');
 $siteKeywords = htmlspecialchars($site_keywords ?? '', ENT_QUOTES, 'UTF-8');
 $siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
+
+// Cache busting
+$cssVer = file_exists(__DIR__ . '/../css/default.css') ? filemtime(__DIR__ . '/../css/default.css') : '1.0';
+$popupVer = file_exists(__DIR__ . '/../css/bubblePopup.css') ? filemtime(__DIR__ . '/../css/bubblePopup.css') : '1.0';
+
+// Prepare JS config
+$configData = [
+    'langArray' => $langArray ?? [],
+    'illegalChars' => $fullname_illegal_chars_regex ?? '',
+    'validName' => $fullname_regex ?? '',
+    'validNickname' => $nickname_regex ?? ''
+];
+$configJson = json_encode($configData);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $langID; ?>">
@@ -31,17 +44,13 @@ $siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
     <meta name="author" content="<?php echo $siteAuthor; ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="./css/default.css">
-    <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css">
+    <link rel="stylesheet" type="text/css" href="./css/default.css?v=<?php echo $cssVer; ?>">
+    <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css?v=<?php echo $popupVer; ?>">
     <script src="./js/jquery-3.7.1.min.js"></script>
-    <script>
-        var langArray = <?php echo json_encode($langArray ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
-        var illegalChars = <?php echo json_encode($fullname_illegal_chars_regex ?? ''); ?>;
-        var validName = <?php echo json_encode($fullname_regex ?? ''); ?>;
-        var validNickname = <?php echo json_encode($nickname_regex ?? ''); ?>;
-    </script>
+    <script src="./js/config.js" defer></script>
 </head>
 
 <body>
+    <div id="app-config" data-config="<?php echo htmlspecialchars($configJson, ENT_QUOTES, 'UTF-8'); ?>" style="display:none;"></div>
     <div class="main_wrapper">
         <div id="wrapper">
