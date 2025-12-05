@@ -125,4 +125,3 @@ if (!isset($fullname)) {
 if (!isset($deluser)) {
     $deluser = null;
 }
-?>

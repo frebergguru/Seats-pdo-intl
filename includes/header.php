@@ -19,6 +19,10 @@ $headerTitle = htmlspecialchars($langArray['header_title'] ?? 'Default Title', E
 $siteDescription = htmlspecialchars($site_description ?? '', ENT_QUOTES, 'UTF-8');
 $siteKeywords = htmlspecialchars($site_keywords ?? '', ENT_QUOTES, 'UTF-8');
 $siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
+
+// Cache busting
+$cssVer = file_exists(__DIR__ . '/../css/default.css') ? filemtime(__DIR__ . '/../css/default.css') : '1.0';
+$popupVer = file_exists(__DIR__ . '/../css/bubblePopup.css') ? filemtime(__DIR__ . '/../css/bubblePopup.css') : '1.0';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $langID; ?>">
@@ -31,8 +35,8 @@ $siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
     <meta name="author" content="<?php echo $siteAuthor; ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" type="text/css" href="./css/default.css">
-    <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css">
+    <link rel="stylesheet" type="text/css" href="./css/default.css?v=<?php echo $cssVer; ?>">
+    <link rel="stylesheet" type="text/css" href="./css/bubblePopup.css?v=<?php echo $popupVer; ?>">
     <script src="./js/jquery-3.7.1.min.js"></script>
     <script>
         var langArray = <?php echo json_encode($langArray ?? [], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
