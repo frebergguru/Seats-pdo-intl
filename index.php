@@ -40,7 +40,7 @@ require 'includes/header.php';
     <hr>
 
     <p class="heading"><?php echo $langArray['stage_front']; ?></p>
-    <table id="seatMap" cellspacing="0" cellpadding="0">
+    <table id="seatMap">
         <?php
         $data = file_get_contents("map.txt");
         $rows = explode("\n", trim($data));
@@ -65,7 +65,7 @@ require 'includes/header.php';
                             }
                             $seatId++;
                         } catch (PDOException $e) {
-                            echo '<td>Error</td>';
+                            echo '<td>DB Error</td>';
                         }
                         break;
                     case "f":
