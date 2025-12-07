@@ -28,7 +28,6 @@
 │   └── i18n.php
 ├── js/
 │   ├── formcheck.js
-│   ├── jquery-3.6.3.min.js
 │   ├── jquery-3.7.1.min.js
 │   ├── pwdcheck.js
 │   └── pwdreq.js
@@ -54,7 +53,6 @@
 ## CSS
 - `css/bubblePopup.css`: Styles the password requirements bubble popup. It includes positioning, gradient backgrounds, borders, and responsive adjustments for smaller screens.
 - `css/default.css`: The main stylesheet for the application. It defines global styles (body, links, forms), seat map grid layout, responsive behaviors, and various utility classes for status messages and buttons.
-- `default.css`: A duplicate of `css/default.css` located in the root directory.
 
 ## Images
 - `img/exit.jpg`
