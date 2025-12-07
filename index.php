@@ -1,162 +1,140 @@
 <?php
 /*
-Copyright 2023 Morten Freberg
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License...
-*/
+ * This file is part of Seats-pdl-intl.
+ *
+ * Copyright (C) 2023-2025 Morten Freberg
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
 
-$home = true;
-require_once 'includes/config.php';
-require_once 'includes/functions.php';
-require_once 'includes/i18n.php';
+require 'includes/config.php';
+require 'includes/functions.php';
+require 'includes/i18n.php';
 
 session_start();
 
-$useatId = isset($_GET['seatid']) ? (int)$_GET['seatid'] : null;
-$seatId = 1;
-
-try {
-    $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
-} catch (PDOException $e) {
-    error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage());
+// Validate session and nickname
+if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
+    header("Location: login.php");
     exit();
 }
 
-require 'includes/header.php';
-?>
+$nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
 
-<div class="seatmap">
-    <p class="heading"><?php echo $langArray['symbol_explanation']; ?>:</p>
-    <p class="seat_symbols">
-        <img src="./img/wall.jpg" class="wall" alt="<?php echo $langArray['wall']; ?>"> <?php echo $langArray['wall']; ?>
-        &#127869; <?php echo $langArray['kitchen']; ?>
-        &#128701; <?php echo $langArray['bathroom']; ?>
-        &#128682; <?php echo $langArray['door']; ?>
-        <img src="./img/exit.jpg" class="exit" alt="<?php echo $langArray['exit']; ?>"> <?php echo $langArray['exit']; ?><br><br>
-        <img src="./img/yellow.jpg" alt="<?php echo $langArray['selected_seat']; ?>"> <?php echo $langArray['selected_seat']; ?>
-        <img src="./img/red.jpg" alt="<?php echo $langArray['occupied_seat']; ?>"> <?php echo $langArray['occupied_seat']; ?>
-        <img src="./img/green.jpg" alt="<?php echo $langArray['vacant_seat']; ?>"> <?php echo $langArray['vacant_seat']; ?>
-    </p>
-    <hr>
+// Validate and sanitize seat ID
+$seat = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
+if (!$seat || $seat <= 0) {
+    require_once 'includes/header.php';
+    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+        <div class="srs-content">
+        ' . $langArray['invalid_seat_selected'] . '
+        </div><br><br><br>';
+    require_once 'includes/footer.php';
+    exit();
+}
 
-    <p class="heading"><?php echo $langArray['stage_front']; ?></p>
-    <table id="seatMap">
-        <?php
-        $mapData = getMapData();
-        $rows = $mapData['grid'];
+// Check if the seat exists in the map
+$mapData = getMapData();
+$maxseats = $mapData['max_seats'];
 
-        // Optimize: Fetch all reservations in one go
-        $reservations = [];
-        try {
-            $stmt = $pdo->query("SELECT taken FROM reservations");
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $reservations[$row['taken']] = true;
-            }
-        } catch (PDOException $e) {
-            echo 'DB Error';
-        }
+if ($seat > $maxseats) {
+    require_once 'includes/header.php';
+    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+        <div class="srs-content">
+        ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
+        </div><br><br><br>';
+    require_once 'includes/footer.php';
+    exit();
+}
 
-        foreach ($rows as $row) {
-            echo "<tr>";
-            for ($i = 0; $i < strlen($row); $i++) {
-                $char = $row[$i];
-                switch ($char) {
-                    case "#":
-                        $taken = isset($reservations[$seatId]);
+try {
+    $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
-                        if ($taken) {
-                            echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
-                        } elseif ($useatId === $seatId) {
-                            echo '<td class="seat"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></td>';
-                        } else {
-                            echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . ' #' . $seatId . '"></a></td>';
-                        }
-                        $seatId++;
-                        break;
-                    case "f":
-                        echo '<td class="floor" title="' . $langArray['floor'] . '"></td>';
-                        break;
-                    case "w":
-                        echo '<td class="wall"><img src="./img/wall.jpg" class="wall" alt="' . $langArray['wall'] . '"></td>';
-                        break;
-                    case "k":
-                        echo '<td class="kitchen" title="' . $langArray['kitchen'] . '">&#127869;</td>';
-                        break;
-                    case "b":
-                        echo '<td class="toilet" title="' . $langArray['bathroom'] . '">&#128701;</td>';
-                        break;
-                    case "d":
-                        echo '<td class="door" title="' . $langArray['door'] . '">&#128682;</td>';
-                        break;
-                    case "e":
-                        echo '<td class="exit"><img src="./img/exit.jpg" class="exit" alt="' . $langArray['exit'] . '"></td>';
-                        break;
-                    default:
-                        echo '<td></td>';
-                        break;
-                }
-            }
-            echo "</tr>";
-        }
-        ?>
-    </table>
-</div>
+    // Get user ID and check if the user already has a reserved seat
+    $stmt = $pdo->prepare("SELECT id, rseat FROM users WHERE lower(nickname) = :nickname");
+    $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-<?php
-$seatid = intval(filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT));
-$occupied = null;
-$nickname = '';
-
-if ($seatid) {
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM reservations WHERE taken = ?");
-        $stmt->execute([$seatid]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            $occupied = 1;
-            $user = $row['user_id'];
-        }
-    } catch (PDOException $e) {
-        error_log("Seat lookup error: " . $e->getMessage());
+    if (!$user) {
+        require_once 'includes/header.php';
+        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+            <div class="srs-content">
+            ' . $langArray['user_not_found'] . '
+            </div><br><br><br>';
+        require_once 'includes/footer.php';
+        exit();
     }
 
-    if ($occupied) {
-        try {
-            $stmt = $pdo->prepare("SELECT nickname FROM " . USERS_TABLE . " WHERE id = ?");
-            $stmt->execute([$user]);
-            $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
-            $nickname = $userRow['nickname'] ?? '';
-        } catch (PDOException $e) {
-            error_log("User lookup error: " . $e->getMessage());
-        }
+    if (!empty($user['rseat'])) {
+        require_once 'includes/header.php';
+        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+            <div class="srs-content">
+            ' . $langArray['you_can_only_reserve_one_seat'] . '
+            </div><br><br><br>';
+        require_once 'includes/footer.php';
+        exit();
     }
 
-    echo '<br><div class="seat_registered">';
-    if ($occupied) {
-        echo $langArray['seat_number'] . ' ' . $seatid . ' ' . $langArray['is_reserved_by'] . ' ' . htmlspecialchars($nickname) . '</div>';
-    } else {
-        if (!isset($_SESSION['nickname'])) {
-            echo $langArray['login_before_reserving'] . '</div>';
-        } else {
-            try {
-                $stmt = $pdo->prepare("SELECT " . RSEAT_TABLE . " FROM " . USERS_TABLE . " WHERE nickname = ?");
-                $stmt->execute([$_SESSION['nickname']]);
-                $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
-                $rseat = $userRow[RSEAT_TABLE] ?? 0;
+    // Reserve the seat using transaction and race condition check
+    $pdo->beginTransaction();
 
-                if (empty($rseat)) {
-                    echo $langArray['do_you_want_to_reserve_seat_number'] . ' ' . $seatid .
-                        '? <a href="book.php?seatid=' . $seatid . '">' . $langArray['yes'] . '</a></div>';
-                } else {
-                    echo '<strong>' . $langArray['error'] . ': ' . $langArray['you_can_only_reserve_one_seat'] . '</strong><br><br>' .
-                        $langArray['you_have_reserved_seat_number'] . ' ' . $rseat . '.</div>';
-                }
-            } catch (PDOException $e) {
-                error_log("Reservation check error: " . $e->getMessage());
-            }
-        }
+    $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) SELECT :seatid, :userid FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE taken = :seatid)");
+    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
+    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
+    $stmt->execute();
+
+    if ($stmt->rowCount() == 0) {
+        // Insert failed, meaning seat is taken
+        $pdo->rollBack();
+        require_once 'includes/header.php';
+        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+            <div class="srs-content">
+            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+            </div><br><br><br>';
+        require_once 'includes/footer.php';
+        exit();
     }
+
+    // Update user's reserved seat
+    $stmt = $pdo->prepare("UPDATE users SET rseat = :rseat WHERE id = :userid");
+    $stmt->bindValue(':rseat', $seat, PDO::PARAM_INT);
+    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
+    $stmt->execute();
+
+    $pdo->commit();
+
+    // Construct the redirect URL
+    $redirectUrl = filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
+
+    // Ensure the redirect URL is within the same domain
+    $redirectUrl = rtrim($redirectUrl, '/') . '/index.php'; // Redirect to a safe default page
+
+    // Perform the redirection
+    header("Location: " . $redirectUrl);
+    exit();
+} catch (PDOException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
+    require_once 'includes/header.php';
+    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+        <div class="srs-content">
+        ' . $langArray['database_error'] . '
+        </div><br><br><br>';
+    require_once 'includes/footer.php';
+    exit();
 }
 ?>
-
-<?php require 'includes/footer.php'; ?>
