@@ -45,8 +45,9 @@ if (!$seat || $seat <= 0) {
 }
 
 // Check if the seat exists in the map
-$text = file_get_contents("map.txt");
-$maxseats = substr_count($text, "#");
+$mapData = getMapData();
+$maxseats = $mapData['max_seats'];
+
 if ($seat > $maxseats) {
     require_once 'includes/header.php';
     print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
@@ -59,20 +60,6 @@ if ($seat > $maxseats) {
 
 try {
     $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
-
-    // Check if the seat is already reserved
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
-    $stmt->execute();
-    if ($stmt->fetchColumn() > 0) {
-        require_once 'includes/header.php';
-        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-            <div class="srs-content">
-            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
-            </div><br><br><br>';
-        require_once 'includes/footer.php';
-        exit();
-    }
 
     // Get user ID and check if the user already has a reserved seat
     $stmt = $pdo->prepare("SELECT id, rseat FROM users WHERE lower(nickname) = :nickname");
@@ -100,16 +87,29 @@ try {
         exit();
     }
 
-    // Reserve the seat
+    // Reserve the seat using transaction and race condition check
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("UPDATE users SET rseat = :rseat WHERE id = :userid");
-    $stmt->bindValue(':rseat', $seat, PDO::PARAM_INT);
+    $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) SELECT :seatid, :userid WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE taken = :seatid)");
+    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
     $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
     $stmt->execute();
 
-    $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) VALUES (:seatid, :userid)");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
+    if ($stmt->rowCount() == 0) {
+        // Insert failed, meaning seat is taken
+        $pdo->rollBack();
+        require_once 'includes/header.php';
+        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+            <div class="srs-content">
+            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+            </div><br><br><br>';
+        require_once 'includes/footer.php';
+        exit();
+    }
+
+    // Update user's reserved seat
+    $stmt = $pdo->prepare("UPDATE users SET rseat = :rseat WHERE id = :userid");
+    $stmt->bindValue(':rseat', $seat, PDO::PARAM_INT);
     $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
     $stmt->execute();
 

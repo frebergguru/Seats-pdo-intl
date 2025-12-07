@@ -61,19 +61,19 @@ if (!defined('DB_DRIVER')) {
 }
 //Database server host
 if (!defined('DB_HOST')) {
-    define('DB_HOST', '');
+    define('DB_HOST', 'localhost');
 }
 //Database name
 if (!defined('DB_NAME')) {
-    define('DB_NAME', '');
+    define('DB_NAME', 'lanparty');
 }
 //Database server username
 if (!defined('DB_USERNAME')) {
-    define('DB_USERNAME', '');
+    define('DB_USERNAME', 'seatuser');
 }
 //Database server password
 if (!defined('DB_PASSWORD')) {
-    define('DB_PASSWORD', '');
+    define('DB_PASSWORD', 'seatpassword');
 }
 //Some database configuration
 switch (DB_DRIVER) {
@@ -125,4 +125,3 @@ if (!isset($fullname)) {
 if (!isset($deluser)) {
     $deluser = null;
 }
-?>

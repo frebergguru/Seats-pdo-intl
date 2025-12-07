@@ -42,8 +42,19 @@ require 'includes/header.php';
     <p class="heading"><?php echo $langArray['stage_front']; ?></p>
     <table id="seatMap">
         <?php
-        $data = file_get_contents("map.txt");
-        $rows = explode("\n", trim($data));
+        $mapData = getMapData();
+        $rows = $mapData['grid'];
+
+        // Optimize: Fetch all reservations in one go
+        $reservations = [];
+        try {
+            $stmt = $pdo->query("SELECT taken FROM reservations");
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $reservations[$row['taken']] = true;
+            }
+        } catch (PDOException $e) {
+            echo 'DB Error';
+        }
 
         foreach ($rows as $row) {
             echo "<tr>";
@@ -51,22 +62,16 @@ require 'includes/header.php';
                 $char = $row[$i];
                 switch ($char) {
                     case "#":
-                        try {
-                            $stmt = $pdo->prepare("SELECT 1 FROM reservations WHERE taken = ?");
-                            $stmt->execute([$seatId]);
-                            $taken = $stmt->fetchColumn();
+                        $taken = isset($reservations[$seatId]);
 
-                            if ($taken) {
-                                echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
-                            } elseif ($useatId === $seatId) {
-                                echo '<td class="seat"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></td>';
-                            } else {
-                                echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . ' #' . $seatId . '"></a></td>';
-                            }
-                            $seatId++;
-                        } catch (PDOException $e) {
-                            echo '<td>DB Error</td>';
+                        if ($taken) {
+                            echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . ' #' . $seatId . '"></a></td>';
+                        } elseif ($useatId === $seatId) {
+                            echo '<td class="seat"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . ' #' . $seatId . '"></td>';
+                        } else {
+                            echo '<td class="seat"><a href="?seatid=' . $seatId . '"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . ' #' . $seatId . '"></a></td>';
                         }
+                        $seatId++;
                         break;
                     case "f":
                         echo '<td class="floor" title="' . $langArray['floor'] . '"></td>';
