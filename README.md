@@ -29,6 +29,10 @@ A customizable seat booking system with multi-language support, an interactive r
 
 *Seat map as seen by a logged-in admin user with a reserved seat.*
 
+![Screenshot - Map Editor](https://github.com/frebergguru/Seats-pdo-intl/raw/main/Docs/Screenshot_map_editor.png)
+
+*Interactive map editor in the admin panel.*
+
 ---
 
 ## Installation

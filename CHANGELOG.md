@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v2.1] - 2026-03-15
+## [v2.1.1] - 2026-03-15
 
 ### New Features
 - **Seat changing** — users can click a vacant seat while already having one to change their reservation (old seat released, new seat booked atomically)
