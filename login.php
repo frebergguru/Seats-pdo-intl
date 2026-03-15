@@ -16,9 +16,11 @@
  */
 
 require 'includes/config.php';
+require 'includes/functions.php';
 require 'includes/i18n.php';
 
-$pwdwrong = false; // Flag to track incorrect password
+$pwdwrong = false;
+$rateLimited = false;
 
 // CSRF Token
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -39,8 +41,15 @@ try {
         // Establish database connection
         $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
+        // Rate limiting
+        if (!checkRateLimit($pdo, 'login')) {
+            $rateLimited = true;
+            throw new Exception("Rate limited");
+        }
+        recordRateAttempt($pdo, 'login');
+
         // Prepare the query based on the database driver
-        $stmt = $pdo->prepare("SELECT password, role FROM users WHERE lower(nickname) = :nickname");
+        $stmt = $pdo->prepare("SELECT password, role, language FROM users WHERE lower(nickname) = :nickname");
 
         // Bind and execute the query
         $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
@@ -52,6 +61,9 @@ try {
             session_regenerate_id(true);
             $_SESSION['nickname'] = $nickname;
             $_SESSION['role'] = $results['role'] ?? 'user';
+            if (!empty($results['language'])) {
+                $_SESSION['langID'] = $results['language'];
+            }
 
             // Construct the redirect URL
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -86,7 +98,9 @@ try {
 include 'includes/header.php';
 
 // Display error message if login failed
-if ($pwdwrong) {
+if ($rateLimited) {
+    echo '<div class="regerror">' . $langArray['rate_limit_exceeded'] . '</div><br>';
+} elseif ($pwdwrong) {
     echo '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
 }
 

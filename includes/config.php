@@ -93,6 +93,8 @@ $argon2id_options = [
 // LOAD OVERRIDES FROM DATABASE
 // ============================================================
 
+$email_templates = [];
+
 try {
     $_cfg_pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
     $_cfg_stmt = $_cfg_pdo->query("SELECT setting_key, setting_value FROM settings");
@@ -119,6 +121,11 @@ try {
     if (isset($_db['argon2id_memory_cost']))       $argon2id_options['memory_cost'] = (int)$_db['argon2id_memory_cost'];
     if (isset($_db['argon2id_time_cost']))         $argon2id_options['time_cost'] = (int)$_db['argon2id_time_cost'];
     if (isset($_db['argon2id_threads']))           $argon2id_options['threads'] = (int)$_db['argon2id_threads'];
+
+    // Email templates (stored exclusively in DB)
+    foreach (['reset_en','reset_no','test_en','test_no'] as $_tplKey) {
+        $email_templates[$_tplKey] = $_db['email_tpl_' . $_tplKey] ?? '';
+    }
 
     unset($_cfg_pdo, $_cfg_stmt, $_db, $_row);
 } catch (PDOException $e) {

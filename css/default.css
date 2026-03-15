@@ -922,6 +922,107 @@ a.seat-confirm-btn {
     padding: 5px 14px;
 }
 
+/* Email template editor */
+.email-tpl-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+
+.email-tpl-tab {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #2a2a2a;
+    color: #999;
+    cursor: pointer;
+}
+
+.email-tpl-tab.active {
+    background: #4a90d9;
+    color: #fff;
+    border-color: #4a90d9;
+}
+
+.email-tpl-lang-tab {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #2a2a2a;
+    color: #999;
+    cursor: pointer;
+}
+
+.email-tpl-lang-tab.active {
+    background: #2d6a2e;
+    color: #fff;
+    border-color: #3a8a3b;
+}
+
+.email-tpl-sep {
+    color: #555;
+    margin: 0 2px;
+}
+
+.email-tpl-insert {
+    font-family: monospace;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid #444;
+    background: #1a1a1a;
+    color: #4a90d9;
+    cursor: pointer;
+}
+
+.email-tpl-insert:hover {
+    border-color: #4a90d9;
+    color: #fff;
+}
+
+.email-tpl-code {
+    width: 100%;
+    font-family: monospace;
+    font-size: 13px;
+    background: #2a2a2a;
+    color: #ddd;
+    border: 1px solid #555;
+    border-radius: 6px;
+    padding: 8px;
+    resize: vertical;
+    height: auto;
+}
+
+.email-tpl-preview {
+    border: 1px solid #555;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.email-tpl-preview-frame {
+    background: #ffffff;
+    color: #333;
+    padding: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 80px;
+}
+
+.email-tpl-preview-frame a {
+    color: #4a90d9;
+    font-family: Arial, Helvetica, sans-serif;
+    text-indent: 0;
+}
+
 .admin-success {
     background: #2d6a2e;
     color: #fff;

@@ -21,10 +21,6 @@
 require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
-require 'vendor/autoload.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
 function getParam($name, $method = INPUT_GET, $filter = FILTER_DEFAULT) {
     $value = filter_input($method, $name, $filter);
@@ -219,13 +215,22 @@ HTML;
         exit();
     }
 
+    // Rate limiting
+    $pdo = getPDO();
+    if (!checkRateLimit($pdo, 'forgot')) {
+        require 'includes/header.php';
+        echo '<div class="regerror">' . $langArray['rate_limit_exceeded'] . '</div><br><br>';
+        require 'includes/footer.php';
+        exit();
+    }
+    recordRateAttempt($pdo, 'forgot');
+
     require 'includes/header.php';
     echo "<span class=\"srs-header\">{$langArray['new_password']} - {$langArray['email']}</span>
     <div class=\"srs-content\">{$langArray['email_sent_instruction_page_text']}</div><br><br><br>";
     require 'includes/footer.php';
 
     try {
-        $pdo = getPDO();
         $stmt = $pdo->prepare("SELECT nickname FROM users WHERE email=:email");
         $stmt->execute([':email' => $email]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -241,33 +246,18 @@ HTML;
             );
             $stmt->execute([':token' => $token, ':nickname' => $nickname]);
 
-            $mail = new PHPMailer(true);
             try {
-                $mail->isSMTP();
-                $mail->Host = $smtp_server;
-                $mail->SMTPAuth = true;
-                $mail->Username = $smtp_username;
-                $mail->Password = $smtp_password;
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port = $smtp_port;
-
-                $mail->setFrom($from_mail, $from_name);
-                $mail->addAddress($email);
-
-                $mail->isHTML(true);
-                $mail->Subject = $mail_subject;
-
                 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                $resetLink = htmlspecialchars($scheme . "://{$_SERVER['SERVER_NAME']}" . dirname($_SERVER['REQUEST_URI']) . "/forgot.php?nickname=" . urlencode($nickname) . "&key=" . urlencode($token));
+                $resetLink = $scheme . "://{$_SERVER['SERVER_NAME']}" . dirname($_SERVER['REQUEST_URI']) . "/forgot.php?nickname=" . urlencode($nickname) . "&key=" . urlencode($token);
 
-                $mail->Body = "{$langArray['email_change_password_body_hi']} " . htmlspecialchars($nickname) . "<br><br>" .
-                              "{$langArray['email_change_password_body_link']}<br><br>" .
-                              "<a href=\"$resetLink\">$resetLink</a>";
-
-                $mail->send();
+                sendMail($email, $mail_subject, getEmailTemplate('reset'), [
+                    'nickname'   => htmlspecialchars($nickname, ENT_QUOTES, 'UTF-8'),
+                    'reset_link' => htmlspecialchars($resetLink, ENT_QUOTES, 'UTF-8'),
+                    'site_name'  => htmlspecialchars($from_name, ENT_QUOTES, 'UTF-8'),
+                ]);
                 error_log("Password reset email sent to: $email");
             } catch (Exception $e) {
-                error_log("Mailer Error: " . $mail->ErrorInfo);
+                error_log("Mailer Error: " . $e->getMessage());
             }
         }
     } catch (PDOException $e) {

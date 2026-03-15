@@ -219,4 +219,190 @@ function renderAdminNav($activePage = '')
     echo implode(' | ', $links);
     echo '</div>';
 }
+
+/**
+ * Get client IP address.
+ */
+function getClientIP()
+{
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+        return trim($ips[0]);
+    }
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+}
+
+/**
+ * Check if an action is rate-limited for the current IP.
+ * Returns true if allowed, false if blocked.
+ *
+ * Limits: login=5/15min, register=3/15min, forgot=3/15min
+ */
+function checkRateLimit($pdo, $action)
+{
+    $limits = [
+        'login'    => ['max' => 5,  'window' => 900],
+        'register' => ['max' => 3,  'window' => 900],
+        'forgot'   => ['max' => 3,  'window' => 900],
+    ];
+
+    if (!isset($limits[$action])) return true;
+
+    $ip = getClientIP();
+    $window = $limits[$action]['window'];
+    $max = $limits[$action]['max'];
+
+    // Cleanup old records (older than 1 hour)
+    try {
+        if (DB_DRIVER === 'pgsql') {
+            $pdo->exec("DELETE FROM rate_limits WHERE attempted_at < NOW() - INTERVAL '1 hour'");
+        } else {
+            $pdo->exec("DELETE FROM rate_limits WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        }
+    } catch (PDOException $e) {
+        // Table may not exist yet
+        return true;
+    }
+
+    // Count recent attempts
+    try {
+        $cutoff = date('Y-m-d H:i:s', time() - $window);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM rate_limits WHERE ip_address = :ip AND action = :action AND attempted_at > :cutoff");
+        $stmt->bindValue(':ip', $ip, PDO::PARAM_STR);
+        $stmt->bindValue(':action', $action, PDO::PARAM_STR);
+        $stmt->bindValue(':cutoff', $cutoff, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchColumn() < $max;
+    } catch (PDOException $e) {
+        return true;
+    }
+}
+
+/**
+ * Record a rate-limited action attempt.
+ */
+function recordRateAttempt($pdo, $action)
+{
+    try {
+        $stmt = $pdo->prepare("INSERT INTO rate_limits (ip_address, action) VALUES (:ip, :action)");
+        $stmt->execute([':ip' => getClientIP(), ':action' => $action]);
+    } catch (PDOException $e) {
+        // Table may not exist yet
+    }
+}
+
+/**
+ * Export user data as an associative array (for GDPR data export).
+ */
+function exportUserData($pdo, $nickname)
+{
+    $stmt = $pdo->prepare("SELECT id, fullname, nickname, email, role, rseat, language, privacy_consent FROM users WHERE lower(nickname) = :nick");
+    $stmt->execute([':nick' => mb_strtolower($nickname)]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$user) return null;
+
+    // Remove password hash from export
+    unset($user['password']);
+
+    // Get reservation
+    if ($user['rseat']) {
+        $stmt = $pdo->prepare("SELECT taken, id FROM reservations WHERE user_id = :uid");
+        $stmt->execute([':uid' => $user['id']]);
+        $user['reservation'] = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    } else {
+        $user['reservation'] = null;
+    }
+
+    $user['exported_at'] = date('c');
+    return $user;
+}
+
+/**
+ * Get an email template by type (e.g. 'reset', 'test') for the current session language.
+ * Falls back to English, then empty string.
+ */
+function getEmailTemplate($type)
+{
+    global $email_templates;
+    $lang = $_SESSION['langID'] ?? 'en';
+    $tpl = $email_templates[$type . '_' . $lang] ?? '';
+    if (empty($tpl)) {
+        $tpl = $email_templates[$type . '_en'] ?? '';
+    }
+    return $tpl;
+}
+
+/**
+ * Wrap email body content in a styled HTML template.
+ */
+function emailTemplate($bodyHtml)
+{
+    return '<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;padding:30px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+<tr><td style="background-color:#3a3a3a;padding:20px 30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:22px;">Seats</h1>
+</td></tr>
+<tr><td style="padding:30px;color:#333333;font-size:15px;line-height:1.6;">
+' . $bodyHtml . '
+</td></tr>
+<tr><td style="background-color:#f4f4f4;padding:15px 30px;text-align:center;font-size:12px;color:#999;">
+Seats &copy; ' . date('Y') . '
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>';
+}
+
+/**
+ * Replace {{placeholders}} in a template string with values.
+ */
+function renderTemplate($template, $vars)
+{
+    foreach ($vars as $key => $val) {
+        $template = str_replace('{{' . $key . '}}', $val, $template);
+    }
+    return $template;
+}
+
+/**
+ * Send an HTML email using PHPMailer with the app's HTML template.
+ * $bodyTemplate can contain {{placeholders}} that are replaced from $vars.
+ */
+function sendMail($to, $subject, $bodyTemplate, $vars = [])
+{
+    global $smtp_server, $smtp_port, $smtp_username, $smtp_password, $from_mail, $from_name;
+
+    require_once __DIR__ . '/../vendor/autoload.php';
+
+    $body = renderTemplate($bodyTemplate, $vars);
+    $html = emailTemplate($body);
+
+    $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host = $smtp_server;
+    $mail->SMTPAuth = true;
+    $mail->Username = $smtp_username;
+    $mail->Password = $smtp_password;
+    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = (int)$smtp_port;
+    $mail->CharSet = 'UTF-8';
+
+    $mail->setFrom($from_mail, $from_name);
+    $mail->addAddress($to);
+
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = $html;
+    $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
+
+    $mail->send();
+}
 ?>

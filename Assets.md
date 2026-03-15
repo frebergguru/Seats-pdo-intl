@@ -10,6 +10,7 @@
 │   ├── README.md
 │   ├── Screenshot.png
 │   ├── Screenshot_logged_in.png
+│   ├── Screenshot_map_editor.png
 │   ├── Seats-MySQL.sql
 │   ├── Seats-PostgreSQL.sql
 │   └── migration-admin.sql
@@ -59,20 +60,22 @@
 ├── book.php
 ├── composer.json
 ├── deluser.php
+├── export.php
 ├── forgot.php
 ├── index.php
 ├── login.php
 ├── logout.php
+├── privacy.php
 └── register.php
 ```
 
 ## Admin Panel
 - `admin/index.php`: Dashboard with user, reservation, and seat count stats.
 - `admin/users.php`: User list with role badges, edit/delete actions.
-- `admin/user_edit.php`: Add/edit user form with role and optional password reset.
+- `admin/user_edit.php`: Add/edit user form with role, optional password reset, language default.
 - `admin/reservations.php`: Reservation list with individual delete and purge all.
 - `admin/map.php`: Interactive visual map editor with tile palette, grid resize, text mode, import/download.
-- `admin/settings.php`: All application settings with SMTP test email, regex generators, and live testers.
+- `admin/settings.php`: All settings — site, SMTP (with test), per-language email templates (Code/Preview), regex generators with live testers, Argon2id.
 - `admin/ajax-test-email.php`: AJAX endpoint for sending SMTP test emails.
 - `admin/.htaccess`: Extra protection for admin directory.
 
@@ -82,24 +85,35 @@
 - `ajax/ajax-email.php`: Real-time email validation and uniqueness check.
 - `ajax/ajax-pwd.php`: Real-time password strength validation against regex.
 
+## Public Pages
+- `index.php`: Seat map display with interactive booking, seat info, and symbol legend.
+- `book.php`: POST-only seat booking/changing handler with CSRF protection.
+- `login.php`: Login form with CSRF and rate limiting. Restores user's language preference.
+- `register.php`: Registration form with CSRF, rate limiting, AJAX validation, privacy consent.
+- `forgot.php`: Password reset flow — email request, token validation, password change.
+- `deluser.php`: Account deletion (blocked for admin accounts).
+- `logout.php`: Session destruction with cookie invalidation.
+- `privacy.php`: GDPR privacy policy page.
+- `export.php`: Personal data export as JSON download.
+
 ## JavaScript
-- `js/formcheck.js`: Real-time AJAX validation for fullname, nickname, and email fields on the registration form.
+- `js/formcheck.js`: Real-time AJAX validation for fullname, nickname, and email on registration.
 - `js/jquery-3.7.1.min.js`: jQuery library version 3.7.1.
 - `js/pwdcheck.js`: Real-time password strength validation using AJAX.
 - `js/pwdreq.js`: Password requirements bubble popup with accessibility (Escape key, focus management).
 
 ## CSS
 - `css/bubblePopup.css`: Password requirements bubble popup styles with responsive adjustments.
-- `css/default.css`: Main stylesheet — global styles, seat map grid with CSS variables, form layout, legend, seat info/confirm popups, admin panel dark theme (tables, cards, nav, buttons, badges, map editor, regex generators), accessibility (skip-link, sr-only, focus-visible), responsive breakpoints (768px, 480px).
+- `css/default.css`: Main stylesheet — global styles, seat map grid with CSS variables, form layout, legend, seat info/confirm popups, admin panel dark theme, email template editor, regex generators, accessibility (skip-link, sr-only, focus-visible), responsive breakpoints (768px, 480px).
 
 ## Includes
-- `includes/config.php`: Session setup, DB connection, defaults, DB settings override loader.
-- `includes/functions.php`: Shared functions — `getDBConnection()`, `getMapData()`, `saveMapData()`, `loadSettings()`, `saveSettings()`, `isAdmin()`, `requireAdmin()`, `setFlash()`, `getFlash()`, `noCacheHeaders()`, `renderAdminNav()`, `genRandomKey()`.
-- `includes/i18n.php`: Language loader with session-based language selection.
+- `includes/config.php`: Session setup, DB connection, defaults, DB settings override, `$email_templates` from DB.
+- `includes/functions.php`: Shared functions — `getDBConnection()`, `getMapData()`, `saveMapData()`, `loadSettings()`, `saveSettings()`, `isAdmin()`, `requireAdmin()`, `setFlash()`, `getFlash()`, `noCacheHeaders()`, `renderAdminNav()`, `genRandomKey()`, `getClientIP()`, `checkRateLimit()`, `recordRateAttempt()`, `exportUserData()`, `getEmailTemplate()`, `emailTemplate()`, `renderTemplate()`, `sendMail()`.
+- `includes/i18n.php`: Language loader with session-based selection and DB persistence for logged-in users.
 - `includes/header.php`: HTML head, asset loading with `$basePath`, skip-to-content link, `<main>` open.
-- `includes/footer.php`: Navigation menu with role-aware links, language selector, `</main>` close.
-- `includes/i18n/en.php`: English translations (179 keys).
-- `includes/i18n/no.php`: Norwegian translations (179 keys).
+- `includes/footer.php`: Navigation menu with role-aware links, privacy/export links, language selector, `</main>` close.
+- `includes/i18n/en.php`: English translations (211 keys).
+- `includes/i18n/no.php`: Norwegian translations (211 keys).
 
 ## Images
 - `img/exit.jpg`: Emergency exit icon for seat map.
@@ -111,10 +125,20 @@
 
 ## Configuration
 - `.htaccess`: Apache security headers, directory protection, sensitive file blocking, compression, caching.
+- `admin/.htaccess`: Admin directory protection, blocks GET on AJAX endpoint.
 - `composer.json`: PHPMailer dependency.
 
 ## Database
-- `Docs/Seats-MySQL.sql`: Full MySQL schema with default seat map seed.
-- `Docs/Seats-PostgreSQL.sql`: Full PostgreSQL schema with default seat map seed.
-- `Docs/migration-admin.sql`: Migration for existing installs (role column, seatmap, settings tables).
+- `Docs/Seats-MySQL.sql`: Full MySQL schema with default seat map and email template seeds.
+- `Docs/Seats-PostgreSQL.sql`: Full PostgreSQL schema with default seat map and email template seeds.
+- `Docs/migration-admin.sql`: Migration for existing installs (role, language, privacy_consent columns; seatmap, settings, rate_limits tables; email template seeds).
 - `Docs/Argon2id.ods`: LibreOffice spreadsheet for calculating Argon2id parameters.
+
+## Database Tables
+| Table | Purpose |
+|-------|---------|
+| `users` | User accounts (fullname, nickname, email, password, role, language, rseat, forgottoken, privacy_consent) |
+| `reservations` | Seat reservations (taken seat number, user_id) |
+| `seatmap` | Room layout data (map_data text, updated_at) |
+| `settings` | Application settings as key-value pairs (including email templates) |
+| `rate_limits` | Rate limiting records (ip_address, action, attempted_at) |

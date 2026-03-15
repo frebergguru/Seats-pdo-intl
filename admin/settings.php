@@ -32,6 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
             'argon2id_memory_cost'         => (int)($_POST['argon2id_memory_cost'] ?? 65536),
             'argon2id_time_cost'           => (int)($_POST['argon2id_time_cost'] ?? 3),
             'argon2id_threads'             => (int)($_POST['argon2id_threads'] ?? 1),
+            'email_tpl_reset_en'           => $_POST['email_tpl_reset_en'] ?? '',
+            'email_tpl_reset_no'           => $_POST['email_tpl_reset_no'] ?? '',
+            'email_tpl_test_en'            => $_POST['email_tpl_test_en'] ?? '',
+            'email_tpl_test_no'            => $_POST['email_tpl_test_no'] ?? '',
         ];
 
         $smtpPwd = $_POST['smtp_password'] ?? '';
@@ -55,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
 
 // GET
 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-
 $dbSettings = loadSettings($pdo);
 
 $v = [
@@ -76,6 +79,10 @@ $v = [
     'argon2id_memory_cost'=> $dbSettings['argon2id_memory_cost'] ?? $argon2id_options['memory_cost'],
     'argon2id_time_cost'  => $dbSettings['argon2id_time_cost'] ?? $argon2id_options['time_cost'],
     'argon2id_threads'    => $dbSettings['argon2id_threads'] ?? $argon2id_options['threads'],
+    'email_tpl_reset_en'  => $dbSettings['email_tpl_reset_en'] ?? '',
+    'email_tpl_reset_no'  => !empty($dbSettings['email_tpl_reset_no']) ? $dbSettings['email_tpl_reset_no'] : ($dbSettings['email_tpl_reset_en'] ?? ''),
+    'email_tpl_test_en'   => $dbSettings['email_tpl_test_en']  ?? '',
+    'email_tpl_test_no'   => !empty($dbSettings['email_tpl_test_no'])  ? $dbSettings['email_tpl_test_no']  : ($dbSettings['email_tpl_test_en'] ?? ''),
 ];
 
 function esc($val) { return htmlspecialchars((string)$val, ENT_QUOTES, 'UTF-8'); }
@@ -85,12 +92,11 @@ renderAdminNav('settings');
 ?>
 
 <div class="admin-page-title"><?php echo $langArray['admin_settings']; ?></div>
-
 <?php echo getFlash(); ?>
 
 <form method="POST" action="settings.php">
 
-<!-- Site Settings -->
+<!-- ==================== SITE ==================== -->
 <div class="admin-panel" style="max-width:700px;">
     <div class="admin-panel-header"><?php echo $langArray['admin_settings_site']; ?></div>
     <div class="admin-panel-body">
@@ -118,10 +124,12 @@ renderAdminNav('settings');
     </div>
 </div>
 
-<!-- Email/SMTP Settings -->
+<!-- ==================== EMAIL ==================== -->
 <div class="admin-panel" style="max-width:700px;">
     <div class="admin-panel-header"><?php echo $langArray['admin_settings_email']; ?></div>
     <div class="admin-panel-body">
+
+        <!-- SMTP connection -->
         <div class="admin-form-row">
             <div class="admin-form-group">
                 <label for="smtp_server"><?php echo $langArray['admin_smtp_server']; ?></label>
@@ -142,56 +150,118 @@ renderAdminNav('settings');
                 <input name="smtp_password" id="smtp_password" type="password" placeholder="<?php echo esc($langArray['admin_smtp_password_hint']); ?>">
             </div>
         </div>
-        <div class="admin-form-group">
-            <label for="from_name"><?php echo $langArray['admin_from_name']; ?></label>
-            <input name="from_name" id="from_name" value="<?php echo esc($v['from_name']); ?>">
-        </div>
+
+        <!-- Sender info -->
         <div class="admin-form-row">
+            <div class="admin-form-group">
+                <label for="from_name"><?php echo $langArray['admin_from_name']; ?></label>
+                <input name="from_name" id="from_name" value="<?php echo esc($v['from_name']); ?>">
+            </div>
             <div class="admin-form-group">
                 <label for="from_mail"><?php echo $langArray['admin_from_email']; ?></label>
                 <input name="from_mail" id="from_mail" value="<?php echo esc($v['from_mail']); ?>">
             </div>
-            <div class="admin-form-group">
-                <label for="mail_subject"><?php echo $langArray['admin_mail_subject']; ?></label>
-                <input name="mail_subject" id="mail_subject" value="<?php echo esc($v['mail_subject']); ?>">
-            </div>
         </div>
-    </div>
-</div>
+        <div class="admin-form-group">
+            <label for="mail_subject"><?php echo $langArray['admin_mail_subject']; ?></label>
+            <input name="mail_subject" id="mail_subject" value="<?php echo esc($v['mail_subject']); ?>">
+        </div>
 
-<!-- SMTP Test -->
-<div class="admin-panel" style="max-width:700px;">
-    <div class="admin-panel-header"><?php echo $langArray['admin_test_email']; ?></div>
-    <div class="admin-panel-body">
-        <small style="color:#999;"><?php echo $langArray['admin_test_email_hint']; ?></small><br><br>
-        <div class="admin-form-row">
-            <div class="admin-form-group">
-                <label for="test_email_addr"><?php echo $langArray['admin_test_email_address']; ?></label>
-                <input type="email" id="test_email_addr" placeholder="test@example.com">
-            </div>
-            <div class="admin-form-group" style="display:flex; align-items:flex-end;">
+        <!-- SMTP test (inline) -->
+        <div style="border-top:1px solid #444; margin-top:15px; padding-top:15px;">
+            <small style="color:#999;"><?php echo $langArray['admin_test_email_hint']; ?></small>
+            <div style="display:flex; gap:10px; align-items:flex-end; margin-top:8px; flex-wrap:wrap;">
+                <div style="flex:1; min-width:200px;">
+                    <label for="test_email_addr" style="font-size:11px;color:#999;text-transform:uppercase;font-weight:bold;letter-spacing:.3px;display:block;margin-bottom:3px;"><?php echo $langArray['admin_test_email_address']; ?></label>
+                    <input type="email" id="test_email_addr" placeholder="test@example.com">
+                </div>
                 <button type="button" id="sendTestEmail" class="admin-btn"><?php echo $langArray['admin_test_email_send']; ?></button>
             </div>
+            <div id="testEmailResult" style="margin-top:8px;"></div>
         </div>
-        <div id="testEmailResult" style="margin-top:10px;"></div>
     </div>
 </div>
 
-<!-- Security / Password Settings -->
+<!-- ==================== EMAIL TEMPLATES ==================== -->
+<?php
+$tplLangs = ['en' => 'English', 'no' => 'Norsk'];
+$tplTypes = [
+    'reset' => ['label' => $langArray['admin_email_template_reset'], 'placeholders' => ['nickname','reset_link','site_name'], 'rows' => 8],
+    'test'  => ['label' => $langArray['admin_email_template_test'],  'placeholders' => ['site_name'], 'rows' => 4],
+];
+?>
+<div class="admin-panel" style="max-width:700px;">
+    <div class="admin-panel-header"><?php echo $langArray['admin_email_templates']; ?></div>
+    <div class="admin-panel-body">
+        <small style="color:#888;"><?php echo $langArray['admin_email_template_help']; ?></small>
+
+        <?php foreach ($tplTypes as $tplKey => $tpl): ?>
+        <div style="border-top:1px solid #444; margin-top:15px; padding-top:15px;">
+            <label style="display:block; margin-bottom:8px;"><strong><?php echo $tpl['label']; ?></strong></label>
+
+            <!-- Row 1: Language + View mode -->
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:6px;">
+                <?php foreach ($tplLangs as $lc => $ln): ?>
+                    <button type="button" class="email-tpl-lang-tab <?php echo $lc === 'en' ? 'active' : ''; ?>" data-tpl="<?php echo $tplKey; ?>" data-lang="<?php echo $lc; ?>"><?php echo $ln; ?></button>
+                <?php endforeach; ?>
+                <span class="email-tpl-sep">|</span>
+                <button type="button" class="email-tpl-tab active" data-target="<?php echo $tplKey; ?>" data-mode="code"><?php echo $langArray['admin_tpl_code']; ?></button>
+                <button type="button" class="email-tpl-tab" data-target="<?php echo $tplKey; ?>" data-mode="preview"><?php echo $langArray['admin_tpl_preview']; ?></button>
+            </div>
+
+            <!-- Row 2: Insert placeholders -->
+            <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:6px;">
+                <span style="color:#666; font-size:11px; align-self:center; margin-right:2px;">Insert:</span>
+                <?php foreach ($tpl['placeholders'] as $ph): ?>
+                    <button type="button" class="email-tpl-insert" data-tpl="<?php echo $tplKey; ?>" data-placeholder="{{<?php echo $ph; ?>}}"><?php echo $ph; ?></button>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Textareas (one per language) -->
+            <?php foreach ($tplLangs as $lc => $ln):
+                $fn = 'email_tpl_' . $tplKey . '_' . $lc;
+            ?>
+                <textarea name="<?php echo $fn; ?>" id="<?php echo $fn; ?>" class="email-tpl-code" data-tpl="<?php echo $tplKey; ?>" data-lang="<?php echo $lc; ?>" rows="<?php echo $tpl['rows']; ?>" <?php echo $lc !== 'en' ? 'style="display:none;"' : ''; ?>><?php echo esc($v[$fn]); ?></textarea>
+            <?php endforeach; ?>
+
+            <div class="email-tpl-preview" id="preview_<?php echo $tplKey; ?>" style="display:none;"></div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+
+<!-- ==================== SECURITY ==================== -->
 <div class="admin-panel" style="max-width:700px;">
     <div class="admin-panel-header"><?php echo $langArray['admin_settings_security']; ?></div>
     <div class="admin-panel-body">
 
-        <!-- Password Regex -->
+        <?php
+        // Regex fields config: id, label, test placeholder, generator id (null = none)
+        $regexFields = [
+            ['pwd_regex',    $langArray['admin_pwd_regex'],    $langArray['admin_regex_test_pwd'],     'genPwd',  $langArray['admin_gen_password']],
+            ['nickname_regex', $langArray['admin_nickname_regex'], $langArray['admin_regex_test_nick'], 'genNick', $langArray['admin_gen_nickname']],
+            ['fullname_regex', $langArray['admin_fullname_regex'], $langArray['admin_regex_test_name'], 'genName', $langArray['admin_gen_fullname']],
+            ['fullname_illegal_chars_regex', $langArray['admin_fullname_illegal_regex'], $langArray['admin_regex_test_illegal'], null, null],
+        ];
+        foreach ($regexFields as $rf):
+            list($id, $label, $testPh, $genId, $genLabel) = $rf;
+            $isIllegal = ($id === 'fullname_illegal_chars_regex');
+        ?>
         <div class="admin-form-group">
-            <label for="pwd_regex"><?php echo $langArray['admin_pwd_regex']; ?></label>
-            <input name="pwd_regex" id="pwd_regex" value="<?php echo esc($v['pwd_regex']); ?>" class="regex-field" style="font-family:monospace;">
+            <label for="<?php echo $id; ?>"><?php echo $label; ?></label>
+            <input name="<?php echo $id; ?>" id="<?php echo $id; ?>" value="<?php echo esc($v[$id]); ?>" class="regex-field" style="font-family:monospace;">
             <div class="regex-tester">
-                <input type="text" class="regex-test" data-field="pwd_regex" placeholder="<?php echo esc($langArray['admin_regex_test_pwd']); ?>">
+                <input type="text" class="regex-test" data-field="<?php echo $id; ?>" <?php echo $isIllegal ? 'data-invert="1"' : ''; ?> placeholder="<?php echo esc($testPh); ?>">
                 <span class="regex-result"></span>
             </div>
-            <button type="button" class="regex-gen-toggle" onclick="$('#genPwd').toggle();"><?php echo $langArray['admin_gen_password']; ?></button>
+            <?php if ($genId): ?>
+                <button type="button" class="regex-gen-toggle" onclick="$('#<?php echo $genId; ?>').toggle();"><?php echo $genLabel; ?></button>
+            <?php else: ?>
+                <small style="color:#888;"><?php echo $langArray['admin_gen_illegal_auto']; ?></small>
+            <?php endif; ?>
         </div>
+
+        <?php if ($id === 'pwd_regex'): ?>
         <div id="genPwd" class="regex-gen-box" style="display:none;">
             <div class="regex-gen-row">
                 <label><?php echo $langArray['admin_regex_min_length']; ?></label>
@@ -208,17 +278,7 @@ renderAdminNav('settings');
             <div class="regex-gen-output" id="pwdGenOut"></div>
             <button type="button" class="admin-btn" onclick="$('#pwd_regex').val($('#pwdGenOut').text()).trigger('input');"><?php echo $langArray['admin_regex_apply']; ?></button>
         </div>
-
-        <!-- Nickname Regex -->
-        <div class="admin-form-group">
-            <label for="nickname_regex"><?php echo $langArray['admin_nickname_regex']; ?></label>
-            <input name="nickname_regex" id="nickname_regex" value="<?php echo esc($v['nickname_regex']); ?>" class="regex-field" style="font-family:monospace;">
-            <div class="regex-tester">
-                <input type="text" class="regex-test" data-field="nickname_regex" placeholder="<?php echo esc($langArray['admin_regex_test_nick']); ?>">
-                <span class="regex-result"></span>
-            </div>
-            <button type="button" class="regex-gen-toggle" onclick="$('#genNick').toggle();"><?php echo $langArray['admin_gen_nickname']; ?></button>
-        </div>
+        <?php elseif ($id === 'nickname_regex'): ?>
         <div id="genNick" class="regex-gen-box" style="display:none;">
             <div class="regex-gen-row">
                 <label><?php echo $langArray['admin_regex_min_length']; ?></label>
@@ -234,17 +294,7 @@ renderAdminNav('settings');
             <div class="regex-gen-output" id="nickGenOut"></div>
             <button type="button" class="admin-btn" onclick="$('#nickname_regex').val($('#nickGenOut').text()).trigger('input');"><?php echo $langArray['admin_regex_apply']; ?></button>
         </div>
-
-        <!-- Fullname Regex -->
-        <div class="admin-form-group">
-            <label for="fullname_regex"><?php echo $langArray['admin_fullname_regex']; ?></label>
-            <input name="fullname_regex" id="fullname_regex" value="<?php echo esc($v['fullname_regex']); ?>" class="regex-field" style="font-family:monospace;">
-            <div class="regex-tester">
-                <input type="text" class="regex-test" data-field="fullname_regex" placeholder="<?php echo esc($langArray['admin_regex_test_name']); ?>">
-                <span class="regex-result"></span>
-            </div>
-            <button type="button" class="regex-gen-toggle" onclick="$('#genName').toggle();"><?php echo $langArray['admin_gen_fullname']; ?></button>
-        </div>
+        <?php elseif ($id === 'fullname_regex'): ?>
         <div id="genName" class="regex-gen-box" style="display:none;">
             <div class="regex-gen-row">
                 <label><?php echo $langArray['admin_gen_min_per_word']; ?></label>
@@ -259,22 +309,13 @@ renderAdminNav('settings');
             <div class="regex-gen-output" id="nameGenOut"></div>
             <button type="button" class="admin-btn" onclick="applyNameRegex();"><?php echo $langArray['admin_regex_apply']; ?></button>
         </div>
+        <?php endif; ?>
 
-        <!-- Fullname Illegal Chars Regex -->
-        <div class="admin-form-group">
-            <label for="fullname_illegal_chars_regex"><?php echo $langArray['admin_fullname_illegal_regex']; ?></label>
-            <input name="fullname_illegal_chars_regex" id="fullname_illegal_chars_regex" value="<?php echo esc($v['fullname_illegal_chars_regex']); ?>" class="regex-field" style="font-family:monospace;">
-            <div class="regex-tester">
-                <input type="text" class="regex-test" data-field="fullname_illegal_chars_regex" data-invert="1" placeholder="<?php echo esc($langArray['admin_regex_test_illegal']); ?>">
-                <span class="regex-result"></span>
-            </div>
-            <small style="color:#888;"><?php echo $langArray['admin_gen_illegal_auto']; ?></small>
-        </div>
-
+        <?php endforeach; ?>
     </div>
 </div>
 
-<!-- Argon2id Settings -->
+<!-- ==================== HASHING ==================== -->
 <div class="admin-panel" style="max-width:700px;">
     <div class="admin-panel-header"><?php echo $langArray['admin_settings_argon2id']; ?></div>
     <div class="admin-panel-body">
@@ -295,6 +336,7 @@ renderAdminNav('settings');
     </div>
 </div>
 
+<!-- ==================== SAVE ==================== -->
 <input type="hidden" name="save_settings" value="1">
 <input type="hidden" name="csrf_token" value="<?php echo esc($_SESSION['csrf_token']); ?>">
 
@@ -307,124 +349,82 @@ renderAdminNav('settings');
 <script>
 $(function() {
     // =====================
-    // SMTP Test Email
+    // SMTP Test
     // =====================
     $('#sendTestEmail').on('click', function() {
         var email = $('#test_email_addr').val().trim();
         if (!email) return;
-        var $btn = $(this);
-        var $result = $('#testEmailResult');
+        var $btn = $(this), $r = $('#testEmailResult');
         $btn.prop('disabled', true).text(langArray.admin_test_email_sending);
-        $result.html('');
-
+        $r.html('');
         $.ajax({
-            type: 'POST',
-            url: 'ajax-test-email.php',
-            data: {
-                test_email: email,
-                csrf_token: <?php echo json_encode($_SESSION['csrf_token']); ?>
-            },
-            dataType: 'json',
-            timeout: 30000,
-            success: function(res) {
-                var cls = res.success ? 'admin-success' : 'admin-error';
-                $result.html('<div class="' + cls + '" style="margin:0;">' + $('<span>').text(res.message).html() + '</div>');
-            },
-            error: function(xhr, status) {
-                $result.html('<div class="admin-error" style="margin:0;">Request failed: ' + $('<span>').text(status).html() + '</div>');
-            },
-            complete: function() {
-                $btn.prop('disabled', false).text(langArray.admin_test_email_send);
-            }
+            type: 'POST', url: 'ajax-test-email.php', dataType: 'json', timeout: 30000,
+            data: { test_email: email, csrf_token: <?php echo json_encode($_SESSION['csrf_token']); ?> },
+            success: function(res) { $r.html('<div class="'+(res.success?'admin-success':'admin-error')+'" style="margin:0;">'+$('<span>').text(res.message).html()+'</div>'); },
+            error: function(x,s) { $r.html('<div class="admin-error" style="margin:0;">'+$('<span>').text(s).html()+'</div>'); },
+            complete: function() { $btn.prop('disabled', false).text(langArray.admin_test_email_send); }
         });
     });
 
     // =====================
-    // Regex Tester (inline on each field)
+    // Regex Tester
     // =====================
-    function runTest($input) {
-        var fieldId = $input.data('field');
-        var regexStr = $('#' + fieldId).val();
-        var testVal = $input.val();
-        var invert = $input.data('invert');
-        var $result = $input.closest('.regex-tester').find('.regex-result');
-        if (!testVal) { $result.html(''); return; }
-        try {
-            var m = regexStr.match(/^\/(.+)\/([gimusy]*)$/);
-            var re = m ? new RegExp(m[1], m[2]) : new RegExp(regexStr);
-            var ok = re.test(testVal);
-            if (invert) ok = !ok;
-            $result.html(ok ? '<span style="color:#4CAF50;">\u2714</span>' : '<span style="color:#d9534f;">\u2718</span>');
-        } catch(e) {
-            $result.html('<span style="color:#d9534f;">\u2718</span>');
-        }
+    function runTest($i) {
+        var f=$i.data('field'), r=$('#'+f).val(), t=$i.val(), inv=$i.data('invert'), $r=$i.closest('.regex-tester').find('.regex-result');
+        if(!t){$r.html('');return;}
+        try{var m=r.match(/^\/(.+)\/([gimusy]*)$/),re=m?new RegExp(m[1],m[2]):new RegExp(r),ok=re.test(t);if(inv)ok=!ok;
+        $r.html(ok?'<span style="color:#4CAF50;">\u2714</span>':'<span style="color:#d9534f;">\u2718</span>');}catch(e){$r.html('<span style="color:#d9534f;">\u2718</span>');}
     }
-    $('.regex-test').on('input', function(){ runTest($(this)); });
-    $('.regex-field').on('input', function(){
-        var $t = $('.regex-test[data-field="'+$(this).attr('id')+'"]');
-        if ($t.val()) runTest($t);
+    $('.regex-test').on('input',function(){runTest($(this));});
+    $('.regex-field').on('input',function(){var $t=$('.regex-test[data-field="'+$(this).attr('id')+'"]');if($t.val())runTest($t);});
+
+    // =====================
+    // Regex Generators
+    // =====================
+    function buildPwdRegex(){var n=parseInt($('#pwdGenMin').val())||1,x=parseInt($('#pwdGenMax').val())||100;if(x<n)x=n;var p=[];$('.pwd-opt:checked').each(function(){p.push($(this).data('look'));});$('#pwdGenOut').text('/^'+p.join('')+'.{'+n+','+x+'}$/');}
+    $('#pwdGenMin,#pwdGenMax').on('input',buildPwdRegex);$('.pwd-opt').on('change',buildPwdRegex);buildPwdRegex();
+
+    function buildNickRegex(){var n=parseInt($('#nickGenMin').val())||1,c=[];$('.nick-opt:checked').each(function(){c.push($(this).data('chars'));});$('#nickGenOut').text('/^['+c.join('')+']{'+n+',}$/');}
+    $('#nickGenMin').on('input',buildNickRegex);$('.nick-opt').on('change',buildNickRegex);buildNickRegex();
+
+    function buildNameRegex(){var n=parseInt($('#nameGenMin').val())||1,c=[];$('.name-opt:checked').each(function(){c.push($(this).data('chars'));});var cc='['+c.join('')+']';$('#nameGenOut').text('/^'+cc+'{'+n+',}(\\s'+cc+'{'+n+',})*$/u');$('#nameGenOut').data('illegal','/[^'+c.join('')+'\\s]/u');}
+    $('#nameGenMin').on('input',buildNameRegex);$('.name-opt').on('change',buildNameRegex);buildNameRegex();
+    window.applyNameRegex=function(){var r=$('#nameGenOut').text(),i=$('#nameGenOut').data('illegal');if(r)$('#fullname_regex').val(r).trigger('input');if(i)$('#fullname_illegal_chars_regex').val(i).trigger('input');};
+
+    // =====================
+    // Email Template Editor
+    // =====================
+    var sampleVars = { nickname:'JohnDoe', reset_link:'https://example.com/forgot.php?nickname=johndoe&key=abc123', site_name:<?php echo json_encode($from_name); ?> };
+    var activeLang = {};
+    $('.email-tpl-lang-tab.active').each(function(){ activeLang[$(this).data('tpl')]=$(this).data('lang'); });
+
+    function getActiveTa(t){ return $('#email_tpl_'+t+'_'+(activeLang[t]||'en')); }
+
+    function renderPreview(t){
+        var h=getActiveTa(t).val();
+        $.each(sampleVars,function(k,v){h=h.split('{{'+k+'}}').join(v);});
+        $('#preview_'+t).html('<div class="email-tpl-preview-frame">'+h+'</div>');
+    }
+
+    $('.email-tpl-lang-tab').on('click',function(){
+        var t=$(this).data('tpl'),l=$(this).data('lang');activeLang[t]=l;
+        $('.email-tpl-lang-tab[data-tpl="'+t+'"]').removeClass('active');$(this).addClass('active');
+        var ip=$('#preview_'+t).is(':visible');$('textarea[data-tpl="'+t+'"]').hide();
+        if(!ip)getActiveTa(t).show(); else renderPreview(t);
     });
 
-    // =====================
-    // Password Regex Generator
-    // =====================
-    function buildPwdRegex() {
-        var min = parseInt($('#pwdGenMin').val())||1, max = parseInt($('#pwdGenMax').val())||100;
-        if (max<min) max=min;
-        var p = [];
-        $('.pwd-opt:checked').each(function(){ p.push($(this).data('look')); });
-        $('#pwdGenOut').text('/^'+p.join('')+'.{'+min+','+max+'}$/');
-    }
-    $('#pwdGenMin,#pwdGenMax').on('input', buildPwdRegex);
-    $('.pwd-opt').on('change', buildPwdRegex);
-    buildPwdRegex();
+    $('.email-tpl-tab').on('click',function(){
+        var t=$(this).data('target'),m=$(this).data('mode');
+        $('.email-tpl-tab[data-target="'+t+'"]').removeClass('active');$(this).addClass('active');
+        if(m==='preview'){renderPreview(t);$('textarea[data-tpl="'+t+'"]').hide();$('#preview_'+t).show();}
+        else{$('#preview_'+t).hide();getActiveTa(t).show();}
+    });
 
-    // =====================
-    // Nickname Regex Generator
-    // =====================
-    function buildNickRegex() {
-        var min = parseInt($('#nickGenMin').val())||1;
-        var chars = [];
-        $('.nick-opt:checked').each(function(){ chars.push($(this).data('chars')); });
-        var set = chars.join('');
-        $('#nickGenOut').text('/^['+set+']{'+min+',}$/');
-    }
-    $('#nickGenMin').on('input', buildNickRegex);
-    $('.nick-opt').on('change', buildNickRegex);
-    buildNickRegex();
-
-    // =====================
-    // Fullname Regex Generator
-    // =====================
-    function buildNameRegex() {
-        var min = parseInt($('#nameGenMin').val())||1;
-        var chars = [];
-        $('.name-opt:checked').each(function(){ chars.push($(this).data('chars')); });
-        var set = chars.join("\\");
-        // escape the apostrophe for the char class
-        set = set.replace(/'/g, "\\'");
-        var charClass = '['+chars.join('')+']';
-        var regex = '/^'+charClass+'{'+min+',}(\\s'+charClass+'{'+min+',})*$/u';
-        var illegal = '/[^'+chars.join('')+'\\s]/u';
-        $('#nameGenOut').text(regex);
-        // Store the illegal version for auto-apply
-        $('#nameGenOut').data('illegal', illegal);
-    }
-    $('#nameGenMin').on('input', buildNameRegex);
-    $('.name-opt').on('change', buildNameRegex);
-    buildNameRegex();
-
-    // Apply name regex also updates the illegal chars regex automatically
-    window.applyNameRegex = function() {
-        var regex = $('#nameGenOut').text();
-        var illegal = $('#nameGenOut').data('illegal');
-        if (regex) {
-            $('#fullname_regex').val(regex).trigger('input');
-        }
-        if (illegal) {
-            $('#fullname_illegal_chars_regex').val(illegal).trigger('input');
-        }
-    };
+    $('.email-tpl-insert').on('click',function(){
+        var t=$(this).data('tpl'),ph=$(this).data('placeholder'),$ta=getActiveTa(t),ta=$ta[0];
+        if(!$ta.is(':visible')){$('textarea[data-tpl="'+t+'"]').hide();$ta.show();$('#preview_'+t).hide();$('.email-tpl-tab[data-target="'+t+'"][data-mode="code"]').addClass('active');$('.email-tpl-tab[data-target="'+t+'"][data-mode="preview"]').removeClass('active');}
+        var s=ta.selectionStart,e=ta.selectionEnd,v=$ta.val();$ta.val(v.substring(0,s)+ph+v.substring(e));ta.setSelectionRange(s+ph.length,s+ph.length);$ta.focus();
+    });
 });
 </script>
 

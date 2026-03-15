@@ -99,8 +99,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit();
                 } else {
                     $hp = password_hash($password, PASSWORD_ARGON2ID, $argon2id_options);
-                    $stmt = $pdo->prepare("INSERT INTO users (fullname,nickname,email,password,role) VALUES (:fn,:nn,:em,:pw,:ro)");
-                    $stmt->execute([':fn'=>$fullname, ':nn'=>$nick, ':em'=>$emailInput, ':pw'=>$hp, ':ro'=>$role]);
+                    $stmt = $pdo->prepare("INSERT INTO users (fullname,nickname,email,password,role,language) VALUES (:fn,:nn,:em,:pw,:ro,:lang)");
+                    $stmt->execute([':fn'=>$fullname, ':nn'=>$nick, ':em'=>$emailInput, ':pw'=>$hp, ':ro'=>$role, ':lang'=>$_SESSION['langID'] ?? 'en']);
                     setFlash('success', $langArray['admin_user_created']);
                     header("Location: users.php");
                     exit();

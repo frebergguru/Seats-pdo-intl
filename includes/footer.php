@@ -27,6 +27,7 @@ $footerBasePath = isset($baseUrl) ? $baseUrl : './';
     }
     if (!empty($_SESSION['nickname'])) {
         echo '  <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'logout.php">' . htmlspecialchars($langArray['logout'], ENT_QUOTES, 'UTF-8') . '</a>';
+        echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'export.php">' . htmlspecialchars($langArray['privacy_export_btn'], ENT_QUOTES, 'UTF-8') . '</a>';
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'deluser.php">' . htmlspecialchars($langArray['delete_account'], ENT_QUOTES, 'UTF-8') . '</a>';
         }
@@ -54,6 +55,7 @@ $footerBasePath = isset($baseUrl) ? $baseUrl : './';
             ?>
         </select>
     </form>
+    <a href="<?php echo htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8'); ?>privacy.php" style="font-size:12px;"><?php echo htmlspecialchars($langArray['privacy_policy_link'], ENT_QUOTES, 'UTF-8'); ?></a>
 </nav>
 </div>
 </div>

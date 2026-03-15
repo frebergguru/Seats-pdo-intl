@@ -7,12 +7,14 @@ A customizable seat booking system with multi-language support, an interactive r
 ## Features
 
 - **Interactive seat map** — visual room layout with click-to-book confirmation, seat owner info, and seat changing
-- **Multi-language support** — English and Norwegian built-in, easily extensible
-- **Admin panel** — dark-themed dashboard for managing users, reservations, seat map, and all application settings
+- **Multi-language support** — English and Norwegian built-in with automatic language persistence per user
+- **Rich HTML email templates** — styled password reset and test emails, editable per language from the admin panel with live preview
+- **Admin panel** — dark-themed dashboard for managing users, reservations, seat map, email templates, and all application settings
 - **Interactive map editor** — visual drag-to-paint editor with tile palette, grid resize, text mode, file import, and download export
-- **Database-stored settings** — site metadata, SMTP, password policy, and Argon2id parameters all configurable from the admin panel with live regex testers and SMTP test email
+- **Database-stored settings** — site metadata, SMTP, password policy, Argon2id parameters, and email templates all configurable from the admin panel
 - **MySQL and PostgreSQL** — dual database support via PDO
-- **Secure by default** — Argon2id password hashing, CSRF protection on all forms (including booking), security headers via `.htaccess`, session hardening, prepared statements, XSS-safe output escaping
+- **GDPR-compliant** — privacy policy page, personal data export (JSON), consent tracking on registration, rate limiting with auto-cleanup
+- **Secure by default** — Argon2id password hashing, CSRF protection on all forms (including booking), security headers via `.htaccess`, session hardening, prepared statements, XSS-safe output escaping, rate limiting
 - **Role-based access** — user and admin roles; admin accounts protected from self-deletion
 - **Mobile responsive** — CSS grid seat map scales across screen sizes with accessible skip-to-content, semantic HTML, and keyboard focus indicators
 - **Apache hardened** — `.htaccess` with directory protection, sensitive file blocking, compression, caching, and security headers
@@ -77,11 +79,11 @@ A customizable seat booking system with multi-language support, an interactive r
 
 6. Log out and back in. The **Admin Panel** link will appear in the footer menu.
 
-All remaining settings (SMTP, site metadata, password policy, etc.) can be configured from **Admin Panel > Settings**.
+All remaining settings (SMTP, site metadata, password policy, email templates, etc.) can be configured from **Admin Panel > Settings**.
 
 ### Upgrading existing installations
 
-Run the migration script to add the admin, settings, and seatmap tables:
+Run the migration script:
 
 ```bash
 mysql -u root -p lanparty < Docs/migration-admin.sql
@@ -95,7 +97,7 @@ See `Docs/migration-admin.sql` for both MySQL and PostgreSQL commands.
 
 ### MySQL
 
-1. Import the schema as root (creates the database, tables, and default seat map):
+1. Import the schema as root (creates the database, tables, default seat map, and email templates):
    ```bash
    mysql -u root -p < Docs/Seats-MySQL.sql
    ```
@@ -134,12 +136,8 @@ The room layout is stored in the database (`seatmap` table) and managed via the 
 
 Map symbols:
 ```
-# = seat
-f = floor
-w = wall
-k = kitchen (🍽️)
-b = bathroom/toilet (🚽)
-d = door (🚪)
+# = seat       f = floor       w = wall
+k = kitchen    b = bathroom    d = door
 e = emergency exit
 ```
 
@@ -161,7 +159,7 @@ Accessible to users with the `admin` role. Dark-themed interface.
 | **Users** | Add, edit, delete users; assign roles; reset passwords |
 | **Reservations** | View and delete individual reservations, or purge all |
 | **Map Editor** | Interactive visual/text editor with tile palette, grid resize, import/download |
-| **Settings** | Site metadata, SMTP/email (with test email), password/nickname/fullname regex (with generators and live testers), Argon2id hashing parameters |
+| **Settings** | Site metadata, SMTP/email with test send, per-language email templates (Code/Preview), regex generators with live testers, Argon2id hashing |
 
 Admin accounts are protected from self-deletion (both from the admin panel and the regular "Delete account" page).
 
@@ -175,6 +173,7 @@ Only database connection settings remain in `includes/config.php`. Everything el
 |----------|----------|
 | **Site** | Description, keywords, author, default language |
 | **Email/SMTP** | Server, port, username, password, from name, from email, subject |
+| **Email Templates** | Per-language (EN/NO) HTML templates for password reset and test emails with `{{placeholder}}` support |
 | **Security** | Password regex, nickname regex, fullname regex (each with visual generator and live tester) |
 | **Hashing** | Argon2id memory cost, time cost, threads |
 
@@ -187,15 +186,13 @@ Only database connection settings remain in `includes/config.php`. Everything el
 3. Click a green (vacant) seat on the map and confirm to reserve it.
 4. Click any red (occupied) seat to see who reserved it.
 5. Click a green seat while you already have one to change your reservation.
+6. Your language preference is saved automatically and restored on login.
 
 ---
 
 ## TO-DO List
 
-### Planned Features
-- Make the system GDPR-compliant (cookie consent, data export/deletion requests).
-- Add support for sending rich HTML emails (templates, inline CSS).
-- Add rate limiting to login, registration, and password reset.
+- Verify that the email system works end-to-end (password reset flow, test email, i18n templates, SMTP delivery).
 
 ---
 

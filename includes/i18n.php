@@ -25,8 +25,19 @@ $allowedLangs = array_map(function ($file) {
 
 // Check if the user has selected a language
 if (isset($_GET['lang']) && in_array($_GET['lang'], $allowedLangs, true)) {
-    // Sanitize and set the selected language in the session
     $_SESSION['langID'] = $_GET['lang'];
+
+    // Save preference to DB if logged in
+    if (!empty($_SESSION['nickname'])) {
+        try {
+            $_i18n_pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+            $_i18n_stmt = $_i18n_pdo->prepare("UPDATE users SET language = :lang WHERE lower(nickname) = :nick");
+            $_i18n_stmt->execute([':lang' => $_GET['lang'], ':nick' => mb_strtolower($_SESSION['nickname'])]);
+            unset($_i18n_pdo, $_i18n_stmt);
+        } catch (PDOException $e) {
+            // Column may not exist yet
+        }
+    }
 }
 
 // Use the language from the session or default to English

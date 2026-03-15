@@ -16,6 +16,7 @@
  */
 
 require 'includes/config.php';
+require 'includes/functions.php';
 require 'includes/i18n.php';
 
 require 'includes/header.php';
@@ -46,6 +47,18 @@ try {
 
         if (!hash_equals($_SESSION['csrf_token'] ?? '', $form_token)) {
             $errors[] = $langArray['invalid_csrf_token'];
+        }
+
+        // Rate limiting
+        if (!checkRateLimit($pdo, 'register')) {
+            $errors[] = $langArray['rate_limit_exceeded'];
+        } else {
+            recordRateAttempt($pdo, 'register');
+        }
+
+        // Privacy consent
+        if (empty($_POST['privacy_consent'])) {
+            $errors[] = $langArray['privacy_consent_required'];
         }
 
         if (empty($fullname)) {
@@ -102,12 +115,13 @@ try {
 
         if (empty($errors)) {
             $hashedPassword = password_hash($password, PASSWORD_ARGON2ID, $argon2id_options);
-            $stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password) VALUES (:fullname, :nickname, :email, :password)");
+            $stmt = $pdo->prepare("INSERT INTO users (fullname, nickname, email, password, language, privacy_consent) VALUES (:fullname, :nickname, :email, :password, :language, CURRENT_TIMESTAMP)");
             $stmt->execute([
                 ':fullname' => $fullname,
                 ':nickname' => $nickname,
                 ':email'    => $email,
-                ':password' => $hashedPassword
+                ':password' => $hashedPassword,
+                ':language' => $_SESSION['langID'] ?? 'en'
             ]);
 
             echo '<span class="srs-header">' . $langArray['user_was_created'] . '!</span>
@@ -161,6 +175,13 @@ if ($formstatus !== true) {
             <div class="form-field">
                 <label for="password2" class="srs-lb"><?= $langArray['repeat_password'] ?></label>
                 <input name="password2" id="password2" type="password" class="srs-tb">
+            </div>
+            <div class="form-field">
+                <label style="font-weight:normal;">
+                    <input type="checkbox" name="privacy_consent" value="1" required style="width:auto;height:auto;">
+                    <?= $langArray['privacy_consent_text'] ?>
+                    <a href="privacy.php" target="_blank"><?= $langArray['privacy_policy_link'] ?></a>
+                </label>
             </div>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
         </div>
