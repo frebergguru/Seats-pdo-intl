@@ -2,46 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT**: When you modify CLAUDE.md, also review and update README.md, CHANGELOG.md, and Assets.md if the changes affect project documentation, features, file structure, or architecture.
+
 ## Project Overview
 
-Seats is a PHP seat booking system for events/conferences/LAN parties. Users register, log in, and reserve seats from a configurable room map. Supports MySQL and PostgreSQL via PDO, with i18n (English and Norwegian). Includes an admin panel for user/reservation/map management.
+Seats is a PHP seat booking system for events/conferences/LAN parties. Users register, log in, and reserve or change seats from a configurable room map. Supports MySQL and PostgreSQL via PDO, with i18n (English and Norwegian). Includes a dark-themed admin panel for user/reservation/map/settings management.
 
 ## Setup
 
 ```bash
 composer install                          # installs PHPMailer
-# Configure DB and SMTP in includes/config.php
-mysql -u lanparty -p < Docs/Seats-MySQL.sql       # MySQL
+# Configure DB credentials in includes/config.php
+mysql -u root -p < Docs/Seats-MySQL.sql   # MySQL (as root)
 psql -U lanparty -d lanparty < Docs/Seats-PostgreSQL.sql  # PostgreSQL
 # Promote a user to admin:
 # UPDATE users SET role = 'admin' WHERE lower(nickname) = lower('your_nickname');
 ```
 
-For existing installations, run `Docs/migration-admin.sql` to add the `role` column and `seatmap` table.
+For existing installations, run `Docs/migration-admin.sql`. All other settings (SMTP, regex, Argon2id, etc.) are configured from Admin Panel > Settings.
 
-No build step, test suite, or linter exists. Serve via Apache/Nginx with PHP 7.4+.
+No build step, test suite, or linter. Serve via Apache (`.htaccess` included) or Nginx with PHP 7.4+.
 
 ## Architecture
 
-- **No framework** — plain PHP with PDO, no routing layer. Each top-level `.php` file is a page/endpoint.
-- **Page flow**: `index.php` (seat map display) → `book.php` (booking handler) → redirect back to `index.php`. Auth pages: `login.php`, `register.php`, `forgot.php`, `deluser.php`, `logout.php`. Admin pages in `admin/` directory.
-- **Request flow**: Every page includes `includes/config.php` (session with secure cookie settings, DB config, regex patterns, constants) → `includes/i18n.php` (language loading) → `includes/header.php` / `includes/footer.php` (HTML shell). Admin pages use `$baseUrl = '../'` before including header/footer so asset paths resolve correctly from the subdirectory.
-- **Session management**: `config.php` is the single entry point for `session_start()` with secure cookie flags (httponly, secure, samesite=Strict, strict_mode). No other file should call `session_start()` directly.
-- **DB driver abstraction**: Many queries use ternary on `DB_DRIVER` for MySQL vs PostgreSQL differences (e.g., `lower()` usage, `FROM DUAL`). This pattern must be maintained when adding/modifying queries.
-- **Room map**: Stored in `seatmap` DB table. Parsed by `getMapData($pdo)` in `includes/functions.php`. Rendered as a CSS grid in `index.php`. Editable via the admin panel's interactive map editor. Default map is seeded by the SQL schema.
-- **AJAX endpoints** (`ajax/`): JSON APIs for real-time registration form validation (email uniqueness, nickname uniqueness, password strength). Called from `js/formcheck.js` and `js/pwdcheck.js`.
-- **Password reset flow** (`forgot.php`): generates token → stores in `users.forgottoken` → emails link via PHPMailer → validates token with `hash_equals()` → allows password change. All in one file with branching logic.
-- **Auth**: Session-based. Login stores `$_SESSION['nickname']` and `$_SESSION['role']`. Session is regenerated after login. Roles: `user` (default), `admin`.
-- **Admin panel** (`admin/`): Protected by `requireAdmin()` guard in `includes/functions.php`. Pages: dashboard (`index.php`), user CRUD (`users.php`, `user_edit.php`), reservation management (`reservations.php`), map editor (`map.php`).
-- **Passwords**: Argon2id with configurable parameters in `config.php`. Never trimmed.
-- **CSRF**: All forms use `hash_equals()` for timing-safe token comparison. Tokens regenerated per GET request.
+- **No framework** — plain PHP with PDO. Each top-level `.php` file is a page/endpoint.
+- **Page flow**: `index.php` (seat map display) → `book.php` (POST booking handler with CSRF) → redirect back to `index.php`. Users can reserve a new seat or change their existing one. Auth pages: `login.php`, `register.php`, `forgot.php`, `deluser.php`, `logout.php`.
+- **Request flow**: Every page includes `includes/config.php` (security headers via `.htaccess`, session, DB config, defaults, DB settings override) → `includes/i18n.php` (language loading) → `includes/header.php` / `includes/footer.php` (HTML shell with `<main>` and `<nav>`).
+- **Session management**: `config.php` is the single entry point for `session_start()` with secure cookie flags. No other file should call `session_start()` directly. Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy) are handled by `.htaccess`.
+- **DB driver abstraction**: Queries use ternary on `DB_DRIVER` for MySQL vs PostgreSQL differences (`lower()`, `FROM DUAL`). Maintain this pattern.
+- **Room map**: Stored exclusively in `seatmap` DB table (no file fallback). Parsed by `getMapData($pdo)`. Rendered as a CSS grid with `--cell-size` variable. Tiles: `#`=seat, `f`=floor, `w`=wall, `k`=kitchen (🍽️), `b`=bathroom (🚽), `d`=door (🚪), `e`=exit. Default map seeded by SQL schema.
+- **AJAX endpoints** (`ajax/`): JSON APIs for real-time registration validation — fullname (`ajax-fullname.php`), nickname, email, password strength. Called from `js/formcheck.js` and `js/pwdcheck.js`.
+- **Auth**: Session-based. Login stores `$_SESSION['nickname']` and `$_SESSION['role']`. Session regenerated after login. Roles: `user` (default), `admin`. Admin self-deletion blocked at 3 layers.
+- **Admin panel** (`admin/`): Dark-themed. Protected by `requireAdmin()`. Uses PRG pattern with flash messages and `noCacheHeaders()`. Pages: dashboard, users CRUD, reservations (with purge all), interactive map editor (visual + text + import/export), settings (with SMTP test email and regex generators).
+- **Settings**: Stored in `settings` DB table. `config.php` sets defaults then loads overrides from DB. Editable from admin panel with live regex testers and visual password regex builder.
+- **Security**: `.htaccess` handles headers, directory protection, static file blocking. PHP handles CSRF (POST + `hash_equals()` with `?? ''` fallback), Argon2id hashing, prepared statements, `htmlspecialchars()` output escaping. Passwords never trimmed.
 
 ## Key Conventions
 
-- All DB queries use PDO prepared statements with named parameters (`:param`). Never reuse the same named parameter in one statement.
-- Output escaping uses `htmlspecialchars($val, ENT_QUOTES, 'UTF-8')`.
-- Nickname comparisons are always lowercased (`mb_strtolower`).
-- Language strings are in `includes/i18n/en.php` and `includes/i18n/no.php` as `$langArray` entries. Both files must be kept in sync when adding keys.
-- Admin pages set `$baseUrl = '../'` before including header/footer.
-- `getDBConnection()` in `functions.php` returns null on failure (no throw). `getMapData($pdo)` accepts optional PDO to avoid creating duplicate connections.
-- `requireAdmin()` returns the PDO connection for reuse by the calling admin page.
+- PDO prepared statements with named parameters (`:param`). Never reuse the same parameter name in one statement.
+- Output escaping: `htmlspecialchars($val, ENT_QUOTES, 'UTF-8')`.
+- Nickname comparisons: always `mb_strtolower()`.
+- Language strings in `includes/i18n/en.php` and `includes/i18n/no.php` as `$langArray`. Both files must stay in sync.
+- Admin pages: set `$baseUrl = '../'` before header/footer, call `requireAdmin()` and `noCacheHeaders()`.
+- `hash_equals($_SESSION['csrf_token'] ?? '', ...)` — always use `?? ''` fallback.
+- All `<button>` elements inside or near forms must have explicit `type="button"` or `type="submit"`.
+- `getDBConnection()` returns null on failure. `getMapData($pdo)` accepts optional PDO. `requireAdmin()` returns PDO for reuse.
+- `setFlash()` / `getFlash()` for admin page messages after PRG redirects.

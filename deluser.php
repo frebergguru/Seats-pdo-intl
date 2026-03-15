@@ -49,7 +49,7 @@ try {
 
 // CSRF Token Generation and Validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         require_once("includes/header.php");
         echo '<div class="userdel">' . $langArray['error'] . ': ' . $langArray['invalid_csrf_token'] . '</div><br><br>';
         require_once("includes/footer.php");
@@ -111,18 +111,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
         <span class="srs-header">' . $langArray['delete_account'] . '</span>
         <div class="srs-content">
             <p><strong>' . $langArray['please_confirm_with_your_password'] . '</strong></p>
-            <label for="password" class="srs-lb">' . $langArray['password'] . '</label>
-            <input name="password" id="password" type="password" class="srs-tb" required><br>
+            <div class="form-field">
+                <label for="password" class="srs-lb">' . $langArray['password'] . '</label>
+                <input name="password" id="password" type="password" class="srs-tb" required>
+            </div>
+            <input type="hidden" name="delete_user" value="1">
+            <input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') . '">
         </div>
         <div class="srs-footer">
             <div class="srs-button-container">
                 <input type="submit" class="submit" value="' . $langArray['delete_btn'] . '">
-                <input type="hidden" name="delete_user" value="1">
-                <input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') . '">
             </div>
             <div class="srs-slope"></div>
         </div>
-    </form><br><br>';
+    </form>';
     require_once("includes/footer.php");
 }
 ?>

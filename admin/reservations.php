@@ -7,6 +7,26 @@ $pdo = requireAdmin();
 $baseUrl = '../';
 noCacheHeaders();
 
+// Handle purge all (PRG)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['purge_all'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
+        setFlash('error', $langArray['invalid_csrf_token']);
+    } else {
+        $pdo->beginTransaction();
+        try {
+            $pdo->exec("DELETE FROM reservations");
+            $pdo->exec("UPDATE users SET rseat = NULL");
+            $pdo->commit();
+            setFlash('success', $langArray['admin_purge_all_done']);
+        } catch (PDOException $e) {
+            $pdo->rollBack();
+            setFlash('error', $langArray['error_occurred']);
+        }
+    }
+    header("Location: reservations.php");
+    exit();
+}
+
 // Handle deletion (PRG)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_seat'])) {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
@@ -41,6 +61,16 @@ renderAdminNav('reservations');
 <div class="admin-page-title"><?php echo $langArray['admin_reservations']; ?></div>
 
 <?php echo getFlash(); ?>
+
+<?php if (!empty($reservations)): ?>
+<div style="text-align:center; margin-bottom:15px;">
+    <form method="POST" action="reservations.php" style="display:inline;" onsubmit="return confirm('<?php echo htmlspecialchars($langArray['admin_confirm_purge_all'], ENT_QUOTES, 'UTF-8'); ?>');">
+        <input type="hidden" name="purge_all" value="1">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
+        <button type="submit" class="admin-btn admin-btn-delete"><?php echo $langArray['admin_purge_all']; ?></button>
+    </form>
+</div>
+<?php endif; ?>
 
 <?php if (empty($reservations)): ?>
     <div class="admin-panel"><div class="admin-panel-body" style="text-align:center;color:#999;"><?php echo $langArray['admin_no_reservations']; ?></div></div>

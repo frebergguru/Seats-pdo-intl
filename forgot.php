@@ -68,7 +68,7 @@ function verifyToken($nickname, $key) {
 // Handle password change submission
 if ($password && $password2 && $key && $nickname) {
     // CSRF validation
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         require 'includes/header.php';
         echo '<span class="srs-header">' . $langArray['forgot_password_heading'] . ' - ' . $langArray['error'] . '</span>
         <div class="srs-content">' . $langArray['invalid_csrf_token'] . '</div><br><br><br>';
@@ -139,9 +139,9 @@ if ($password && $password2 && $key && $nickname) {
                 <button type="button" id="closePopup">{$langArray['close_btn']}</button>
             </div>
         </div>
-        <label for="password" class="srs-lb">{$langArray['password']}</label><input name="password" id="password" type="password" class="srs-tb"><br>
+        <div class="form-field"><label for="password" class="srs-lb">{$langArray['password']}</label><input name="password" id="password" type="password" class="srs-tb"></div>
         <span id="pwstatus"></span><br>
-        <label for="password2" class="srs-lb">{$langArray['repeat_password']}</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
+        <div class="form-field"><label for="password2" class="srs-lb">{$langArray['repeat_password']}</label><input name="password2" id="password2" type="password" class="srs-tb"></div>
         <input type="hidden" name="csrf_token" value="$csrfToken">
     </div>
     <div class="srs-footer">
@@ -187,9 +187,9 @@ HTML;
                 <button type="button" id="closePopup">{$langArray['close_btn']}</button>
             </div>
         </div>
-        <label for="password" class="srs-lb">{$langArray['password']}</label><input name="password" id="password" type="password" class="srs-tb"><br>
+        <div class="form-field"><label for="password" class="srs-lb">{$langArray['password']}</label><input name="password" id="password" type="password" class="srs-tb"></div>
         <span id="pwstatus"></span><br>
-        <label for="password2" class="srs-lb">{$langArray['repeat_password']}</label><input name="password2" id="password2" type="password" class="srs-tb"><br>
+        <div class="form-field"><label for="password2" class="srs-lb">{$langArray['repeat_password']}</label><input name="password2" id="password2" type="password" class="srs-tb"></div>
         <input type="hidden" name="csrf_token" value="$csrfToken">
     </div>
     <div class="srs-footer">
@@ -211,7 +211,7 @@ HTML;
     }
 } elseif ($email && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF validation for email submission
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         require 'includes/header.php';
         echo '<span class="srs-header">' . $langArray['forgot_password_heading'] . ' - ' . $langArray['error'] . '</span>
         <div class="srs-content">' . $langArray['invalid_csrf_token'] . '</div><br><br><br>';
@@ -283,7 +283,7 @@ HTML;
     <span class="srs-header">{$langArray['forgot_password_heading']}</span>
     <div class="srs-content">
         <label for="email" class="srs-lb">{$langArray['email']}</label>
-        <input name="email" id="email" class="srs-tb"><br>
+        <input name="email" id="email" class="srs-tb">
         <input type="hidden" name="csrf_token" value="$csrfToken">
     </div>
     <div class="srs-footer">

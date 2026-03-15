@@ -50,7 +50,7 @@ CREATE TABLE `seatmap` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Default seat map
-INSERT INTO `seatmap` (`map_data`) VALUES ('wwwwwwwwwwwwwwwww\nweww#########wkkw\nwffw#########wkkw\nwffd#########dkkw\nwdww#########wkkw\nwfbw#########wkkw\nwwwwwwwwdwwwwwwww\nw###############w\nw###############w\nw###############w\nw###############w\nw###############w\nwwwwwwwwwwwwwwwww');
+INSERT INTO `seatmap` (`map_data`) VALUES ('wwwwwwwwwwwwwwwww\nwewwfffffffffwkkw\nwffwf#######fwkkw\nwffdf#######fdkkw\nwdwwf#######fwkkw\nwfbwfffffffffwkkw\nwwwwwwwwdwwwwwwww\nwfffffffffffffffw\nwf#############fw\nwf#############fw\nwf#############fw\nwfffffffffffffffw\nwwwwwwwwwwwwwwwww');
 
 -- Table structure for table "settings"
 CREATE TABLE `settings` (

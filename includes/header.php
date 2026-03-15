@@ -47,5 +47,7 @@ $siteAuthor = htmlspecialchars($site_author ?? '', ENT_QUOTES, 'UTF-8');
 </head>
 
 <body>
+    <a href="#main-content" class="skip-link"><?php echo $langArray['skip_to_content'] ?? 'Skip to content'; ?></a>
     <div class="main_wrapper">
         <div id="wrapper">
+            <main id="main-content">

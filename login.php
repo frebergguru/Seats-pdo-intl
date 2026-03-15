@@ -32,7 +32,7 @@ $password = $_POST['password'] ?? '';
 try {
     if (!empty($nickname) && !empty($password) && $_SERVER['REQUEST_METHOD'] === 'POST') {
         // CSRF validation
-        if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+        if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
             $pwdwrong = true;
             throw new Exception("CSRF token validation failed");
         }
@@ -94,16 +94,17 @@ if ($pwdwrong) {
 ?>
 <form class="srs-container" method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
     <span class="srs-header"><?php echo $langArray['login']; ?></span>
-
     <div class="srs-content">
-        <label for="nickname" class="srs-lb"><?php echo $langArray['nickname']; ?></label>
-        <input name="nickname" value="<?php echo htmlspecialchars($nickname); ?>" id="nickname" class="srs-tb"><br><br>
-
-        <label for="password" class="srs-lb"><?php echo $langArray['password']; ?></label>
-        <input name="password" id="password" type="password" class="srs-tb"><br>
+        <div class="form-field">
+            <label for="nickname" class="srs-lb"><?php echo $langArray['nickname']; ?></label>
+            <input name="nickname" value="<?php echo htmlspecialchars($nickname); ?>" id="nickname" class="srs-tb">
+        </div>
+        <div class="form-field">
+            <label for="password" class="srs-lb"><?php echo $langArray['password']; ?></label>
+            <input name="password" id="password" type="password" class="srs-tb">
+        </div>
         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
     </div>
-
     <div class="srs-footer">
         <div class="srs-button-container">
             <input type="submit" class="submit" value="<?php echo $langArray['login']; ?>">
