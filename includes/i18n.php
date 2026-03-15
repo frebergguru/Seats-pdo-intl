@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-session_start(); // Ensure the session is started
-require 'config.php';
+require_once 'config.php';
 
 // Get the list of allowed languages
 $allowedLangs = array_map(function ($file) {
@@ -27,7 +26,7 @@ $allowedLangs = array_map(function ($file) {
 // Check if the user has selected a language
 if (isset($_GET['lang']) && in_array($_GET['lang'], $allowedLangs, true)) {
     // Sanitize and set the selected language in the session
-    $_SESSION['langID'] = htmlspecialchars($_GET['lang']);
+    $_SESSION['langID'] = $_GET['lang'];
 }
 
 // Use the language from the session or default to English

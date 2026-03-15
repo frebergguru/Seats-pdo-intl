@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Seats-pdl-intl.
+ * This file is part of Seats-pdo-intl.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,69 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//Check if session is started it not start session
+//Set secure session cookie parameters before starting the session
 if (session_status() == PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 1 : 0);
+    ini_set('session.cookie_samesite', 'Strict');
+    ini_set('session.use_strict_mode', 1);
     session_start();
 }
 
-$site_description = 'Seat registration';
-$site_keywords = 'seat, registration';
-$site_author = 'Hypnotize';
-
-//Regex to check if the password is valid.
-$pwd_regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%])(?=.{8,26})[A-Za-z\d!@#^&*(),.?":{}|<>+-\/\[\]=_`~\$%]+$/';
-//$pwd_regex = '/^(?=.{8,26})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=:;<>,.?\/]).*$/';
-
-//Regex to check if the nickname is valid.
-$nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
-
-//Regex for checking if the fullname is valid.
-$fullname_regex = '/^[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,}(\s[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,})*$/u';
-
-//Regex to check for illegal characters in the fullname.
-$fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-\s]/u';
-
-$smtp_port = "587";
-$smtp_server = "";
-$smtp_username = "";
-$smtp_password = "";
-$from_name = "Seat reservation";
-$mail_subject = "Seat reservation";
-$from_mail = "";
-
-//Setup the Argon2id options that you want to use (You can use Argon2id.ods to calculate memory_cost).
-$argon2id_options = [
-    'memory_cost' => 1 << 17,
-    'time_cost' => 4,
-    'threads' => 6,
-];
-
-//Set the default language (valid options: en or no).
-if (!isset($_SESSION['langID'])) {
-    $_SESSION['langID'] = "no";
-}
+// ============================================================
+// DATABASE CONNECTION SETTINGS (must remain in this file)
+// ============================================================
 
 //Which database server do you want to use? (valid options: mysql or pgsql)
 if (!defined('DB_DRIVER')) {
     define('DB_DRIVER', 'mysql');
 }
-//Database server host
 if (!defined('DB_HOST')) {
     define('DB_HOST', 'localhost');
 }
-//Database name
 if (!defined('DB_NAME')) {
     define('DB_NAME', 'lanparty');
 }
-//Database server username
 if (!defined('DB_USERNAME')) {
     define('DB_USERNAME', 'seatuser');
 }
-//Database server password
 if (!defined('DB_PASSWORD')) {
     define('DB_PASSWORD', 'seatpassword');
 }
-//Some database configuration
+
 switch (DB_DRIVER) {
     case "mysql":
         $dsn = DB_DRIVER . ":host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4;";
@@ -94,7 +61,8 @@ $db_options = [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     PDO::ATTR_EMULATE_PREPARES => false,
 ];
-//DO NOT CHANGE ANYTHING FROM HERE!!
+
+// Table name constants
 if (!defined('USERS_TABLE')) {
     define('USERS_TABLE', 'users');
 }
@@ -104,6 +72,98 @@ if (!defined('RSEAT_TABLE')) {
 if (!defined('CONFIG_TABLE')) {
     define('CONFIG_TABLE', 'config');
 }
+if (!defined('SEATMAP_TABLE')) {
+    define('SEATMAP_TABLE', 'seatmap');
+}
+
+// ============================================================
+// DEFAULT VALUES (overridden by database settings if available)
+// ============================================================
+
+// Site metadata
+$site_description = 'Seat registration';
+$site_keywords = 'seat, registration';
+$site_author = 'Hypnotize';
+
+// Default language (valid options: en or no)
+$default_language = 'no';
+
+// Regex patterns
+$pwd_regex = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,26}$/';
+$nickname_regex = '/^[a-zA-Z0-9_-]{4,}$/';
+$fullname_regex = '/^[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,}(\s[a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-]{2,})*$/u';
+$fullname_illegal_chars_regex = '/[^a-zA-ZæøåÆØÅÀ-ÖØ-öø-ÿ\'\-\s]/u';
+
+// SMTP / Email settings
+$smtp_port = '587';
+$smtp_server = '';
+$smtp_username = '';
+$smtp_password = '';
+$from_name = 'Seat reservation';
+$mail_subject = 'Seat reservation';
+$from_mail = '';
+
+// Argon2id options (OWASP-recommended balance of security and compatibility)
+// memory_cost: 65536 KiB (64 MiB) — PHP's default, works on most hosts with 512MB+ RAM
+// time_cost: 3 — number of iterations
+// threads: 1 — safest for compatibility; not all systems/builds support multiple threads
+$argon2id_options = [
+    'memory_cost' => 1 << 16,
+    'time_cost' => 3,
+    'threads' => 1,
+];
+
+// ============================================================
+// LOAD OVERRIDES FROM DATABASE
+// ============================================================
+
+try {
+    $_cfg_pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+    $_cfg_stmt = $_cfg_pdo->query("SELECT setting_key, setting_value FROM settings");
+    $_db = [];
+    while ($_row = $_cfg_stmt->fetch(PDO::FETCH_ASSOC)) {
+        $_db[$_row['setting_key']] = $_row['setting_value'];
+    }
+
+    // Site
+    if (isset($_db['site_description']))    $site_description = $_db['site_description'];
+    if (isset($_db['site_keywords']))       $site_keywords = $_db['site_keywords'];
+    if (isset($_db['site_author']))         $site_author = $_db['site_author'];
+    if (isset($_db['default_language']))    $default_language = $_db['default_language'];
+
+    // Regex
+    if (isset($_db['pwd_regex']))                   $pwd_regex = $_db['pwd_regex'];
+    if (isset($_db['nickname_regex']))              $nickname_regex = $_db['nickname_regex'];
+    if (isset($_db['fullname_regex']))              $fullname_regex = $_db['fullname_regex'];
+    if (isset($_db['fullname_illegal_chars_regex']))$fullname_illegal_chars_regex = $_db['fullname_illegal_chars_regex'];
+
+    // SMTP
+    if (isset($_db['smtp_port']))       $smtp_port = $_db['smtp_port'];
+    if (isset($_db['smtp_server']))     $smtp_server = $_db['smtp_server'];
+    if (isset($_db['smtp_username']))   $smtp_username = $_db['smtp_username'];
+    if (isset($_db['smtp_password']))   $smtp_password = $_db['smtp_password'];
+    if (isset($_db['from_name']))       $from_name = $_db['from_name'];
+    if (isset($_db['mail_subject']))    $mail_subject = $_db['mail_subject'];
+    if (isset($_db['from_mail']))       $from_mail = $_db['from_mail'];
+
+    // Argon2id
+    if (isset($_db['argon2id_memory_cost'])) $argon2id_options['memory_cost'] = (int)$_db['argon2id_memory_cost'];
+    if (isset($_db['argon2id_time_cost']))   $argon2id_options['time_cost'] = (int)$_db['argon2id_time_cost'];
+    if (isset($_db['argon2id_threads']))     $argon2id_options['threads'] = (int)$_db['argon2id_threads'];
+
+    unset($_cfg_pdo, $_cfg_stmt, $_db, $_row);
+} catch (PDOException $e) {
+    // Settings table may not exist yet — use defaults
+}
+
+// ============================================================
+// SESSION AND VARIABLE DEFAULTS
+// ============================================================
+
+if (!isset($_SESSION['langID'])) {
+    $_SESSION['langID'] = $default_language;
+}
+
 if (!isset($formstatus)) {
     $formstatus = false;
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Seats-pdl-intl.
+ * This file is part of Seats-pdo-intl.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,27 @@
  *
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+$footerBasePath = isset($baseUrl) ? $baseUrl : './';
 ?>
 <br>
 <div class="menu">
     <?php
     if (empty($home)) {
-        echo '<a href="index.php">' . htmlspecialchars($langArray['home'], ENT_QUOTES, 'UTF-8') . ' |</a>';
+        echo '<a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'index.php">' . htmlspecialchars($langArray['home'], ENT_QUOTES, 'UTF-8') . ' |</a>';
     }
     if (!empty($_SESSION['nickname'])) {
-        echo '  <a href="logout.php">' . htmlspecialchars($langArray['logout'], ENT_QUOTES, 'UTF-8') . '</a>';
-        echo ' | <a href="deluser.php">' . htmlspecialchars($langArray['delete_account'], ENT_QUOTES, 'UTF-8') . '</a>';
+        echo '  <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'logout.php">' . htmlspecialchars($langArray['logout'], ENT_QUOTES, 'UTF-8') . '</a>';
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'deluser.php">' . htmlspecialchars($langArray['delete_account'], ENT_QUOTES, 'UTF-8') . '</a>';
+        }
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'admin/">' . htmlspecialchars($langArray['admin_panel'] ?? 'Admin', ENT_QUOTES, 'UTF-8') . '</a>';
+        }
     } else {
-        echo '  <a href="register.php">' . htmlspecialchars($langArray['new_user_menu'], ENT_QUOTES, 'UTF-8') . '</a>';
-        echo ' | <a href="login.php">' . htmlspecialchars($langArray['login'], ENT_QUOTES, 'UTF-8') . '</a>';
-        echo ' | <a href="forgot.php">' . htmlspecialchars($langArray['forgot_password'], ENT_QUOTES, 'UTF-8') . '</a>';
+        echo '  <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'register.php">' . htmlspecialchars($langArray['new_user_menu'], ENT_QUOTES, 'UTF-8') . '</a>';
+        echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'login.php">' . htmlspecialchars($langArray['login'], ENT_QUOTES, 'UTF-8') . '</a>';
+        echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'forgot.php">' . htmlspecialchars($langArray['forgot_password'], ENT_QUOTES, 'UTF-8') . '</a>';
     }
     ?>
     <br><br>
@@ -38,8 +45,7 @@
                 <?php echo htmlspecialchars($langArray['select_language'], ENT_QUOTES, 'UTF-8'); ?>
             </option>
             <?php
-            // Dynamically generate language options
-            $languages = ['en' => 'English', 'no' => 'Norsk']; // Add more languages as needed
+            $languages = ['en' => 'English', 'no' => 'Norsk'];
             foreach ($languages as $code => $name) {
                 echo '<option value="' . htmlspecialchars($code, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . '</option>';
             }

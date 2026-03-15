@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Seats-pdl-intl.
+ * This file is part of Seats-pdo-intl.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@ require 'includes/config.php';
 require 'includes/functions.php';
 require 'includes/i18n.php';
 
-session_start();
-
 // Validate session and nickname
 if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
     header("Location: login.php");
@@ -32,40 +30,22 @@ $nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
 // Validate and sanitize seat ID
 $seat = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
 if (!$seat || $seat <= 0) {
-    require_once 'includes/header.php';
-    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-        <div class="srs-content">
-        ' . $langArray['invalid_seat_selected'] . '
-        </div><br><br><br>';
-    require_once 'includes/footer.php';
-    exit();
-}
-
-// Check if the seat exists in the map
-$text = file_get_contents("map.txt");
-$maxseats = substr_count($text, "#");
-if ($seat > $maxseats) {
-    require_once 'includes/header.php';
-    print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-        <div class="srs-content">
-        ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
-        </div><br><br><br>';
-    require_once 'includes/footer.php';
+    header("Location: index.php");
     exit();
 }
 
 try {
     $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
-    // Check if the seat is already reserved
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE taken = :seatid");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
-    $stmt->execute();
-    if ($stmt->fetchColumn() > 0) {
+    // Check if the seat exists in the map (DB first, file fallback)
+    $mapData = getMapData($pdo);
+    $maxseats = $mapData['max_seats'];
+
+    if ($seat > $maxseats) {
         require_once 'includes/header.php';
         print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
             <div class="srs-content">
-            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+            ' . $langArray['the_seat_you_have_selected_does_not_exist'] . '
             </div><br><br><br>';
         require_once 'includes/footer.php';
         exit();
@@ -97,32 +77,42 @@ try {
         exit();
     }
 
-    // Reserve the seat
+    // Reserve the seat using transaction and race condition check
     $pdo->beginTransaction();
 
+    if (DB_DRIVER === 'pgsql') {
+        $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) SELECT :seatid, :userid WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE taken = :seatid2)");
+    } else {
+        $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) SELECT :seatid, :userid FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE taken = :seatid2)");
+    }
+    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
+    $stmt->bindValue(':seatid2', $seat, PDO::PARAM_INT);
+    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
+    $stmt->execute();
+
+    if ($stmt->rowCount() == 0) {
+        $pdo->rollBack();
+        require_once 'includes/header.php';
+        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
+            <div class="srs-content">
+            ' . $langArray['the_seat_you_have_selected_is_already_reserved_by_someone_else'] . '
+            </div><br><br><br>';
+        require_once 'includes/footer.php';
+        exit();
+    }
+
+    // Update user's reserved seat
     $stmt = $pdo->prepare("UPDATE users SET rseat = :rseat WHERE id = :userid");
     $stmt->bindValue(':rseat', $seat, PDO::PARAM_INT);
     $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
     $stmt->execute();
 
-    $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) VALUES (:seatid, :userid)");
-    $stmt->bindValue(':seatid', $seat, PDO::PARAM_INT);
-    $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
-    $stmt->execute();
-
     $pdo->commit();
 
-    // Construct the redirect URL
-    $redirectUrl = filter_var(dirname($_SERVER['REQUEST_URI']), FILTER_SANITIZE_URL);
-
-    // Ensure the redirect URL is within the same domain
-    $redirectUrl = rtrim($redirectUrl, '/') . '/index.php'; // Redirect to a safe default page
-
-    // Perform the redirection
-    header("Location: " . $redirectUrl);
+    header("Location: index.php");
     exit();
 } catch (PDOException $e) {
-    if ($pdo->inTransaction()) {
+    if (isset($pdo) && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
     error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);

@@ -22,7 +22,7 @@ $register_page = true;
 require 'includes/header.php';
 
 // CSRF Token
-if (empty($_SESSION['csrf_token'])) {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $csrf_token = $_SESSION['csrf_token'];
@@ -45,8 +45,8 @@ try {
         // Input validation
         $errors = [];
 
-        if ($form_token !== $_SESSION['csrf_token']) {
-            $errors[] = $langArray['invalid_csfr_token'];
+        if (!hash_equals($_SESSION['csrf_token'], $form_token)) {
+            $errors[] = $langArray['invalid_csrf_token'];
         }
 
         if (empty($fullname)) {
@@ -74,7 +74,7 @@ try {
         if (empty($password2)) {
             $errors[] = $langArray['you_must_enter_a_confirmation_password'];
         } elseif ($password !== $password2) {
-            $errors[] = $langArray['the_passwords_dosent_match'];
+            $errors[] = $langArray['the_password_dosent_match'];
         }
 
         // Duplicate email check
@@ -140,14 +140,14 @@ if ($formstatus !== true) {
             <div class="bubble-container">
                 <div class="bubble" id="bubblePopup">
                     <?= $langArray['password_requirements_text'] ?>
-                    <button id="closePopup"><?= $langArray['close_btn'] ?></button>
+                    <button type="button" id="closePopup"><?= $langArray['close_btn'] ?></button>
                 </div>
             </div>
             <label for="password" class="srs-lb"><?= $langArray['password'] ?></label>
             <input name="password" id="password" type="password" class="srs-tb"><br>
             <label for="password2" class="srs-lb"><?= $langArray['repeat_password'] ?></label>
             <input name="password2" id="password2" type="password" class="srs-tb"><br>
-            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
         </div>
         <div class="srs-footer">
             <div class="srs-button-container">

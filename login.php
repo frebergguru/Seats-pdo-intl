@@ -15,32 +15,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-session_start(); // Start the session
 require 'includes/config.php';
 require 'includes/i18n.php';
 
 $pwdwrong = false; // Flag to track incorrect password
 
+// CSRF Token
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Sanitize and validate inputs
 $nickname = trim($_POST['nickname'] ?? '');
-$password = trim($_POST['password'] ?? '');
+$password = $_POST['password'] ?? '';
 
 try {
-    if (!empty($nickname) && !empty($password)) {
+    if (!empty($nickname) && !empty($password) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        // CSRF validation
+        if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+            $pwdwrong = true;
+            throw new Exception("CSRF token validation failed");
+        }
         // Establish database connection
         $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
         // Prepare the query based on the database driver
-        switch (DB_DRIVER) {
-            case "mysql":
-                $stmt = $pdo->prepare("SELECT password FROM users WHERE nickname = :nickname");
-                break;
-            case "pgsql":
-                $stmt = $pdo->prepare("SELECT password FROM users WHERE lower(nickname) = :nickname");
-                break;
-            default:
-                throw new Exception("Unsupported database driver");
-        }
+        $stmt = $pdo->prepare("SELECT password, role FROM users WHERE lower(nickname) = :nickname");
 
         // Bind and execute the query
         $stmt->bindValue(':nickname', mb_strtolower($nickname), PDO::PARAM_STR);
@@ -49,10 +49,13 @@ try {
 
         // Verify the password
         if ($results && password_verify($password, $results["password"])) {
+            session_regenerate_id(true);
             $_SESSION['nickname'] = $nickname;
+            $_SESSION['role'] = $results['role'] ?? 'user';
 
             // Construct the redirect URL
-            $baseUrl = 'https://' . $_SERVER['HTTP_HOST']; // Use a trusted base URL
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $baseUrl = $scheme . '://' . $_SERVER['HTTP_HOST'];
             $redirectPath = dirname($_SERVER['PHP_SELF']);
             $redirectUrl = filter_var($baseUrl . $redirectPath, FILTER_SANITIZE_URL);
 
@@ -73,7 +76,7 @@ try {
     }
 } catch (PDOException $e) {
     // Log database errors
-    error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . ($stmt ? $langArray['whole_query'] . ' ' . $stmt->queryString : ''), 0);
+    error_log($langArray['invalid_query'] . ' ' . $e->getMessage() . '\n' . (isset($stmt) ? $langArray['whole_query'] . ' ' . $stmt->queryString : ''), 0);
 } catch (Exception $e) {
     // Log other exceptions
     error_log("Error: " . $e->getMessage());
@@ -98,6 +101,7 @@ if ($pwdwrong) {
 
         <label for="password" class="srs-lb"><?php echo $langArray['password']; ?></label>
         <input name="password" id="password" type="password" class="srs-tb"><br>
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
     </div>
 
     <div class="srs-footer">

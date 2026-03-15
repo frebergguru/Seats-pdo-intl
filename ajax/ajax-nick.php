@@ -28,19 +28,10 @@ try {
 
     if (!$nickname || strlen($nickname) < 4) {
         $response['status'] = 'TOO_SHORT';
-    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $nickname)) {
+    } elseif (!preg_match($nickname_regex, $nickname)) {
         $response['status'] = 'INVALID_CHARS';
     } else {
-        switch (DB_DRIVER) {
-            case "mysql":
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE nickname = :nickname");
-                break;
-            case "pgsql":
-                $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) LIKE :nickname");
-                break;
-            default:
-                throw new Exception("Unsupported database driver");
-        }
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) = :nickname");
 
         $stmt->bindValue(':nickname', $nickname, PDO::PARAM_STR);
         $stmt->execute();

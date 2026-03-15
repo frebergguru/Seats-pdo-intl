@@ -19,10 +19,6 @@ require_once 'includes/config.php';
 require_once 'includes/functions.php';
 require_once 'includes/i18n.php';
 
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Validate session and nickname
 if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
     require_once("includes/header.php");
@@ -32,6 +28,14 @@ if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
 }
 
 $nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
+
+// Block admin accounts from self-deletion
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    require_once("includes/header.php");
+    echo '<div class="userdel">' . $langArray['admin_cannot_self_delete'] . '</div><br><br>';
+    require_once("includes/footer.php");
+    exit();
+}
 
 try {
     $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
@@ -45,7 +49,7 @@ try {
 
 // CSRF Token Generation and Validation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         require_once("includes/header.php");
         echo '<div class="userdel">' . $langArray['error'] . ': ' . $langArray['invalid_csrf_token'] . '</div><br><br>';
         require_once("includes/footer.php");
@@ -114,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
             <div class="srs-button-container">
                 <input type="submit" class="submit" value="' . $langArray['delete_btn'] . '">
                 <input type="hidden" name="delete_user" value="1">
-                <input type="hidden" name="csrf_token" value="' . $_SESSION['csrf_token'] . '">
+                <input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') . '">
             </div>
             <div class="srs-slope"></div>
         </div>

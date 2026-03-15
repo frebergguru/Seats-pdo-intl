@@ -22,7 +22,7 @@ require '../includes/config.php';
 $response = ['status' => 'UNKNOWN_ERROR'];
 
 // Sanitize and validate the password input
-$postpassword = trim($_POST['password'] ?? '');
+$postpassword = $_POST['password'] ?? '';
 
 if ($postpassword === '') {
     $response['status'] = 'EMPTY';

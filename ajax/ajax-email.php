@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of Seats-pdl-intl.
+ * This file is part of Seats-pdo-intl.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,9 @@
  */
 
 require '../includes/config.php';
+require '../includes/i18n.php';
 
-header('Content-Type: application/json'); // Tell the browser we're returning JSON
-
-$response = [];
+header('Content-Type: application/json');
 
 $email = mb_strtolower(filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL));
 
@@ -35,17 +34,11 @@ if (!$email) {
 try {
     $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
 
-    $query = match (DB_DRIVER) {
-        "mysql" => "SELECT id FROM users WHERE email = :email",
-        "pgsql" => "SELECT id FROM users WHERE lower(email) = :email",
-        default => throw new Exception("unsupported_database_driver"),
-    };
-
-    $stmt = $pdo->prepare($query);
+    $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) = :email");
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->execute();
 
-    if ($stmt->rowCount() > 0) {
+    if ($stmt->fetch()) {
         $response = [
             'status' => 'EMAILINUSE',
             'message' => $langArray['the_email_address_already_exists'] ?? 'Email is already in use.',

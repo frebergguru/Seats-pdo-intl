@@ -15,10 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Start the session if it's not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require 'includes/config.php';
 
 // Destroy the session and invalidate the session cookie
 if (session_status() === PHP_SESSION_ACTIVE) {
