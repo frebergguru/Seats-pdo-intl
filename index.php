@@ -60,21 +60,27 @@ try {
     error_log($langArray['could_not_connect_to_db_server'] . ' ' . $e->getMessage(), 0);
 }
 
+// Generate CSRF token for booking form
+$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
 require_once 'includes/header.php';
 
 // Symbol explanation
 echo '<div class="seat_registered">';
 echo '<p class="heading">' . $langArray['symbol_explanation'] . '</p>';
-echo '<p class="seat_symbols">';
+echo '<div class="legend">';
 if ($loggedIn) {
-    echo '<img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . '" class="seat"> = ' . $langArray['selected_seat'] . '&nbsp;&nbsp;';
+    echo '<div class="legend-item"><img src="./img/yellow.jpg" alt="' . $langArray['selected_seat'] . '" class="seat"><span>' . $langArray['selected_seat'] . '</span></div>';
 }
-echo '<img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . '" class="seat"> = ' . $langArray['occupied_seat'] . '&nbsp;&nbsp;';
-echo '<img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . '" class="seat"> = ' . $langArray['vacant_seat'] . '&nbsp;&nbsp;';
-echo '<img src="./img/wall.jpg" alt="' . $langArray['wall'] . '" class="wall"> = ' . $langArray['wall'] . '&nbsp;&nbsp;';
-echo '&#x1F6AA; = ' . $langArray['door'] . '&nbsp;&nbsp;';
-echo '<img src="./img/exit.jpg" alt="' . $langArray['exit'] . '" class="exit"> = ' . $langArray['exit'] . '&nbsp;&nbsp;';
-echo '</p>';
+echo '<div class="legend-item"><img src="./img/red.jpg" alt="' . $langArray['occupied_seat'] . '" class="seat"><span>' . $langArray['occupied_seat'] . '</span></div>';
+echo '<div class="legend-item"><img src="./img/green.jpg" alt="' . $langArray['vacant_seat'] . '" class="seat"><span>' . $langArray['vacant_seat'] . '</span></div>';
+echo '<div class="legend-item"><img src="./img/wall.jpg" alt="' . $langArray['wall'] . '" class="wall"><span>' . $langArray['wall'] . '</span></div>';
+echo '<div class="legend-item"><span class="floor legend-swatch"></span><span>' . $langArray['floor'] . '</span></div>';
+echo '<div class="legend-item"><span class="door legend-swatch">&#x1F6AA;</span><span>' . $langArray['door'] . '</span></div>';
+echo '<div class="legend-item"><img src="./img/exit.jpg" alt="' . $langArray['exit'] . '" class="exit"><span>' . $langArray['exit'] . '</span></div>';
+echo '<div class="legend-item"><span class="kitchen legend-swatch">&#x1F37D;</span><span>' . $langArray['kitchen'] . '</span></div>';
+echo '<div class="legend-item"><span class="toilet legend-swatch">&#x1F6BD;</span><span>' . $langArray['bathroom'] . '</span></div>';
+echo '</div>';
 echo '</div><br>';
 
 if (!$loggedIn) {
@@ -86,20 +92,24 @@ if ($loggedIn && $userSeat) {
 }
 
 // Seat info popup (shown on click)
-echo '<div id="seatInfoBox" class="seat-info-box" style="display:none;">';
+echo '<div id="seatInfoBox" class="seat-info-box" style="display:none;" role="status" aria-live="polite">';
 echo '  <span id="seatInfoText"></span>';
-echo '  <button id="seatInfoClose" class="seat-info-close">' . $langArray['close_btn'] . '</button>';
+echo '  <button type="button" id="seatInfoClose" class="seat-info-close" aria-label="' . $langArray['close_btn'] . '">' . $langArray['close_btn'] . '</button>';
 echo '</div>';
 
 // Seat confirmation popup (shown when clicking a vacant seat)
-echo '<div id="seatConfirmBox" class="seat-confirm-box" style="display:none;">';
+echo '<div id="seatConfirmBox" class="seat-confirm-box" style="display:none;" role="dialog" aria-live="assertive">';
 echo '  <span id="seatConfirmText"></span><br>';
-echo '  <a id="seatConfirmYes" href="#" class="submit seat-confirm-btn">' . $langArray['yes'] . '</a>';
-echo '  <button id="seatConfirmNo" class="submit seat-confirm-btn">' . $langArray['cancel'] . '</button>';
+echo '  <form id="seatConfirmForm" method="POST" action="book.php" style="display:inline;">';
+echo '    <input type="hidden" name="seatid" id="seatConfirmSeatId" value="">';
+echo '    <input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') . '">';
+echo '    <button type="submit" class="submit seat-confirm-btn">' . $langArray['yes'] . '</button>';
+echo '  </form>';
+echo '  <button type="button" id="seatConfirmNo" class="submit seat-confirm-btn">' . $langArray['cancel'] . '</button>';
 echo '</div>';
 
 // Render the seat map
-echo '<div id="seatMap">';
+echo '<div id="seatMap" role="grid" aria-label="' . $langArray['symbol_explanation'] . '">';
 $cols = isset($grid[0]) ? strlen($grid[0]) : 1;
 echo '<div class="seatmap" style="grid-template-columns: repeat(' . $cols . ', var(--cell-size, 20px));">';
 
@@ -119,8 +129,9 @@ foreach ($grid as $row) {
                         echo '<img src="./img/red.jpg" alt="' . $langArray['seat_number'] . ' ' . $seatNumber . '" class="seat seat-clickable" data-seat="' . $seatNumber . '" data-owner="' . $reservedBy . '">';
                     }
                 } else {
-                    if ($loggedIn && !$userSeat) {
-                        echo '<img src="./img/green.jpg" alt="' . $langArray['seat_number'] . ' ' . $seatNumber . '" class="seat seat-clickable seat-vacant" data-seat="' . $seatNumber . '">';
+                    if ($loggedIn) {
+                        $cls = $userSeat ? 'seat-change' : 'seat-vacant';
+                        echo '<img src="./img/green.jpg" alt="' . $langArray['seat_number'] . ' ' . $seatNumber . '" class="seat seat-clickable ' . $cls . '" data-seat="' . $seatNumber . '">';
                     } else {
                         echo '<img src="./img/green.jpg" alt="' . $langArray['seat_number'] . ' ' . $seatNumber . '" class="seat seat-clickable seat-vacant-info" data-seat="' . $seatNumber . '">';
                     }
@@ -133,10 +144,10 @@ foreach ($grid as $row) {
                 echo '<img src="./img/wall.jpg" alt="' . $langArray['wall'] . '" class="wall">';
                 break;
             case 'k':
-                echo '<img src="./img/wall.jpg" alt="' . $langArray['kitchen'] . '" title="' . $langArray['kitchen'] . '" class="wall">';
+                echo '<span class="kitchen" title="' . $langArray['kitchen'] . '">&#x1F37D;</span>';
                 break;
             case 'b':
-                echo '<img src="./img/wall.jpg" alt="' . $langArray['bathroom'] . '" title="' . $langArray['bathroom'] . '" class="wall">';
+                echo '<span class="toilet" title="' . $langArray['bathroom'] . '">&#x1F6BD;</span>';
                 break;
             case 'd':
                 echo '<span class="door" title="' . $langArray['door'] . '">&#x1F6AA;</span>';
@@ -163,7 +174,7 @@ $(function() {
     var infoText = $('#seatInfoText');
     var confirmBox = $('#seatConfirmBox');
     var confirmText = $('#seatConfirmText');
-    var confirmYes = $('#seatConfirmYes');
+    var confirmSeatId = $('#seatConfirmSeatId');
 
     function hideAll() {
         infoBox.hide();
@@ -184,7 +195,16 @@ $(function() {
         hideAll();
         var seat = $(this).data('seat');
         confirmText.text(langArray.do_you_want_to_reserve_seat_number + ' ' + seat + '?');
-        confirmYes.attr('href', 'book.php?seatid=' + seat);
+        confirmSeatId.val(seat);
+        confirmBox.show();
+    });
+
+    // Vacant seats for logged-in user who already has a seat - show change confirmation
+    $('.seat-change').on('click', function() {
+        hideAll();
+        var seat = $(this).data('seat');
+        confirmText.text(langArray.do_you_want_to_change_to_seat + ' ' + seat + '?');
+        confirmSeatId.val(seat);
         confirmBox.show();
     });
 

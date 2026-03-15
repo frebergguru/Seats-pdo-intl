@@ -15,6 +15,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// FULLNAME CHECK
+$(document).on('keyup focusout', '#fullname', function () {
+    var fullname = $('#fullname').val();
+    if (!fullname) {
+        $('#fullname').removeClass('green red');
+        $('#statusfullname').html('');
+        return;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "ajax/ajax-fullname.php",
+        data: { fullname: fullname },
+        beforeSend: function () {
+            $("#statusfullname").html('<img src="./img/loader.gif">&nbsp;' + langArray.checking_availability);
+        },
+        success: function (response) {
+            try {
+                var res = typeof response === "string" ? JSON.parse(response) : response;
+
+                switch (res.status) {
+                    case 'OK':
+                        $("#fullname").removeClass("red").addClass("green");
+                        $("#statusfullname").html('');
+                        break;
+                    case 'ILLEGAL_CHARS':
+                        $("#fullname").removeClass("green").addClass("red");
+                        $("#statusfullname").html(langArray.fullname_contains_illegal_characters);
+                        break;
+                    case 'INVALID':
+                        $("#fullname").removeClass("green").addClass("red");
+                        $("#statusfullname").html(langArray.fullname_invalid_format);
+                        break;
+                    case 'EMPTY':
+                        $("#fullname").removeClass("green red");
+                        $("#statusfullname").html('');
+                        break;
+                    default:
+                        $("#fullname").removeClass("green").addClass("red");
+                        $("#statusfullname").html(langArray.error);
+                        break;
+                }
+            } catch (e) {
+                console.error("Invalid JSON:", response);
+            }
+        }
+    });
+});
+
+// NICKNAME CHECK
 $(document).on('keyup focusout', '#nickname', function () {
     const nickname = $("#nickname").val();
     const url = "ajax/ajax-nick.php";

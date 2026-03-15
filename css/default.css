@@ -23,6 +23,35 @@
     box-sizing: border-box;
 }
 
+/* Accessibility */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    background: #4a90d9;
+    color: #fff;
+    padding: 8px 16px;
+    z-index: 9999;
+    font-family: Arial, Helvetica, sans-serif;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 body {
     background-color: #696969;
     margin: 0;
@@ -38,13 +67,21 @@ a:visited {
     font-family: Impact, Charcoal, sans-serif;
 }
 
-a:hover {
+a:hover,
+a:focus-visible {
     color: #000;
     text-decoration: none;
     border-bottom: 1px solid #000;
     border-top: 1px solid #000;
     text-indent: 5px;
     font-family: Impact, Charcoal, sans-serif;
+    outline: none;
+}
+
+/* Global focus outline for keyboard navigation */
+*:focus-visible {
+    outline: 2px solid #4a90d9;
+    outline-offset: 2px;
 }
 
 .submit {
@@ -86,6 +123,7 @@ input {
 
 #status,
 #statusemail,
+#statusfullname,
 #statuspw,
 #statuspassword {
     font-size: 11px;
@@ -120,8 +158,32 @@ p.heading {
     text-indent: 5px;
 }
 
-p.seat_symbols {
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+    padding: 5px 10px 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
     font-weight: bold;
+    white-space: nowrap;
+}
+
+.legend-swatch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--cell-size, 20px);
+    height: var(--cell-size, 20px);
+    font-size: var(--cell-size, 20px);
+    line-height: 1;
 }
 
 .main_wrapper {
@@ -169,7 +231,14 @@ p.seat_symbols {
     height: var(--cell-size, 20px);
 }
 
-.door {
+.floor {
+    background-color: #b0a890;
+    border-radius: 2px;
+}
+
+.door,
+.kitchen,
+.toilet {
     font-size: var(--cell-size, 20px);
     text-align: center;
     line-height: var(--cell-size, 20px);
@@ -240,10 +309,9 @@ img.exit {
     border-bottom-left-radius: 15px;
 }
 
-.srs-tb {
-    display: inline-block;
-    width: 80%;
-    max-width: 400px;
+.form-field {
+    margin-bottom: 8px;
+    overflow: hidden;
 }
 
 .srs-lb {
@@ -252,6 +320,20 @@ img.exit {
     font-family: Arial, Helvetica, sans-serif;
     text-indent: 5px;
     font-weight: bold;
+}
+
+.srs-tb {
+    display: inline-block;
+    width: 80%;
+    max-width: 400px;
+}
+
+.field-status {
+    display: block;
+    font-size: 11px;
+    margin-left: 105px;
+    font-weight: bold;
+    min-height: 14px;
 }
 
 .srs-footer {
@@ -363,6 +445,10 @@ a.seat-confirm-btn {
         font-size: 14px;
     }
 
+    .field-status {
+        margin-left: 85px;
+    }
+
     .submit {
         font-size: 16px;
         padding: 8px 16px;
@@ -411,6 +497,10 @@ a.seat-confirm-btn {
     .srs-tb {
         width: 95%;
         max-width: none;
+    }
+
+    .field-status {
+        margin-left: 0;
     }
 
     input {
@@ -697,6 +787,141 @@ a.seat-confirm-btn {
 }
 
 /* Messages */
+/* Inline regex tester */
+.regex-tester {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.regex-tester input {
+    flex: 1;
+    padding: 5px 8px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #aaa;
+    font-size: 13px;
+    height: auto;
+    width: auto;
+}
+
+.regex-tester input:focus {
+    border-color: #4a90d9;
+    outline: none;
+    color: #ddd;
+}
+
+.regex-tester .regex-result {
+    font-size: 16px;
+    min-width: 20px;
+}
+
+/* Regex generator toggle */
+.regex-gen-toggle {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #2a2a2a;
+    color: #888;
+    cursor: pointer;
+}
+
+.regex-gen-toggle:hover {
+    border-color: #4a90d9;
+    color: #ccc;
+}
+
+/* Regex generator box */
+.regex-gen-box {
+    background: #252525;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 0 0 18px;
+    border: 1px solid #3a3a3a;
+}
+
+/* Generator inline row: label + input side by side */
+.regex-gen-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.regex-gen-row label {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.regex-gen-row input[type="number"] {
+    width: 70px;
+    padding: 4px 8px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #1a1a1a;
+    color: #ddd;
+    font-size: 13px;
+    height: auto;
+}
+
+.regex-gen-checks {
+    margin: 6px 0 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+}
+
+.regex-gen-checks label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #bbb;
+    text-transform: none;
+    font-weight: normal;
+    letter-spacing: 0;
+    padding: 2px 0;
+    white-space: nowrap;
+}
+
+.regex-gen-checks label input[type="checkbox"] {
+    width: auto;
+    height: auto;
+}
+
+.regex-gen-output {
+    font-family: monospace;
+    font-size: 12px;
+    background: #1a1a1a;
+    color: #4a90d9;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin: 6px 0 8px;
+    word-break: break-all;
+    border: 1px solid #333;
+    min-height: 28px;
+    line-height: 1.4;
+}
+
+.regex-gen-box .admin-btn {
+    font-size: 12px;
+    padding: 5px 14px;
+}
+
 .admin-success {
     background: #2d6a2e;
     color: #fff;

@@ -18,7 +18,6 @@
 require 'includes/config.php';
 require 'includes/i18n.php';
 
-$register_page = true;
 require 'includes/header.php';
 
 // CSRF Token
@@ -45,7 +44,7 @@ try {
         // Input validation
         $errors = [];
 
-        if (!hash_equals($_SESSION['csrf_token'], $form_token)) {
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $form_token)) {
             $errors[] = $langArray['invalid_csrf_token'];
         }
 
@@ -130,23 +129,39 @@ if ($formstatus !== true) {
     <form class="srs-container" method="POST" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]) ?>">
         <span class="srs-header"><?= $langArray['new_user'] ?></span>
         <div class="srs-content">
-            <label for="fullname" class="srs-lb"><?= $langArray['fullname'] ?></label>
-            <input name="fullname" value="<?= htmlspecialchars($fullname) ?>" id="fullname" class="srs-tb"><br>
-            <label for="nickname" class="srs-lb"><?= $langArray['nickname'] ?></label>
-            <input name="nickname" value="<?= htmlspecialchars($nickname) ?>" id="nickname" class="srs-tb"><br>
-            <label for="email" class="srs-lb"><?= $langArray['email'] ?></label>
-            <input name="email" value="<?= htmlspecialchars($email) ?>" id="email" class="srs-tb"><br>
-            <a href="#" id="passwordRequirements"><?= $langArray['password_requirements'] ?></a><br>
-            <div class="bubble-container">
-                <div class="bubble" id="bubblePopup">
-                    <?= $langArray['password_requirements_text'] ?>
-                    <button type="button" id="closePopup"><?= $langArray['close_btn'] ?></button>
+            <div class="form-field">
+                <label for="fullname" class="srs-lb"><?= $langArray['fullname'] ?></label>
+                <input name="fullname" value="<?= htmlspecialchars($fullname) ?>" id="fullname" class="srs-tb">
+                <span id="statusfullname" class="field-status" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+                <label for="nickname" class="srs-lb"><?= $langArray['nickname'] ?></label>
+                <input name="nickname" value="<?= htmlspecialchars($nickname) ?>" id="nickname" class="srs-tb">
+                <span id="status" class="field-status" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+                <label for="email" class="srs-lb"><?= $langArray['email'] ?></label>
+                <input name="email" value="<?= htmlspecialchars($email) ?>" id="email" class="srs-tb">
+                <span id="statusemail" class="field-status" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+                <a href="#" id="passwordRequirements"><?= $langArray['password_requirements'] ?></a>
+                <div class="bubble-container">
+                    <div class="bubble" id="bubblePopup">
+                        <?= $langArray['password_requirements_text'] ?>
+                        <button type="button" id="closePopup"><?= $langArray['close_btn'] ?></button>
+                    </div>
                 </div>
             </div>
-            <label for="password" class="srs-lb"><?= $langArray['password'] ?></label>
-            <input name="password" id="password" type="password" class="srs-tb"><br>
-            <label for="password2" class="srs-lb"><?= $langArray['repeat_password'] ?></label>
-            <input name="password2" id="password2" type="password" class="srs-tb"><br>
+            <div class="form-field">
+                <label for="password" class="srs-lb"><?= $langArray['password'] ?></label>
+                <input name="password" id="password" type="password" class="srs-tb">
+                <span id="statuspassword" class="field-status" aria-live="polite"></span>
+            </div>
+            <div class="form-field">
+                <label for="password2" class="srs-lb"><?= $langArray['repeat_password'] ?></label>
+                <input name="password2" id="password2" type="password" class="srs-tb">
+            </div>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token, ENT_QUOTES, 'UTF-8') ?>">
         </div>
         <div class="srs-footer">

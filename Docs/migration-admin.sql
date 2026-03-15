@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Seed the default map (skip if you already have map data):
-INSERT INTO `seatmap` (`map_data`) VALUES ('wwwwwwwwwwwwwwwww\nweww#########wkkw\nwffw#########wkkw\nwffd#########dkkw\nwdww#########wkkw\nwfbw#########wkkw\nwwwwwwwwdwwwwwwww\nw###############w\nw###############w\nw###############w\nw###############w\nw###############w\nwwwwwwwwwwwwwwwww');
+INSERT INTO `seatmap` (`map_data`) VALUES ('wwwwwwwwwwwwwwwww\nwewwfffffffffwkkw\nwffwf#######fwkkw\nwffdf#######fdkkw\nwdwwf#######fwkkw\nwfbwfffffffffwkkw\nwwwwwwwwdwwwwwwww\nwfffffffffffffffw\nwf#############fw\nwf#############fw\nwf#############fw\nwfffffffffffffffw\nwwwwwwwwwwwwwwwww');
 
 -- Promote a user to admin (replace 'your_nickname' with the actual nickname):
 -- UPDATE users SET role = 'admin' WHERE lower(nickname) = lower('your_nickname');
@@ -44,7 +44,7 @@ INSERT INTO `seatmap` (`map_data`) VALUES ('wwwwwwwwwwwwwwwww\nweww#########wkkw
 -- );
 
 -- Seed the default map (skip if you already have map data):
--- INSERT INTO "seatmap" ("map_data") VALUES (E'wwwwwwwwwwwwwwwww\nweww#########wkkw\nwffw#########wkkw\nwffd#########dkkw\nwdww#########wkkw\nwfbw#########wkkw\nwwwwwwwwdwwwwwwww\nw###############w\nw###############w\nw###############w\nw###############w\nw###############w\nwwwwwwwwwwwwwwwww');
+-- INSERT INTO "seatmap" ("map_data") VALUES (E'wwwwwwwwwwwwwwwww\nwewwfffffffffwkkw\nwffwf#######fwkkw\nwffdf#######fdkkw\nwdwwf#######fwkkw\nwfbwfffffffffwkkw\nwwwwwwwwdwwwwwwww\nwfffffffffffffffw\nwf#############fw\nwf#############fw\nwf#############fw\nwfffffffffffffffw\nwwwwwwwwwwwwwwwww');
 
 -- Promote a user to admin (replace 'your_nickname' with the actual nickname):
 -- UPDATE users SET role = 'admin' WHERE lower(nickname) = 'your_nickname';

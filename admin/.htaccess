@@ -1,0 +1,11 @@
+# Admin directory — extra protection
+# PHP auth (requireAdmin) handles access control, but this adds defense in depth
+
+Options -Indexes
+
+# Block direct access to the AJAX test endpoint via GET
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} GET
+    RewriteRule ^ajax-test-email\.php$ - [F,L]
+</IfModule>

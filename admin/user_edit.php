@@ -27,7 +27,7 @@ if (isset($_GET['id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
         $message = '<div class="admin-error">' . $langArray['invalid_csrf_token'] . '</div>';
     } else {
         $isEdit = isset($_POST['user_id']) && $_POST['user_id'] !== '';

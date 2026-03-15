@@ -27,8 +27,20 @@ if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
 
 $nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
 
+// Only accept POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: index.php");
+    exit();
+}
+
+// CSRF validation
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
+    header("Location: index.php");
+    exit();
+}
+
 // Validate and sanitize seat ID
-$seat = filter_input(INPUT_GET, 'seatid', FILTER_VALIDATE_INT);
+$seat = filter_input(INPUT_POST, 'seatid', FILTER_VALIDATE_INT);
 if (!$seat || $seat <= 0) {
     header("Location: index.php");
     exit();
@@ -67,19 +79,18 @@ try {
         exit();
     }
 
-    if (!empty($user['rseat'])) {
-        require_once 'includes/header.php';
-        print '<span class="srs-header">' . $langArray['an_error_has_occured'] . '</span>
-            <div class="srs-content">
-            ' . $langArray['you_can_only_reserve_one_seat'] . '
-            </div><br><br><br>';
-        require_once 'includes/footer.php';
-        exit();
-    }
-
-    // Reserve the seat using transaction and race condition check
+    // Reserve (or change) seat using transaction
     $pdo->beginTransaction();
 
+    // Release old seat if user already has one
+    if (!empty($user['rseat'])) {
+        $stmt = $pdo->prepare("DELETE FROM reservations WHERE taken = :oldseat AND user_id = :userid");
+        $stmt->bindValue(':oldseat', $user['rseat'], PDO::PARAM_INT);
+        $stmt->bindValue(':userid', $user['id'], PDO::PARAM_INT);
+        $stmt->execute();
+    }
+
+    // Try to reserve the new seat (atomic check: only insert if not taken)
     if (DB_DRIVER === 'pgsql') {
         $stmt = $pdo->prepare("INSERT INTO reservations (taken, user_id) SELECT :seatid, :userid WHERE NOT EXISTS (SELECT 1 FROM reservations WHERE taken = :seatid2)");
     } else {

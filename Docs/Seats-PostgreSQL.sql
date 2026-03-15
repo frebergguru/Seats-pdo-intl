@@ -59,7 +59,7 @@ CREATE TABLE "seatmap" (
 --
 
 -- Default seat map
-INSERT INTO "seatmap" ("map_data") VALUES (E'wwwwwwwwwwwwwwwww\nweww#########wkkw\nwffw#########wkkw\nwffd#########dkkw\nwdww#########wkkw\nwfbw#########wkkw\nwwwwwwwwdwwwwwwww\nw###############w\nw###############w\nw###############w\nw###############w\nw###############w\nwwwwwwwwwwwwwwwww');
+INSERT INTO "seatmap" ("map_data") VALUES (E'wwwwwwwwwwwwwwwww\nwewwfffffffffwkkw\nwffwf#######fwkkw\nwffdf#######fdkkw\nwdwwf#######fwkkw\nwfbwfffffffffwkkw\nwwwwwwwwdwwwwwwww\nwfffffffffffffffw\nwf#############fw\nwf#############fw\nwf#############fw\nwfffffffffffffffw\nwwwwwwwwwwwwwwwww');
 
 --
 

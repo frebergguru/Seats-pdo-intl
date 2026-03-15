@@ -18,8 +18,9 @@
 
 $footerBasePath = isset($baseUrl) ? $baseUrl : './';
 ?>
+</main>
 <br>
-<div class="menu">
+<nav class="menu" aria-label="<?php echo htmlspecialchars($langArray['site_navigation'] ?? 'Site navigation', ENT_QUOTES, 'UTF-8'); ?>">
     <?php
     if (empty($home)) {
         echo '<a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'index.php">' . htmlspecialchars($langArray['home'], ENT_QUOTES, 'UTF-8') . ' |</a>';
@@ -40,7 +41,8 @@ $footerBasePath = isset($baseUrl) ? $baseUrl : './';
     ?>
     <br><br>
     <form name="langSelect" id="langSelect" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"], ENT_QUOTES, 'UTF-8'); ?>" method="get">
-        <select name="lang" id="lang" onchange="document.getElementById('langSelect').submit();">
+        <label for="lang" class="sr-only"><?php echo htmlspecialchars($langArray['select_language'], ENT_QUOTES, 'UTF-8'); ?></label>
+        <select name="lang" id="lang" onchange="document.getElementById('langSelect').submit();" aria-label="<?php echo htmlspecialchars($langArray['select_language'], ENT_QUOTES, 'UTF-8'); ?>">
             <option value="<?php echo htmlspecialchars($_SESSION['langID'] ?? 'en', ENT_QUOTES, 'UTF-8'); ?>">
                 <?php echo htmlspecialchars($langArray['select_language'], ENT_QUOTES, 'UTF-8'); ?>
             </option>
@@ -52,7 +54,7 @@ $footerBasePath = isset($baseUrl) ? $baseUrl : './';
             ?>
         </select>
     </form>
-</div>
+</nav>
 </div>
 </div>
 </body>
