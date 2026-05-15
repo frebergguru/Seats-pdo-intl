@@ -17,7 +17,7 @@ $currentAdminId = (int)$stmt->fetchColumn();
 $editingSelf = false;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 }
 
 if (isset($_GET['id'])) {
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Always generate a fresh token for the form display
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 
 function esc($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 

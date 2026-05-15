@@ -37,7 +37,7 @@ $formstatus = null;
 
 // CSRF Token
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 }
 
 function getPDO() {
@@ -135,7 +135,7 @@ if ($password && $password2 && $key && $nickname) {
                 echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_password_dosent_match'] . '</div><br>';
             }
             // Re-display the password change form
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
             $escapedAction = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8');
             $escapedNick = htmlspecialchars($nickname, ENT_QUOTES, 'UTF-8');
             $escapedKey = htmlspecialchars($key, ENT_QUOTES, 'UTF-8');
@@ -182,7 +182,7 @@ HTML;
     }
 
     if ($tokenValid) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
         require 'includes/header.php';
         $escapedAction = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8');
         $escapedNick = htmlspecialchars($nickname, ENT_QUOTES, 'UTF-8');
@@ -280,7 +280,7 @@ HTML;
         error_log("Email Reset Error: " . $e->getMessage());
     }
 } elseif (!$pwdchanged) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
     require 'includes/header.php';
     $action = htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES, 'UTF-8');
     $csrfToken = htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8');

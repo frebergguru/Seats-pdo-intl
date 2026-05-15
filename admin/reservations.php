@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_seat'])) {
 }
 
 // GET
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 
 $stmt = $pdo->query("SELECT r.id, r.taken, u.id as user_id, u.nickname, u.fullname FROM reservations r JOIN users u ON r.user_id = u.id ORDER BY r.taken");
 $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);

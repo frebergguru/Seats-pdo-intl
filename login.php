@@ -21,10 +21,11 @@ require 'includes/i18n.php';
 
 $pwdwrong = false;
 $rateLimited = false;
+$csrfFailed = false;
 
 // CSRF Token
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 }
 
 // Sanitize and validate inputs
@@ -33,9 +34,11 @@ $password = $_POST['password'] ?? '';
 
 try {
     if (!empty($nickname) && !empty($password) && $_SERVER['REQUEST_METHOD'] === 'POST') {
-        // CSRF validation
+        // CSRF validation. Flag this separately from a wrong-password failure so
+        // we don't mislead the user when their token went stale (e.g. they
+        // visited another page that rotated $_SESSION['csrf_token']).
         if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $_POST['csrf_token'])) {
-            $pwdwrong = true;
+            $csrfFailed = true;
             throw new Exception("CSRF token validation failed");
         }
         // Establish database connection
@@ -100,6 +103,8 @@ include 'includes/header.php';
 // Display error message if login failed
 if ($rateLimited) {
     echo '<div class="regerror">' . $langArray['rate_limit_exceeded'] . '</div><br>';
+} elseif ($csrfFailed) {
+    echo '<div class="regerror">' . $langArray['invalid_csrf_token'] . '</div><br>';
 } elseif ($pwdwrong) {
     echo '<span class="srs-header">' . $langArray['wrong_username_or_password'] . '</span><br><br><br>';
 }

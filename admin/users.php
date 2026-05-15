@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user_id'])) {
 }
 
 // GET
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 
 $stmt = $pdo->query("SELECT id, fullname, nickname, email, role, rseat FROM users ORDER BY id");
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
