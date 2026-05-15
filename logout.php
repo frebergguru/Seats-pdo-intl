@@ -17,22 +17,26 @@
 
 require 'includes/config.php';
 
+// Require POST + CSRF token to defend against forced logout from cross-origin
+// requests (e.g. <img src="…/logout.php">). On any failure we silently bounce
+// back to the home page rather than expose state to the attacker.
+if ($_SERVER['REQUEST_METHOD'] !== 'POST'
+    || empty($_POST['logout_csrf'])
+    || !hash_equals($_SESSION['logout_csrf'] ?? '', $_POST['logout_csrf'])) {
+    header("Location: index.php");
+    exit;
+}
+
 // Destroy the session and invalidate the session cookie
 if (session_status() === PHP_SESSION_ACTIVE) {
-    // Unset all session variables
     $_SESSION = [];
-
-    // Destroy the session
     session_destroy();
-
-    // Invalidate the session cookie
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
     }
 }
 
-// Redirect the user to the home page (or a safe location)
 $redirectUrl = filter_var('index.php', FILTER_SANITIZE_URL);
 header("Location: " . $redirectUrl);
 exit;

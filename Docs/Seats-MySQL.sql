@@ -24,7 +24,7 @@ CREATE TABLE `users` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `fullname` VARCHAR(255) NOT NULL,
   `nickname` VARCHAR(255) NOT NULL UNIQUE,
-  `password` VARCHAR(255) NOT NULL,
+  `password` TEXT NOT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
   `forgottoken` VARCHAR(64) DEFAULT NULL,
   `rseat` INT DEFAULT NULL,
@@ -37,9 +37,11 @@ CREATE TABLE `users` (
 -- Table structure for table "reservations"
 CREATE TABLE `reservations` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `taken` TINYINT(1) NOT NULL DEFAULT 0,
+  `taken` INT NOT NULL,
   `user_id` INT NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_reservations_user` (`user_id`),
+  UNIQUE KEY `uq_reservations_seat` (`taken`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

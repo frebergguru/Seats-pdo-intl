@@ -63,13 +63,13 @@ try {
 
         if (empty($fullname)) {
             $errors[] = $langArray['you_must_enter_a_name'];
-        } elseif (!preg_match($fullname_regex, $fullname)) {
+        } elseif (safePregMatch($fullname_regex, $fullname) !== 1) {
             $errors[] = $langArray['fullname_contains_illegal_characters'];
         }
 
         if (empty($nickname)) {
             $errors[] = $langArray['you_must_enter_a_nickname'];
-        } elseif (!preg_match($nickname_regex, $nickname)) {
+        } elseif (safePregMatch($nickname_regex, $nickname) !== 1) {
             $errors[] = $langArray['the_nickname_is_invalid'];
         }
 
@@ -79,7 +79,7 @@ try {
 
         if (empty($password)) {
             $errors[] = $langArray['you_must_enter_a_password'];
-        } elseif (!preg_match($pwd_regex, $password)) {
+        } elseif (safePregMatch($pwd_regex, $password) !== 1) {
             $errors[] = $langArray['the_password_contains_illegal_characters'];
         }
 
@@ -89,27 +89,16 @@ try {
             $errors[] = $langArray['the_password_dosent_match'];
         }
 
-        // Duplicate email check
+        // Duplicate email / nickname check — return a single generic message
+        // to avoid leaking which one is registered (account enumeration).
         if (empty($errors)) {
             $query = DB_DRIVER === 'pgsql'
-                ? "SELECT id FROM users WHERE lower(email) = lower(:email)"
-                : "SELECT id FROM users WHERE email = :email";
+                ? "SELECT id FROM users WHERE lower(email) = lower(:email) OR lower(nickname) = lower(:nickname)"
+                : "SELECT id FROM users WHERE email = :email OR nickname = :nickname";
             $stmt = $pdo->prepare($query);
-            $stmt->execute([':email' => $email]);
+            $stmt->execute([':email' => $email, ':nickname' => $nickname]);
             if ($stmt->fetch()) {
-                $errors[] = $langArray['the_email_address_already_exists'];
-            }
-        }
-
-        // Duplicate nickname check
-        if (empty($errors)) {
-            $query = DB_DRIVER === 'pgsql'
-                ? "SELECT id FROM users WHERE lower(nickname) = lower(:nickname)"
-                : "SELECT id FROM users WHERE nickname = :nickname";
-            $stmt = $pdo->prepare($query);
-            $stmt->execute([':nickname' => $nickname]);
-            if ($stmt->fetch()) {
-                $errors[] = $langArray['nickname_already_exists'];
+                $errors[] = $langArray['registration_check_credentials'];
             }
         }
 

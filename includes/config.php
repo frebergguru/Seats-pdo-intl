@@ -29,6 +29,13 @@ if (session_status() == PHP_SESSION_NONE) {
 // DATABASE CONNECTION (must remain in this file)
 // ============================================================
 
+// Per-environment overrides — config.local.php is gitignored. Define any of
+// the DB_* constants in it and the if-not-defined guards below will pick
+// them up. The defaults that follow are only used when no override is set.
+if (file_exists(__DIR__ . '/config.local.php')) {
+    require_once __DIR__ . '/config.local.php';
+}
+
 if (!defined('DB_DRIVER')) {
     define('DB_DRIVER', 'mysql');
 }
@@ -138,6 +145,13 @@ try {
 
 if (!isset($_SESSION['langID'])) {
     $_SESSION['langID'] = $default_language;
+}
+
+// Long-lived CSRF token used to protect logout (defense in depth on top of
+// SameSite=Strict cookies). Generated once per session and never rotated so
+// the logout link in the footer works across multi-tab navigation.
+if (!isset($_SESSION['logout_csrf'])) {
+    $_SESSION['logout_csrf'] = bin2hex(random_bytes(32));
 }
 
 // Used by footer.php to hide the Home link on the main page

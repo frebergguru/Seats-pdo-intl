@@ -261,6 +261,27 @@ img.exit {
     max-width: 600px;
 }
 
+.menu .logout-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.menu .logout-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-decoration: underline;
+}
+
+.menu .logout-link:hover {
+    text-decoration: none;
+}
+
 .msg {
     font-size: 20px;
     font-family: Impact, Charcoal, sans-serif;

@@ -42,6 +42,15 @@ DirectoryIndex index.php
     RewriteRule ^Docs/ - [F,L]
 </IfModule>
 
+# --- Force HTTPS in production ---
+# Skip when accessed over localhost / 127.0.0.1 / RFC1918 so local dev (e.g.
+# the bundled php -S server) still works.
+<IfModule mod_rewrite.c>
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|10\..*|192\.168\..*|172\.(1[6-9]|2[0-9]|3[0-1])\..*)(:\d+)?$
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
 # --- Security Headers (supplement PHP headers) ---
 <IfModule mod_headers.c>
     Header always set X-Frame-Options "DENY"
@@ -49,6 +58,16 @@ DirectoryIndex index.php
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set X-XSS-Protection "1; mode=block"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+    # HSTS: tell browsers to use HTTPS for the next year. Only sent on HTTPS
+    # responses so HTTP -> HTTPS redirects above are not bypassed.
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+
+    # Content Security Policy. The codebase uses inline <script> blocks and
+    # inline event handlers (footer language switch, index.php seat handlers,
+    # admin settings page), so 'unsafe-inline' is required for script-src and
+    # style-src today. Tighten once those are externalized.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
     # Remove server signature
     Header unset X-Powered-By

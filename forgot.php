@@ -72,8 +72,24 @@ if ($password && $password2 && $key && $nickname) {
         exit();
     }
 
+    // Rate limit the password-change branch (the email branch is already limited
+    // below). Without this, an attacker with a valid reset link can hammer
+    // verifyToken/password validation endlessly.
+    try {
+        $rlPdo = getPDO();
+        if (!checkRateLimit($rlPdo, 'forgot')) {
+            require 'includes/header.php';
+            echo '<div class="regerror">' . $langArray['rate_limit_exceeded'] . '</div><br><br>';
+            require 'includes/footer.php';
+            exit();
+        }
+        recordRateAttempt($rlPdo, 'forgot');
+    } catch (PDOException $e) {
+        error_log("Rate limit check failed: " . $e->getMessage());
+    }
+
     // Validate password format
-    if (!preg_match($pwd_regex, $password)) {
+    if (safePregMatch($pwd_regex, $password) !== 1) {
         $formstatus = 'FAIL';
     }
 
@@ -112,7 +128,7 @@ if ($password && $password2 && $key && $nickname) {
     } else {
         require 'includes/header.php';
         if ($formstatus === 'FAIL') {
-            if (!preg_match($pwd_regex, $password)) {
+            if (safePregMatch($pwd_regex, $password) !== 1) {
                 echo '<div class="regerror">' . $langArray['error'] . ': ' . $langArray['the_password_contains_illegal_characters'] . '</div><br>';
             }
             if ($password !== $password2) {

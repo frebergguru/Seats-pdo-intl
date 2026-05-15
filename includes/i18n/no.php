@@ -83,7 +83,7 @@ $langArray = array(
 	"repeat_password" => "Gjenta passord",
 	"register_button" => "Registrer bruker",
 	"nickname_available" => "Kallenavnet er tilgjengelig.",
-	"nickname_too_short" => "Kallenavnet m&aring; v&aerlig;re p&aring; minst 4 tegn.",
+	"nickname_too_short" => "Kallenavnet m&aring; v&aelig;re p&aring; minst 4 tegn.",
 	"nickname_contains_illegal_characters" => "Kallenavnet inneholder ugyldige tegn.",
 	"checking_availability" => "Sjekker tilgjengelighet...",
 	"an_error_has_occured" => "Det har skjedd en feil.",
@@ -236,5 +236,6 @@ $langArray = array(
 	"admin_email_template_test" => "Test-e-post",
 	"admin_tpl_code" => "Kode",
 	"admin_tpl_preview" => "Forhåndsvisning",
+	"registration_check_credentials" => "Registreringen mislyktes. Vennligst sjekk informasjonen din og prøv igjen.",
 );
 ?>

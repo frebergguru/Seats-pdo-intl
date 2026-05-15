@@ -10,6 +10,12 @@ $message = '';
 $isEdit = false;
 $userData = ['fullname' => '', 'nickname' => '', 'email' => '', 'role' => 'user'];
 
+// Current admin's id — used to block self-demotion below.
+$stmt = $pdo->prepare("SELECT id FROM users WHERE lower(nickname) = :nick");
+$stmt->execute([':nick' => mb_strtolower($_SESSION['nickname'])]);
+$currentAdminId = (int)$stmt->fetchColumn();
+$editingSelf = false;
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -24,6 +30,7 @@ if (isset($_GET['id'])) {
         header("Location: users.php");
         exit();
     }
+    $editingSelf = ($userId === $currentAdminId);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -39,20 +46,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role = ($_POST['role'] ?? 'user') === 'admin' ? 'admin' : 'user';
         $password = $_POST['password'] ?? '';
 
+        $editingSelf = $isEdit && ($userId === $currentAdminId);
+        // Prevent admin self-demotion: an admin editing their own account
+        // can never downgrade their role and lock themselves out.
+        if ($editingSelf) {
+            $role = 'admin';
+        }
+
         $userData = ['fullname' => $fullname, 'nickname' => $nick, 'email' => $emailInput, 'role' => $role];
         if ($isEdit) $userData['id'] = $userId;
 
         $errors = [];
 
-        if (empty($fullname) || !preg_match($fullname_regex, $fullname))
+        if (empty($fullname) || safePregMatch($fullname_regex, $fullname) !== 1)
             $errors[] = $langArray['you_must_enter_a_name'];
-        if (empty($nick) || !preg_match($nickname_regex, $nick))
+        if (empty($nick) || safePregMatch($nickname_regex, $nick) !== 1)
             $errors[] = $langArray['you_must_enter_a_nickname'];
         if (empty($emailInput) || !filter_var($emailInput, FILTER_VALIDATE_EMAIL))
             $errors[] = $langArray['you_must_enter_a_valid_email_address'];
         if (!$isEdit && empty($password))
             $errors[] = $langArray['you_must_enter_a_password'];
-        if (!empty($password) && !preg_match($pwd_regex, $password))
+        if (!empty($password) && safePregMatch($pwd_regex, $password) !== 1)
             $errors[] = $langArray['the_password_contains_illegal_characters'];
 
         if (empty($errors)) {
@@ -153,10 +167,13 @@ renderAdminNav('users');
                 </div>
                 <div class="admin-form-group">
                     <label for="role"><?php echo $langArray['admin_role']; ?></label>
-                    <select name="role" id="role">
+                    <select name="role" id="role"<?php echo $editingSelf ? ' disabled' : ''; ?>>
                         <option value="user" <?php echo ($userData['role'] ?? 'user') === 'user' ? 'selected' : ''; ?>><?php echo $langArray['admin_role_user']; ?></option>
                         <option value="admin" <?php echo ($userData['role'] ?? 'user') === 'admin' ? 'selected' : ''; ?>><?php echo $langArray['admin_role_admin']; ?></option>
                     </select>
+                    <?php if ($editingSelf): ?>
+                        <input type="hidden" name="role" value="admin">
+                    <?php endif; ?>
                 </div>
             </div>
 

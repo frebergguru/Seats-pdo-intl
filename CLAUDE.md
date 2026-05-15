@@ -46,7 +46,7 @@ No build step, test suite, or linter. Serve via Apache (`.htaccess` included) or
 - PDO prepared statements with named parameters. Never reuse the same parameter name.
 - Output escaping: `htmlspecialchars($val, ENT_QUOTES, 'UTF-8')`.
 - Nickname comparisons: always `mb_strtolower()`.
-- Language strings in `includes/i18n/en.php` and `no.php` as `$langArray` (211 keys). Both must stay in sync.
+- Language strings in `includes/i18n/en.php` and `no.php` as `$langArray` (212 keys). Both must stay in sync.
 - Admin pages: set `$baseUrl = '../'` before header/footer, call `requireAdmin()` and `noCacheHeaders()`.
 - `hash_equals($_SESSION['csrf_token'] ?? '', ...)` — always use `?? ''`.
 - All `<button>` elements must have explicit `type="button"` or `type="submit"`.

@@ -236,5 +236,6 @@ $langArray = array(
 	"admin_email_template_test" => "Test Email",
 	"admin_tpl_code" => "Code",
 	"admin_tpl_preview" => "Preview",
+	"registration_check_credentials" => "Registration failed. Please check your details and try again.",
 );
 ?>

@@ -26,7 +26,16 @@ $footerBasePath = isset($baseUrl) ? $baseUrl : './';
         echo '<a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'index.php">' . htmlspecialchars($langArray['home'], ENT_QUOTES, 'UTF-8') . ' |</a>';
     }
     if (!empty($_SESSION['nickname'])) {
-        echo '  <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'logout.php">' . htmlspecialchars($langArray['logout'], ENT_QUOTES, 'UTF-8') . '</a>';
+        // Logout uses a POST form with a long-lived CSRF token to defend
+        // against forced-logout via cross-origin requests (defense in depth
+        // on top of SameSite=Strict cookies).
+        $logoutToken = htmlspecialchars($_SESSION['logout_csrf'] ?? '', ENT_QUOTES, 'UTF-8');
+        $logoutAction = htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'logout.php';
+        $logoutLabel = htmlspecialchars($langArray['logout'], ENT_QUOTES, 'UTF-8');
+        echo '  <form method="POST" action="' . $logoutAction . '" class="logout-form" style="display:inline;">';
+        echo '<input type="hidden" name="logout_csrf" value="' . $logoutToken . '">';
+        echo '<button type="submit" class="logout-link">' . $logoutLabel . '</button>';
+        echo '</form>';
         echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'export.php">' . htmlspecialchars($langArray['privacy_export_btn'], ENT_QUOTES, 'UTF-8') . '</a>';
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             echo ' | <a href="' . htmlspecialchars($footerBasePath, ENT_QUOTES, 'UTF-8') . 'deluser.php">' . htmlspecialchars($langArray['delete_account'], ENT_QUOTES, 'UTF-8') . '</a>';

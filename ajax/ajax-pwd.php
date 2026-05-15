@@ -18,6 +18,7 @@
 
 header('Content-Type: application/json');
 require '../includes/config.php';
+require '../includes/functions.php';
 
 $response = ['status' => 'UNKNOWN_ERROR'];
 
@@ -26,7 +27,7 @@ $postpassword = $_POST['password'] ?? '';
 
 if ($postpassword === '') {
     $response['status'] = 'EMPTY';
-} elseif (!preg_match($pwd_regex, $postpassword)) {
+} elseif (safePregMatch($pwd_regex, $postpassword) !== 1) {
     $response['status'] = 'INVALID_CHARACTERS';
 } else {
     $response['status'] = 'STRONG';

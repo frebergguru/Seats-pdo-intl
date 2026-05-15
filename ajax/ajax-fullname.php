@@ -18,6 +18,7 @@
 
 header('Content-Type: application/json');
 require '../includes/config.php';
+require '../includes/functions.php';
 
 $response = ['status' => 'ERROR'];
 
@@ -25,9 +26,11 @@ $fullname = trim($_POST['fullname'] ?? '');
 
 if ($fullname === '') {
     $response['status'] = 'EMPTY';
-} elseif (preg_match($fullname_illegal_chars_regex, $fullname)) {
+} elseif (safePregMatch($fullname_illegal_chars_regex, $fullname) !== 0) {
+    // Fail-closed: a broken admin regex returns false (!== 0) and we treat the
+    // input as illegal rather than letting it through.
     $response['status'] = 'ILLEGAL_CHARS';
-} elseif (!preg_match($fullname_regex, $fullname)) {
+} elseif (safePregMatch($fullname_regex, $fullname) !== 1) {
     $response['status'] = 'INVALID';
 } else {
     $response['status'] = 'OK';

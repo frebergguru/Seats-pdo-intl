@@ -30,9 +30,9 @@ DROP TABLE IF EXISTS "users";
 CREATE TABLE "users" (
 "id" serial PRIMARY KEY,
 "fullname" varchar(255) NOT NULL COLLATE "C",
-"nickname" varchar(255) NOT NULL COLLATE "C",
-"password" varchar(255) NOT NULL COLLATE "C",
-"email" varchar(255) NOT NULL COLLATE "C",
+"nickname" varchar(255) NOT NULL UNIQUE COLLATE "C",
+"password" text NOT NULL COLLATE "C",
+"email" varchar(255) NOT NULL UNIQUE COLLATE "C",
 "forgottoken" varchar(64) COLLATE "C",
 "rseat" integer,
 "role" varchar(20) NOT NULL DEFAULT 'user',
@@ -45,8 +45,10 @@ CREATE TABLE "users" (
 -- Table structure for table "reservations"
 CREATE TABLE "reservations" (
 "id" serial PRIMARY KEY,
-"taken" integer,
-"user_id" integer NOT NULL
+"taken" integer NOT NULL,
+"user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+UNIQUE ("user_id"),
+UNIQUE ("taken")
 );
 
 --

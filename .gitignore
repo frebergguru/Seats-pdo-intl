@@ -1,0 +1,13 @@
+# Composer
+/vendor/
+
+# Local overrides (developers can drop a config.local.php to override DB creds)
+/includes/config.local.php
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/

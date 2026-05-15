@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
             'from_name'                    => trim($_POST['from_name'] ?? ''),
             'from_mail'                    => trim($_POST['from_mail'] ?? ''),
             'mail_subject'                 => trim($_POST['mail_subject'] ?? ''),
+            // Regex fields validated below to catch malformed PCRE patterns
+            // before they are persisted and inflicted on every login/register.
             'pwd_regex'                    => $_POST['pwd_regex'] ?? '',
             'nickname_regex'               => $_POST['nickname_regex'] ?? '',
             'fullname_regex'               => $_POST['fullname_regex'] ?? '',
@@ -45,12 +47,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
             $newSettings['smtp_password'] = $dbSettings['smtp_password'];
         }
 
-        try {
-            saveSettings($pdo, $newSettings);
-            setFlash('success', $langArray['admin_settings_saved']);
-        } catch (PDOException $e) {
-            error_log("Admin settings save: " . $e->getMessage());
+        $regexInvalid = false;
+        foreach (['pwd_regex','nickname_regex','fullname_regex','fullname_illegal_chars_regex'] as $rk) {
+            $pat = $newSettings[$rk] ?? '';
+            // Reject empty patterns and patterns that PCRE can't compile.
+            // Setting a malformed pattern would otherwise break every
+            // register/login validation request site-wide.
+            if ($pat === '' || @preg_match($pat, '') === false) {
+                $regexInvalid = true;
+                break;
+            }
+        }
+
+        if ($regexInvalid) {
             setFlash('error', $langArray['error_occurred']);
+        } else {
+            try {
+                saveSettings($pdo, $newSettings);
+                setFlash('success', $langArray['admin_settings_saved']);
+            } catch (PDOException $e) {
+                error_log("Admin settings save: " . $e->getMessage());
+                setFlash('error', $langArray['error_occurred']);
+            }
         }
     }
     header("Location: settings.php");

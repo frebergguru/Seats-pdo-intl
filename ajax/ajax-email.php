@@ -17,6 +17,7 @@
  */
 
 require '../includes/config.php';
+require '../includes/functions.php';
 require '../includes/i18n.php';
 
 header('Content-Type: application/json');
@@ -33,6 +34,12 @@ if (!$email) {
 
 try {
     $pdo = new PDO($dsn, DB_USERNAME, DB_PASSWORD, $db_options);
+
+    if (!checkRateLimit($pdo, 'enumerate')) {
+        echo json_encode(['status' => 'RATE_LIMITED', 'message' => $langArray['rate_limit_exceeded'] ?? 'Too many requests.']);
+        exit();
+    }
+    recordRateAttempt($pdo, 'enumerate');
 
     $stmt = $pdo->prepare("SELECT id FROM users WHERE lower(email) = :email");
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);

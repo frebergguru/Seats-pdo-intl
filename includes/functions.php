@@ -57,14 +57,23 @@ function loadSettings($pdo)
 }
 
 /**
- * Save settings to the database (delete all then insert).
+ * Save settings to the database via per-row upsert.
+ * Preserves keys that aren't in $settings (e.g. rows added by migrations or
+ * features the current admin form doesn't know about).
  */
 function saveSettings($pdo, $settings)
 {
+    if (DB_DRIVER === 'pgsql') {
+        $sql = "INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val)
+                ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value";
+    } else {
+        $sql = "INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val)
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)";
+    }
+
     $pdo->beginTransaction();
     try {
-        $pdo->exec("DELETE FROM settings");
-        $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (:key, :val)");
+        $stmt = $pdo->prepare($sql);
         foreach ($settings as $key => $val) {
             $stmt->execute([':key' => $key, ':val' => $val]);
         }
@@ -222,14 +231,30 @@ function renderAdminNav($activePage = '')
 
 /**
  * Get client IP address.
+ *
+ * X-Forwarded-For is only honored when the connecting peer (REMOTE_ADDR) is
+ * in TRUSTED_PROXIES (define it in config.php as a comma-separated list when
+ * running behind a reverse proxy). Without that, the header is ignored so
+ * clients cannot spoof their IP to bypass rate limiting.
  */
 function getClientIP()
 {
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        return trim($ips[0]);
+    $remote = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    if (defined('TRUSTED_PROXIES') && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $trusted = array_map('trim', explode(',', TRUSTED_PROXIES));
+        if (in_array($remote, $trusted, true)) {
+            $ips = array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+            // Walk right-to-left, skipping trusted proxy hops, to find the first untrusted client.
+            for ($i = count($ips) - 1; $i >= 0; $i--) {
+                if (!in_array($ips[$i], $trusted, true)) {
+                    return $ips[$i];
+                }
+            }
+        }
     }
-    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    return $remote;
 }
 
 /**
@@ -241,9 +266,13 @@ function getClientIP()
 function checkRateLimit($pdo, $action)
 {
     $limits = [
-        'login'    => ['max' => 5,  'window' => 900],
-        'register' => ['max' => 3,  'window' => 900],
-        'forgot'   => ['max' => 3,  'window' => 900],
+        'login'     => ['max' => 5,  'window' => 900],
+        'register'  => ['max' => 3,  'window' => 900],
+        'forgot'    => ['max' => 3,  'window' => 900],
+        // Generous limit for ajax-* email/nick availability checks — these are
+        // called multiple times per registration form interaction, so cap at
+        // 60/hour rather than the tight register limit.
+        'enumerate' => ['max' => 60, 'window' => 3600],
     ];
 
     if (!isset($limits[$action])) return true;
@@ -403,6 +432,38 @@ function sendMail($to, $subject, $bodyTemplate, $vars = [])
     $mail->Body = $html;
     $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $body));
 
-    $mail->send();
+    try {
+        $mail->send();
+        return true;
+    } catch (\PHPMailer\PHPMailer\Exception $e) {
+        error_log("sendMail failed (to=$to): " . $e->getMessage());
+        return false;
+    } catch (\Throwable $e) {
+        error_log("sendMail unexpected error (to=$to): " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Safe preg_match wrapper for admin-supplied regex patterns.
+ * Returns 1 / 0 like preg_match, or false on invalid pattern / runtime error.
+ * Prevents PCRE warnings/exceptions (malformed patterns, ReDoS backtrack limit)
+ * from killing the request.
+ */
+function safePregMatch($pattern, $subject)
+{
+    if (!is_string($pattern) || $pattern === '') {
+        return false;
+    }
+    try {
+        $result = @preg_match($pattern, $subject);
+    } catch (\Throwable $e) {
+        error_log("safePregMatch threw: " . $e->getMessage());
+        return false;
+    }
+    if ($result === false || preg_last_error() !== PREG_NO_ERROR) {
+        return false;
+    }
+    return $result;
 }
 ?>

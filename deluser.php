@@ -27,7 +27,8 @@ if (!isset($_SESSION['nickname']) || empty($_SESSION['nickname'])) {
     exit();
 }
 
-$nickname = htmlspecialchars($_SESSION['nickname'], ENT_QUOTES, 'UTF-8');
+// Use the raw session value for DB lookups; only escape at output sites.
+$nickname = $_SESSION['nickname'];
 
 // Block admin accounts from self-deletion
 if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
